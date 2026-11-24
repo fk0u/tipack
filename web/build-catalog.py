@@ -117,3 +117,38 @@ out = {"apps": [apps[k] for k in order], "categories": cats, "profiles": profile
 dst = pathlib.Path(__file__).resolve().parent / "catalog.json"
 dst.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 print(f"catalog.json: {out['counts']} · {len(cats)} kategori · {len(profiles)} profil")
+
+# ---- docs/katalog.md (dokumentasi daftar aplikasi, dibuat otomatis)
+def md_cell(a, o):
+    d = a[o]
+    if not d:
+        return "—"
+    if d["kind"] == "info":
+        return "manual"
+    if o == "linux":
+        return " · ".join(sorted({m["via"].split("/")[0] for m in d["methods"].values()}))
+    return {"winget": "winget", "wsl": "WSL", "feat": "fitur Windows", "formula": "brew", "cask": "brew cask", "custom": "installer"}.get(d["kind"], d["kind"])
+
+prof_name = {p["key"]: p["name"] for p in profiles}
+L = ["# Katalog Aplikasi", "",
+     "> File ini dibuat otomatis oleh `web/build-catalog.py` dari isi ketiga installer. Jangan diedit manual.", "",
+     f"Total **{out['counts']['total']}** aplikasi unik: Windows {out['counts']['win']}, macOS {out['counts']['mac']}, Linux {out['counts']['linux']}.", "",
+     "Legenda: ★ = rekomendasi · `—` = tidak tersedia di OS itu · `manual` = download manual (link dibuka di akhir instalasi).", "",
+     "Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog", "", "## Daftar isi", ""]
+L += [f"- [{c}](#{re.sub(r'[^a-z0-9 -]', '', c.lower()).replace(' ', '-')})" for c in cats]
+for c in cats:
+    L += ["", f"## {c}", "", "| Aplikasi | Windows | macOS | Linux | Keterangan |", "|---|---|---|---|---|"]
+    for k in order:
+        a = apps[k]
+        if a["cat"] != c:
+            continue
+        tip = a["tip"].replace("|", "/")
+        L.append(f"| {'★ ' if a['rec'] else ''}**{a['name']}** | {md_cell(a, 'win')} | {md_cell(a, 'mac')} | {md_cell(a, 'linux')} | {tip} |")
+L += ["", "## Profil", "", "| Preset | Nama | Isi |", "|---|---|---|"]
+for p in profiles:
+    members = [apps[k]["name"] for k in order if p["key"] in apps[k]["profiles"]]
+    L.append(f"| `{p['key']}` | {p['name']} | {', '.join(members)} |")
+docs = ROOT / "docs"
+docs.mkdir(exist_ok=True)
+(docs / "katalog.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+print("docs/katalog.md ditulis")

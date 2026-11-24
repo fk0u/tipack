@@ -1,4 +1,4 @@
-# DEVSETUP IF v2
+<div align="center">
 
 ```
 ██████╗ ███████╗██╗   ██╗███████╗███████╗████████╗██╗   ██╗██████╗
@@ -7,66 +7,175 @@
 ██║  ██║██╔══╝  ╚██╗ ██╔╝╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
 ██████╔╝███████╗ ╚████╔╝ ███████║███████╗   ██║   ╚██████╔╝██║
 ╚═════╝ ╚══════╝  ╚═══╝  ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
-        I F  ·  Installer Toolkit Mahasiswa Teknik Informatika & Abang IT
 ```
 
-Installer interaktif di terminal untuk laptop baru. Navigasinya pakai panah, ada checklist, panel tooltip untuk setiap aplikasi, label rekomendasi, dan cek otomatis aplikasi yang sudah terpasang.
+# TIPACK · DEVSETUP IF
 
-| OS | File | Mesin |
-|---|---|---|
-| Windows 10/11 | `windows/JALANKAN.bat` → `setup.ps1` | winget + WSL + Windows Features |
-| macOS (Apple Silicon & Intel) | `macos/setup.sh` | Homebrew (diinstall otomatis) |
-| Linux (semua distro besar) | `linux/setup.sh` | apt · dnf · pacman + AUR · zypper · apk, plus Flatpak sebagai cadangan |
+**Setup laptop anak Teknik Informatika dengan satu perintah.**
+Installer interaktif di terminal untuk **Windows, macOS & Linux**: wizard preferensi, 188 aplikasi dengan penjelasan dan rekomendasi, dan yang sudah terpasang otomatis dilewati.
 
-## Cara menjalankan
-**Windows:** klik kanan `windows/JALANKAN.bat` → **Run as administrator**. Paling bagus dibuka di **Windows Terminal**.
+[![Website](https://img.shields.io/badge/web-tipack.kousozo.tech-d946ef?style=flat-square)](https://tipack.kousozo.tech)
+[![Katalog](https://img.shields.io/badge/katalog-188_aplikasi-a855f7?style=flat-square)](https://tipack.kousozo.tech/katalog)
+[![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
+![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20%7C%20Intel-000000?style=flat-square&logo=apple&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-apt%20%7C%20dnf%20%7C%20pacman%20%7C%20zypper%20%7C%20apk-FCC624?style=flat-square&logo=linux&logoColor=black)
 
-**macOS:**
-```bash
-chmod +x macos/setup.sh && ./macos/setup.sh
+[Mulai cepat](#-mulai-cepat) · [Fitur](#-fitur) · [Dokumentasi](docs/README.md) · [Katalog](docs/katalog.md) · [FAQ](docs/troubleshooting.md) · [Kontribusi](CONTRIBUTING.md)
+
+</div>
+
+---
+
+## 🤔 Kenapa TIPACK?
+
+Setiap awal semester selalu ada yang sama: Python tidak masuk PATH, `g++` tidak dikenali, XAMPP bentrok port, WSL tidak jalan, atau bingung pilih WinRAR atau 7-Zip. TIPACK menyelesaikan semua itu di terminal:
+
+- **Kamu memilih, TIPACK yang mengerjakan.** Setiap pilihan punya kotak penjelasan dan label rekomendasi, jadi pemula tahu apa yang dipasang dan kenapa.
+- **Tidak dobel.** Sebelum install, setiap aplikasi dicek dulu. Yang sudah ada ditandai ✓ dan dilewati.
+- **Sumber resmi.** Semua lewat package manager resmi (winget, Homebrew, apt, dnf, pacman, zypper, apk, Flathub) atau installer resmi vendornya.
+- **Bisa diaudit.** Semua kode ada di repo ini. Baca dulu sebelum menjalankan.
+
+## 🚀 Mulai cepat
+
+**Windows 10/11.** Buka **PowerShell** atau **Terminal** (`Win` + `X`), lalu:
+
+```powershell
+irm https://tipack.kousozo.tech/install.ps1 | iex
 ```
 
-**Linux / macOS (satu perintah, OS terdeteksi otomatis):**
+**macOS dan Linux.** Buka **Terminal**, lalu jalankan perintah ini (OS dan distro terdeteksi otomatis):
+
 ```bash
 curl -fsSL https://tipack.kousozo.tech/install.sh | bash
 ```
 
-Mode tanpa menu: `setup.ps1 -Preset starter` / `./setup.sh --preset starter`.
-Pilihan preset: `starter cpp java web mobile data net devops game design tech`. Tambahkan `-NoAnim` / `--no-anim` untuk mematikan animasi.
+Tidak ada `curl` (distro minimal)? Pakai `wget`:
 
-## Fitur
-- **Boot screen:** banner ASCII, cek admin/winget/brew/internet, lalu info laptop (CPU, RAM, disk, status virtualisasi BIOS).
-- **Deteksi otomatis:** setiap aplikasi dicek lewat `winget export` / `brew list`, perintah di PATH, dan folder instalasi. Yang sudah terpasang ditandai ✓ dan otomatis dilewati.
-- **Wizard Preferensi:** sekitar 20 pertanyaan, misalnya WinRAR atau 7-Zip, mau WSL atau tidak, WSA atau alternatifnya, editor, IDE dan bahasa. Setiap pilihan punya tooltip dan rekomendasi. Tekan Esc untuk kembali ke pertanyaan sebelumnya.
-- **Profil siap pakai:** Starter Mahasiswa IF, C/C++, Java/PBO, Web, Mobile, Data/AI, Jaringan & Security, DevOps, Game, Desain, Abang IT.
-- **Pilih manual:** per kategori, atau satu daftar panjang berisi semua aplikasi.
-- **Keranjang:** ditinjau sebelum install, dengan peringatan konflik (Node vs NVM, XAMPP vs MySQL, Docker vs OrbStack) dan peringatan paket berat kalau RAM kecil.
-- **Instalasi:** progress bar, spinner + timer per aplikasi, ringkasan akhir, log lengkap, lalu link download untuk aplikasi yang harus diinstall manual.
-- **Ekstra:** pemilih ekstensi VS Code (28+), setup Git + SSH key + GitHub, tweak OS untuk developer, update semua, info sistem, dan `laporan-status.txt`.
+```bash
+wget -qO- https://tipack.kousozo.tech/install.sh | bash
+```
 
-## Tombol
+> [!TIP]
+> Untuk laptop baru, pilih **🧙 Wizard Preferensi** di menu utama. Butuh sekitar 5 menit untuk menjawab, lalu tinggal ditinggal sampai selesai.
+
+> [!IMPORTANT]
+> Di Linux jalankan sebagai **user biasa**, jangan pakai `sudo` di depan perintah. Password sudo diminta sekali saat instalasi dimulai.
+
+Mau membaca script-nya dulu? Lihat [Instalasi manual](docs/instalasi.md#instalasi-manual).
+
+## ✨ Fitur
+
+| | Fitur | Keterangan |
+|---|---|---|
+| 🧙 | **Wizard preferensi** | 16–20 pertanyaan (tergantung OS): WinRAR vs 7-Zip, mau WSL atau tidak, pengganti WSA, browser, editor, IDE, bahasa, web server, database, container/VM, dan lainnya. Esc untuk kembali ke pertanyaan sebelumnya. |
+| 📦 | **11 profil siap pakai** | `starter`, `cpp`, `java`, `web`, `mobile`, `data`, `net`, `devops`, `game`, `design`, `tech`. Bisa dari menu atau parameter `--preset`. |
+| 🔍 | **Deteksi otomatis** | Dicek lewat `winget export`, `brew list`, database paket distro, `flatpak list`, perintah di PATH, dan folder instalasi. |
+| 🗂 | **Pilih manual** | Jelajahi per kategori (17 kategori) atau satu daftar panjang berisi semua aplikasi. |
+| 🛒 | **Keranjang pintar** | Ditinjau sebelum install. Ada peringatan konflik (Node vs NVM, XAMPP vs MySQL, Docker vs OrbStack) dan peringatan paket berat kalau RAM kecil. |
+| 📊 | **Progress yang jelas** | Progress bar, spinner + timer per aplikasi, ringkasan akhir, log lengkap, dan link untuk aplikasi yang harus diinstall manual. |
+| 🧩 | **Ekstensi VS Code** | Pemilih 24–30 ekstensi penting dengan tooltip. Yang direkomendasikan sudah dicentang. |
+| 🔑 | **Git & SSH ke GitHub** | Atur `user.name`/`email`, buat SSH key ed25519, copy ke clipboard, buka halaman GitHub, `gh auth login`. |
+| ⚙️ | **Tweak OS untuk developer** | Tampilkan ekstensi dan file tersembunyi, Long Paths, Developer Mode, batas inotify, grup docker/dialout, dark mode, dan lainnya. |
+| ⟳ | **Update semua** | `winget upgrade --all`, `brew upgrade`, atau upgrade paket distro + Flatpak. |
+
+### Dukungan OS
+
+| OS | Mesin | Catatan |
+|---|---|---|
+| **Windows 10 (1809+) / 11** | winget, WSL, Windows Optional Features | Jalankan sebagai Administrator untuk WSL dan fitur Windows. |
+| **macOS 12+** (Apple Silicon & Intel) | Homebrew (formula + cask) | Xcode CLT dan Homebrew dipasang otomatis kalau belum ada. |
+| **Debian, Ubuntu, Mint, Pop!_OS, Kali, Zorin** | apt | VS Code dari repo resmi Microsoft, Chrome dari paket resmi Google. |
+| **Fedora, RHEL, Rocky, Alma, Nobara** | dnf | |
+| **Arch, Manjaro, EndeavourOS, CachyOS, Garuda** | pacman + AUR | `yay` dipasang otomatis kalau perlu AUR. |
+| **openSUSE Tumbleweed / Leap** | zypper | |
+| **Alpine** | apk | |
+| **Distro lain** (Void, Solus, NixOS, ...) | Flatpak + script resmi | Paket native tidak didukung; aplikasi GUI tetap bisa lewat Flathub. |
+
+Detail Linux: [docs/linux.md](docs/linux.md).
+
+## 🖥️ Tampilan
+
+```
+▓▒░ DEVSETUP IF │ Wizard │ Pertanyaan 2/20  ●●○○○○○○○○○○○○○○○○○○   │ Keranjang: 6 item
+────────────────────────────────────────────────────────────────────────────────
+ Aplikasi kompres/ekstrak arsip?
+ 7-Zip gratis dan open source (rekomendasi). WinRAR kalau perlu MEMBUAT .rar.
+
+ ► ● 7-Zip                                  ♦ rekomendasi
+   ○ WinRAR
+   ○ NanaZip
+   ○ PeaZip
+   ○ Lewati / tidak perlu
+
+┌─ 7-Zip ──────────────────────────────────────────────────────────────────────┐
+│ Gratis dan open source. Bisa buka zip/rar/7z/iso/tar. Paling aman dan ringan. │
+│ Status: belum terpasang.  |  winget: 7zip.7zip                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ↑↓ gerak  Enter pilih & lanjut  Esc kembali
+```
+
+### Tombol
+
 | Tombol | Fungsi |
 |---|---|
-| ↑ ↓ / j k | gerak |
-| PgUp PgDn Home End | lompat |
-| Spasi | centang |
-| a / n / r | centang semua / kosongkan / hanya rekomendasi |
-| Enter | pilih / lanjut |
-| Esc / Backspace / q (mac) | kembali |
+| `↑` `↓` atau `j` `k` | gerak |
+| `PgUp` `PgDn` `Home` `End` | lompat |
+| `Spasi` | centang / hapus centang |
+| `a` / `n` / `r` | centang semua / kosongkan / hanya rekomendasi |
+| `Enter` | pilih / lanjut |
+| `Esc`, `Backspace` (atau `q` di macOS/Linux) | kembali |
 
-## Catatan penting
-- **WSA (Windows Subsystem for Android) sudah dihentikan Microsoft sejak 5 Maret 2025.** Di wizard, pilihan WSA diarahkan ke Android Studio Emulator atau BlueStacks.
-- **WSL** butuh virtualisasi aktif di BIOS (Intel VT-x / AMD SVM) dan restart. Statusnya tampil di boot screen.
-- Di **Mac tidak ada WSL**. Penggantinya OrbStack (Docker + Linux VM), UTM, atau Multipass.
-- Aplikasi yang harus di-download manual (ditandai ⓘ): Cisco Packet Tracer (akun NetAcad), Microsoft 365 (email kampus), Google Antigravity, Xcode (App Store), XAMPP untuk Mac.
-- Menambah aplikasi cukup dengan menambah satu baris di `$CatalogRaw` (Windows, cari ID pakai `winget search nama`) atau `CATALOG_RAW` (macOS, pakai `brew search nama`).
+## 🧭 Mode tanpa menu
 
-## Linux
-- Distro dideteksi dari `/etc/os-release`: **apt** (Debian, Ubuntu, Mint, Pop!_OS, Kali, Zorin), **dnf** (Fedora, RHEL, Rocky, Alma), **pacman + AUR** (Arch, Manjaro, EndeavourOS, CachyOS, Garuda), **zypper** (openSUSE), **apk** (Alpine).
-- Urutan cara install per aplikasi: paket repo distro → AUR (Arch) → Flatpak (Flathub) → script/repo resmi (VS Code, Chrome, Docker, rustup, Ollama, dll) → download manual. Aplikasi yang tidak tersedia di distro itu disembunyikan dari menu.
-- Jalankan sebagai **user biasa**, bukan dengan `sudo`. Password sudo diminta sekali saat instalasi dimulai.
-- `linux/setup.sh` dirakit oleh `linux/src/build.sh` dari `linux/src/linux-parts.sh` + mesin TUI `macos/setup.sh`. Edit `linux-parts.sh`, lalu jalankan `bash linux/src/build.sh`.
+Pasang satu profil langsung, tanpa menu interaktif (berguna untuk lab atau setup massal):
 
-## Web (tipack.kousozo.tech)
-- `web/index.html` landing page, `web/katalog.html` katalog semua aplikasi, `web/perf.js` sistem optimisasi animasi.
-- `web/catalog.json` dibuat otomatis dari ketiga script: `python3 web/build-catalog.py`. Jalankan ulang setiap kali katalog di script berubah.
+```powershell
+# Windows
+powershell -ExecutionPolicy Bypass -File setup.ps1 -Preset starter
+```
+```bash
+# macOS / Linux
+bash setup.sh --preset starter
+```
+
+Tambahkan `-NoAnim` / `--no-anim` untuk mematikan animasi. Daftar preset dan isinya ada di [docs/katalog.md](docs/katalog.md#profil).
+
+## 📚 Dokumentasi
+
+| Dokumen | Isi |
+|---|---|
+| [Instalasi](docs/instalasi.md) | Syarat, perintah satu baris, instalasi manual, parameter, lokasi file, cara menghapus. |
+| [Panduan penggunaan](docs/penggunaan.md) | Setiap menu dijelaskan: wizard, profil, keranjang, ekstensi VS Code, Git/SSH, tweak, update. |
+| [Linux](docs/linux.md) | Deteksi distro, urutan metode install, AUR, Flatpak, root/sudo, WSL. |
+| [Katalog aplikasi](docs/katalog.md) | Semua 188 aplikasi per kategori dan isi setiap profil (dibuat otomatis). |
+| [Troubleshooting & FAQ](docs/troubleshooting.md) | Masalah umum per OS dan solusinya. |
+| [Keamanan](docs/keamanan.md) | Apa yang dilakukan script, sumber paket, hak akses, cara audit. |
+| [Arsitektur & kontribusi](docs/arsitektur.md) | Struktur repo, format katalog, cara menambah aplikasi, pengujian. |
+| [Website](docs/website.md) | Situs tipack.kousozo.tech: halaman, sistem optimisasi, build katalog, deploy. |
+
+## 🗂️ Struktur repo
+
+```
+tipack/
+├── windows/            setup.ps1 (installer Windows) + JALANKAN.bat
+├── macos/              setup.sh (installer macOS, juga sumber mesin TUI untuk Linux)
+├── linux/              setup.sh (hasil rakitan, jangan diedit langsung)
+│   └── src/            linux-parts.sh, build.sh, test-distro.sh
+├── web/                landing page, katalog, perf.js, bootstrap install.sh/ps1, build-catalog.py
+├── docs/               dokumentasi
+├── CONTRIBUTING.md
+└── LICENSE             MIT
+```
+
+## 🤝 Kontribusi
+
+Ada aplikasi yang kurang, ID paket yang salah, atau distro yang belum didukung? Kontribusi sangat diterima. Untuk menambah satu aplikasi biasanya cukup **satu baris** di katalog. Baca [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## ⚠️ Disclaimer
+
+TIPACK memasang software pihak ketiga dari sumber resminya. Setiap aplikasi tunduk pada lisensinya masing-masing (misalnya WinRAR berlisensi trial, Microsoft 365 butuh akun). Gunakan tool keamanan (Nmap, Wireshark, Burp Suite) hanya pada jaringan dan sistem yang kamu miliki atau sudah diizinkan.
+
+## 📄 Lisensi
+
+[MIT](LICENSE) © 2026 KouMac (fk0u)
