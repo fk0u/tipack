@@ -42,7 +42,7 @@ chrome|Browser|Google Chrome|1|cmd:google-chrome|sh:chrome|sh:chrome|aur:google-
 firefox|Browser|Mozilla Firefox|0|cmd:firefox|firefox|firefox|firefox|MozillaFirefox|firefox|org.mozilla.firefox|-|Open source, menjaga privasi, DevTools CSS terbaik. Bawaan hampir semua distro.
 brave|Browser|Brave|0||-|-|aur:brave-bin|-|-|com.brave.Browser|-|Berbasis Chromium dengan adblock bawaan, lebih hemat RAM.
 chromium|Browser|Chromium|0|cmd:chromium|chromium|chromium|chromium|chromium|chromium|org.chromium.Chromium|-|Versi open source Chrome, tanpa layanan Google.
-clipack|Terminal & Shell|CLI Power Pack (curl, htop, jq, tldr, dll)|1|cmd:htop|curl wget tree htop btop jq tldr ripgrep bat fzf fd-find unzip|curl wget tree htop btop jq tldr ripgrep bat fzf fd-find unzip|curl wget tree htop btop jq tldr ripgrep bat fzf fd eza zoxide unzip|curl wget tree htop btop jq tealdeer ripgrep bat fzf fd eza zoxide unzip|curl wget tree htop btop jq tldr ripgrep bat fzf fd eza zoxide unzip|-|-|Paket tool terminal wajib: curl, wget, tree, htop, btop, jq, tldr (contoh perintah), ripgrep, bat, fzf, fd.
+clipack|Terminal & Shell|CLI Power Pack (curl, htop, jq, tldr, dll)|1|cmd:htop|curl wget tree htop btop jq tldr ripgrep bat fzf fd-find unzip|curl wget tree htop btop jq tldr ripgrep bat fzf fd-find unzip|curl wget tree htop btop jq tldr ripgrep bat fzf fd eza zoxide unzip|curl wget tree htop btop jq tealdeer ripgrep bat fzf fd eza zoxide unzip|curl wget tree htop btop jq tealdeer ripgrep bat fzf fd eza zoxide unzip|-|-|Paket tool terminal wajib: curl, wget, tree, htop, btop, jq, tldr (contoh perintah), ripgrep, bat, fzf, fd.
 zsh|Terminal & Shell|Zsh|0|cmd:zsh|zsh|zsh|zsh|zsh|zsh|-|-|Shell yang lebih nyaman dari bash. Dibutuhkan Oh My Zsh.
 ohmyzsh|Terminal & Shell|Oh My Zsh + autosuggest + syntax highlight|1|dir:~/.oh-my-zsh|sh:ohmyzsh|sh:ohmyzsh|sh:ohmyzsh|sh:ohmyzsh|sh:ohmyzsh|-|-|Framework zsh dengan tema dan plugin, plus saran perintah otomatis dan pewarnaan. Zsh dipasang otomatis.
 fish|Terminal & Shell|Fish shell|0|cmd:fish|fish|fish|fish|fish|fish|-|-|Shell ramah pemula dengan autosuggestion bawaan tanpa konfigurasi.
@@ -58,26 +58,26 @@ antigravity|Editor Kode|Google Antigravity|0|cmd:antigravity|-|-|-|-|-|-|info:ht
 zed|Editor Kode|Zed|0|cmd:zed|-|-|zed|-|-|dev.zed.Zed|-|Editor super cepat (Rust) dengan kolaborasi realtime dan AI.
 sublime|Editor Kode|Sublime Text|0|cmd:subl|-|-|aur:sublime-text-4|-|-|com.sublimetext.three|-|Editor ringan dan sangat cepat.
 neovim|Editor Kode|Neovim|0|cmd:nvim|neovim|neovim|neovim|neovim|neovim|-|-|Editor di terminal untuk yang mau jadi keyboard warrior.
-intellij|IDE|IntelliJ IDEA Community|0||-|-|intellij-idea-community-edition|-|-|com.jetbrains.IntelliJ-IDEA-Community|-|IDE terbaik untuk Java/Kotlin, wajib untuk matkul PBO.
-pycharm|IDE|PyCharm Community|0||-|-|pycharm-community-edition|-|-|com.jetbrains.PyCharm-Community|-|IDE khusus Python dengan debugger dan pengelola virtualenv.
+intellij|IDE|IntelliJ IDEA Community|0||-|-|-|-|-|com.jetbrains.IntelliJ-IDEA-Community|-|IDE terbaik untuk Java/Kotlin, wajib untuk matkul PBO.
+pycharm|IDE|PyCharm Community|0||-|-|-|-|-|com.jetbrains.PyCharm-Community|-|IDE khusus Python dengan debugger dan pengelola virtualenv.
 toolbox|IDE|JetBrains Toolbox|0||-|-|aur:jetbrains-toolbox|-|-|-|info:https://www.jetbrains.com/toolbox-app/|Satu aplikasi untuk install/update semua IDE JetBrains.
 netbeans|IDE|Apache NetBeans|0||-|-|netbeans|-|-|org.apache.netbeans|-|IDE Java yang masih sering dipakai dosen untuk Java Swing/GUI.
-codeblocks|IDE|Code::Blocks|0|cmd:codeblocks|codeblocks|codeblocks|codeblocks|codeblocks|-|org.codeblocks.codeblocks|-|IDE C/C++ klasik untuk praktikum Algoritma.
+codeblocks|IDE|Code::Blocks|0|cmd:codeblocks|codeblocks|codeblocks|codeblocks|-|-|org.codeblocks.codeblocks|-|IDE C/C++ klasik untuk praktikum Algoritma.
 build|Bahasa & Runtime|Build tools C/C++ (gcc, g++, make, gdb)|1|cmd:g++|build-essential gdb|gcc gcc-c++ make gdb|base-devel gdb|gcc gcc-c++ make gdb|build-base gdb|-|-|Compiler C/C++ dan debugger. Wajib untuk Algoritma dan Struktur Data.
 clang|Bahasa & Runtime|Clang + LLVM|0|cmd:clang|clang lldb|clang lldb|clang lldb|clang lldb|clang lldb|-|-|Compiler C/C++ alternatif dengan pesan error lebih jelas, plus clangd untuk editor.
 cmake|Bahasa & Runtime|CMake|0|cmd:cmake|cmake|cmake|cmake|cmake|cmake|-|-|Build system untuk proyek C/C++.
 python|Bahasa & Runtime|Python 3 + pip + venv|1|cmd:pip3|python3 python3-pip python3-venv python-is-python3|python3 python3-pip|python python-pip|python3 python3-pip|python3 py3-pip|-|-|Bahasa wajib untuk algoritma, data science, AI dan scripting.
 uv|Bahasa & Runtime|uv (Python package manager)|0|cmd:uv|-|uv|uv|-|uv|-|sh:uv|Pengganti pip + venv yang 10-100x lebih cepat.
-nodejs|Bahasa & Runtime|Node.js + npm (repo distro)|1|cmd:node|nodejs npm|nodejs npm|nodejs npm|nodejs npm|nodejs npm|-|-|Runtime JavaScript. Versi dari repo distro; butuh versi terbaru? pilih fnm.
+nodejs|Bahasa & Runtime|Node.js + npm (repo distro)|1|cmd:node|nodejs npm|nodejs nodejs-npm|nodejs npm|nodejs-default/nodejs22 npm-default/npm22|nodejs npm|-|-|Runtime JavaScript. Versi dari repo distro; butuh versi terbaru? pilih fnm.
 fnm|Bahasa & Runtime|fnm (Node version manager)|0|cmd:fnm|-|-|fnm|-|-|-|sh:fnm|Untuk memasang Node versi berapa pun (misal fnm install --lts). Pilih ini ATAU Node.js repo.
 bun|Bahasa & Runtime|Bun|0|cmd:bun|-|-|-|-|-|-|sh:bun|Runtime JS super cepat sekaligus package manager.
-jdk|Bahasa & Runtime|Java JDK 21 (OpenJDK)|1|cmd:javac|openjdk-21-jdk|java-21-openjdk-devel|jdk21-openjdk|java-21-openjdk-devel|openjdk21|-|-|JDK LTS. Wajib untuk PBO/Java dan Android.
-jdk17|Bahasa & Runtime|Java JDK 17 (OpenJDK)|0||openjdk-17-jdk|java-17-openjdk-devel|jdk17-openjdk|java-17-openjdk-devel|openjdk17|-|-|Versi LTS lama, kadang diminta dosen atau proyek lama.
+jdk|Bahasa & Runtime|Java JDK LTS (OpenJDK 21/25)|1|cmd:javac|openjdk-21-jdk/openjdk-25-jdk/openjdk-17-jdk|java-21-openjdk-devel/java-25-openjdk-devel/java-latest-openjdk-devel|jdk21-openjdk|java-21-openjdk-devel/java-25-openjdk-devel|openjdk21/openjdk25|-|-|JDK LTS. Wajib untuk PBO/Java dan Android. Versi LTS terbaru yang tersedia di distro dipilih otomatis (21, 25, atau 17 di Debian 12).
+jdk17|Bahasa & Runtime|Java JDK 17 (OpenJDK)|0||openjdk-17-jdk|-|jdk17-openjdk|java-17-openjdk-devel|openjdk17|-|-|Versi LTS lama, kadang diminta dosen atau proyek lama.
 go|Bahasa & Runtime|Go|0|cmd:go|golang-go|golang|go|go|go|-|-|Bahasa backend modern: cepat dan simpel.
 rust|Bahasa & Runtime|Rust (rustup)|0|cmd:rustup|-|-|rustup|-|-|-|sh:rustup|Bahasa sistem yang aman memori. Dipasang lewat rustup resmi.
 php|Bahasa & Runtime|PHP + ekstensi umum|0|cmd:php|php-cli php-mbstring php-xml php-curl php-mysql php-zip|php-cli php-mbstring php-xml php-mysqlnd php-pdo|php|php8 php8-mbstring php8-mysql|php83 php83-mbstring php83-pdo_mysql|-|-|PHP CLI dengan ekstensi untuk Laravel dan MySQL.
 composer|Bahasa & Runtime|Composer|0|cmd:composer|composer|composer|composer|php-composer2|composer|-|-|Package manager PHP, wajib untuk Laravel.
-dotnet|Bahasa & Runtime|.NET SDK 8|0|cmd:dotnet|dotnet-sdk-8.0|dotnet-sdk-8.0|dotnet-sdk|dotnet-sdk-8.0|dotnet8-sdk|-|-|Untuk C#, ASP.NET dan Blazor.
+dotnet|Bahasa & Runtime|.NET SDK|0|cmd:dotnet|dotnet-sdk-8.0/dotnet-sdk-10.0|dotnet-sdk-10.0/dotnet-sdk-8.0|dotnet-sdk|-|dotnet8-sdk/dotnet10-sdk|-|info:https://learn.microsoft.com/dotnet/core/install/linux|Untuk C#, ASP.NET dan Blazor.
 r|Bahasa & Runtime|R|0|cmd:R|r-base|R|r|R-base|R|-|-|Bahasa statistik untuk matkul Statistika/Data Mining.
 lamp|Web Server & Database|Apache + PHP (LAMP)|0|cmd:apachectl|apache2 libapache2-mod-php|httpd php|apache php-apache|apache2 apache2-mod_php8|apache2 php83-apache2|-|-|Web server Apache dengan PHP, setara XAMPP versi native. Folder web: /var/www/html.
 xampp|Web Server & Database|XAMPP (installer resmi)|0|dir:/opt/lampp|-|-|-|-|-|-|info:https://www.apachefriends.org/download.html|Sama seperti di lab kampus. Download file .run lalu jalankan dengan sudo.
@@ -99,25 +99,25 @@ distrobox|DevOps & Cloud|Distrobox|0|cmd:distrobox|distrobox|distrobox|distrobox
 kubectl|DevOps & Cloud|kubectl|0|cmd:kubectl|-|-|kubectl|kubernetes-client|kubectl|-|sh:kubectl|CLI untuk Kubernetes.
 ngrok|DevOps & Cloud|ngrok|0|cmd:ngrok|-|-|aur:ngrok|-|-|-|info:https://ngrok.com/download|Membuat localhost bisa diakses publik untuk demo.
 ollama|AI & Data|Ollama|0|cmd:ollama|-|-|ollama|-|-|-|sh:ollama|Jalankan LLM (Llama, Gemma, Qwen) secara lokal. Nyaman di RAM 16GB.
-jupyter|AI & Data|JupyterLab|0|cmd:jupyter-lab|jupyter-notebook|python3-jupyterlab|jupyterlab|python3-jupyterlab|-|-|-|Notebook untuk data science (alternatif: pip install jupyterlab di venv).
+jupyter|AI & Data|JupyterLab|0|cmd:jupyter-lab|jupyter-notebook|-|jupyterlab|-|-|-|info:https://jupyter.org/install|Notebook untuk data science (alternatif: pip install jupyterlab di venv).
 androidstudio|Mobile & Game|Android Studio|0||-|-|aur:android-studio|-|-|com.google.AndroidStudio|-|IDE resmi Android + emulator. Emulator butuh KVM (cek menu Info Sistem).
 flutter|Mobile & Game|Flutter SDK|0|cmd:flutter|-|-|aur:flutter-bin|-|-|-|info:https://docs.flutter.dev/get-started/install/linux|Framework mobile cross-platform. Install manual atau lewat ekstensi VS Code Flutter.
 godot|Mobile & Game|Godot Engine|0|cmd:godot|-|godot|godot|godot|-|org.godotengine.Godot|-|Engine game open source, ringan, native di Linux.
 blender|Mobile & Game|Blender|0|cmd:blender|-|-|blender|-|-|org.blender.Blender|-|Modeling dan animasi 3D gratis.
 unity|Mobile & Game|Unity Hub|0||-|-|aur:unityhub|-|-|-|info:https://docs.unity3d.com/hub/manual/InstallHub.html|Engine game populer. Linux: pakai repo resmi Unity (Ubuntu) atau AUR.
-arduino|Mobile & Game|Arduino IDE|0||-|-|arduino-ide|-|-|cc.arduino.IDE2|-|Untuk matkul IoT. User otomatis dimasukkan ke grup dialout lewat menu Tweak.
+arduino|Mobile & Game|Arduino IDE|0||-|-|aur:arduino-ide-bin|-|-|cc.arduino.IDE2|-|Untuk matkul IoT. User otomatis dimasukkan ke grup dialout lewat menu Tweak.
 packettracer|Jaringan & Keamanan|Cisco Packet Tracer|0||-|-|aur:packettracer|-|-|-|info:https://www.netacad.com/resources/lab-downloads|Simulasi jaringan Cisco. Download .deb dari NetAcad (butuh akun gratis).
 wireshark|Jaringan & Keamanan|Wireshark|0|cmd:wireshark|wireshark|wireshark|wireshark-qt|wireshark|wireshark|-|-|Analisis paket jaringan. Wajib untuk matkul Jarkom/Keamanan.
 nmap|Jaringan & Keamanan|Nmap|0|cmd:nmap|nmap|nmap|nmap|nmap|nmap|-|-|Port scanner. Pakai hanya di jaringan sendiri atau yang sudah diizinkan.
-nettools|Jaringan & Keamanan|Network tools (dig, traceroute, whois, iperf3)|0|cmd:traceroute|net-tools dnsutils traceroute whois iperf3|net-tools bind-utils traceroute whois iperf3|net-tools bind traceroute whois iperf3|net-tools bind-utils traceroute whois iperf3|net-tools bind-tools whois iperf3|-|-|Perkakas diagnosa jaringan untuk praktikum Jarkom.
+nettools|Jaringan & Keamanan|Network tools (dig, traceroute, whois, iperf3)|0|cmd:traceroute|net-tools dnsutils traceroute whois iperf3|net-tools bind-utils traceroute whois iperf3|net-tools bind traceroute whois iperf3|net-tools bind-utils traceroute whois iperf|net-tools bind-tools whois iperf3|-|-|Perkakas diagnosa jaringan untuk praktikum Jarkom.
 openssh|Jaringan & Keamanan|OpenSSH server|0|cmd:sshd|openssh-server|openssh-server|openssh|openssh-server|openssh-server|-|-|Supaya laptop bisa diakses lewat SSH (praktikum server).
 filezilla|Jaringan & Keamanan|FileZilla|0|cmd:filezilla|filezilla|filezilla|filezilla|filezilla|filezilla|org.filezillaproject.Filezilla|-|Klien FTP/SFTP untuk upload ke hosting.
 remmina|Jaringan & Keamanan|Remmina (RDP/VNC/SSH)|0|cmd:remmina|remmina|remmina|remmina|remmina|remmina|org.remmina.Remmina|-|Remote desktop ke Windows (RDP), VNC dan SSH.
 wireguard|Jaringan & Keamanan|WireGuard tools|0|cmd:wg|wireguard-tools|wireguard-tools|wireguard-tools|wireguard-tools|wireguard-tools|-|-|VPN modern yang cepat.
 burp|Jaringan & Keamanan|Burp Suite Community|0||-|-|aur:burpsuite|-|-|-|info:https://portswigger.net/burp/releases/community/latest|Proxy untuk pentest aplikasi web. Gunakan secara etis.
-virtmanager|Virtualisasi & Linux|virt-manager + QEMU/KVM|1|cmd:virt-manager|virt-manager qemu-system-x86 libvirt-daemon-system|virt-manager qemu-kvm libvirt|virt-manager qemu-full libvirt dnsmasq|virt-manager qemu-kvm libvirt|-|-|-|Mesin virtual native Linux (paling cepat, pakai KVM). Untuk matkul Sistem Operasi.
+virtmanager|Virtualisasi & Linux|virt-manager + QEMU/KVM|1|cmd:virt-manager|virt-manager qemu-system-x86 libvirt-daemon-system|virt-manager qemu-kvm libvirt|virt-manager qemu-full libvirt dnsmasq|virt-manager qemu-x86 libvirt|-|-|-|Mesin virtual native Linux (paling cepat, pakai KVM). Untuk matkul Sistem Operasi.
 boxes|Virtualisasi & Linux|GNOME Boxes|0|cmd:gnome-boxes|gnome-boxes|gnome-boxes|gnome-boxes|gnome-boxes|-|org.gnome.Boxes|-|VM paling mudah: pilih ISO, klik, jadi.
-virtualbox|Virtualisasi & Linux|VirtualBox|0|cmd:virtualbox|virtualbox|-|virtualbox virtualbox-host-modules-arch|virtualbox|-|-|info:https://www.virtualbox.org/wiki/Linux_Downloads|Mesin virtual populer. Fedora: download dari situs resmi.
+virtualbox|Virtualisasi & Linux|VirtualBox|0|cmd:virtualbox|virtualbox|-|virtualbox virtualbox-host-dkms|virtualbox|-|-|info:https://www.virtualbox.org/wiki/Linux_Downloads|Mesin virtual populer. Fedora: download dari situs resmi.
 figma|Desain & Multimedia|Figma (klien komunitas)|1||-|-|aur:figma-linux-bin|-|-|io.github.Figma_Linux.figma_linux|-|Figma tidak punya app resmi Linux; ini klien komunitas. Alternatif: buka figma.com di browser.
 drawio|Desain & Multimedia|draw.io Desktop|1||-|-|aur:drawio-desktop-bin|-|-|com.jgraph.drawio.desktop|-|Flowchart, UML, ERD dan DFD offline. Wajib untuk matkul RPL.
 gimp|Desain & Multimedia|GIMP|0|cmd:gimp|gimp|gimp|gimp|gimp|gimp|org.gimp.GIMP|-|Edit foto gratis, alternatif Photoshop.
@@ -136,11 +136,11 @@ libreoffice|Kuliah & Produktivitas|LibreOffice|1|cmd:libreoffice|libreoffice|lib
 office|Kuliah & Produktivitas|Microsoft 365 (web, email kampus)|0||-|-|-|-|-|-|info:https://www.office.com|Microsoft Office tidak tersedia untuk Linux. Pakai versi web gratis dengan email kampus.
 okular|Kuliah & Produktivitas|Okular (PDF)|0|cmd:okular|okular|okular|okular|okular|okular|org.kde.okular|-|Pembaca PDF lengkap dengan anotasi dan tanda tangan.
 flatpak|Utilitas Sistem|Flatpak + Flathub|1|cmd:flatpak|flatpak|flatpak|flatpak|flatpak|flatpak|-|-|Toko aplikasi universal Linux. Dipasang otomatis kalau ada aplikasi yang butuh.
-fastfetch|Utilitas Sistem|fastfetch|0|cmd:fastfetch|fastfetch|fastfetch|fastfetch|fastfetch|fastfetch|-|-|Tampilkan info sistem + logo distro di terminal (pengganti neofetch). Wajib buat pamer.
+fastfetch|Utilitas Sistem|fastfetch|0|cmd:fastfetch|fastfetch/neofetch|fastfetch|fastfetch|fastfetch|fastfetch|-|-|Tampilkan info sistem + logo distro di terminal (pengganti neofetch). Wajib buat pamer.
 timeshift|Utilitas Sistem|Timeshift (backup sistem)|1|cmd:timeshift|timeshift|timeshift|timeshift|-|-|-|-|Snapshot sistem: kalau update bikin rusak, tinggal restore. WAJIB untuk pemula Linux.
 gparted|Utilitas Sistem|GParted|0|cmd:gparted|gparted|gparted|gparted|gparted|gparted|-|-|Atur partisi disk.
 localsend|Utilitas Sistem|LocalSend|1||-|-|aur:localsend-bin|-|-|org.localsend.localsend_app|-|Kirim file HP ke laptop lewat WiFi, seperti AirDrop lintas platform.
-copyq|Utilitas Sistem|CopyQ (riwayat clipboard)|0|cmd:copyq|copyq|copyq|copyq|copyq|copyq|com.github.hluk.copyq|-|Riwayat copy-paste yang bisa dicari.
+copyq|Utilitas Sistem|CopyQ (riwayat clipboard)|0|cmd:copyq|copyq|copyq|copyq|-|-|com.github.hluk.copyq|-|Riwayat copy-paste yang bisa dicari.
 ventoy|Utilitas Sistem|Ventoy|0||-|-|aur:ventoy-bin|-|-|-|info:https://www.ventoy.net/en/download.html|Satu flashdisk untuk banyak ISO sekaligus. Wajib untuk abang IT.
 gnometweaks|Utilitas Sistem|GNOME Tweaks + Extension Manager|0|cmd:gnome-tweaks|gnome-tweaks gnome-shell-extension-manager|gnome-tweaks|gnome-tweaks|gnome-tweaks|-|com.mattjakeman.ExtensionManager|-|Kustomisasi tampilan GNOME (font, tema, ekstensi). Hanya untuk desktop GNOME.
 '
@@ -623,7 +623,7 @@ resolve_methods() {
 
 method_label() { # $1=index
   case "${K_TYPE[$1]}" in
-    native) echo "$PM: ${K_ID[$1]}" ;; aur) echo "AUR: ${K_ID[$1]} (lewat ${AUR_HELPER:-yay})" ;; flatpak) echo "Flatpak: ${K_ID[$1]}" ;;
+    native) echo "$PM: ${K_ID[$1]//\// atau }" ;; aur) echo "AUR: ${K_ID[$1]} (lewat ${AUR_HELPER:-yay})" ;; flatpak) echo "Flatpak: ${K_ID[$1]}" ;;
     script) echo "script/repo resmi ($(script_desc "${K_ID[$1]}"))" ;; info) echo "Download manual: ${K_ID[$1]}" ;; *) echo "tidak tersedia" ;;
   esac
 }
@@ -677,7 +677,7 @@ scan_installed() {
   for ((i=0;i<NCAT;i++)); do
     hit=0
     case "${K_TYPE[$i]}" in
-      native) first=${K_ID[$i]%% *}; [ "${first#@}" != "$first" ] && first=""; [ -n "$first" ] && case "$NATIVE_LIST" in *$'\n'"$first"$'\n'*) hit=1 ;; esac ;;
+      native) first=${K_ID[$i]%% *}; for alt in ${first//\// }; do case "$NATIVE_LIST" in *$'\n'"$alt"$'\n'*) hit=1 ;; esac; done ;;
       aur) case "$NATIVE_LIST" in *$'\n'"${K_ID[$i]}"$'\n'*) hit=1 ;; esac ;;
       flatpak) case "$FLAT_LIST" in *$'\n'"${K_ID[$i]}"$'\n'*) hit=1 ;; esac ;;
     esac
@@ -703,6 +703,26 @@ pm_refresh() {
     apk) $SUDO apk update ;;
     *) true ;;
   esac
+}
+pkg_avail() { # apakah paket ada di repo distro
+  case $PM in
+    apt) apt-cache show "$1" >/dev/null 2>&1 ;;
+    dnf) dnf -q list --available "$1" >/dev/null 2>&1 || rpm -q "$1" >/dev/null 2>&1 ;;
+    pacman) pacman -Si "$1" >/dev/null 2>&1 || pacman -Q "$1" >/dev/null 2>&1 ;;
+    zypper) zypper -q --non-interactive search -x "$1" >/dev/null 2>&1 ;;
+    apk) [ -n "$(apk search -e "$1" 2>/dev/null)" ] ;;
+    *) return 1 ;;
+  esac
+}
+expand_alts() { # "a/b c" -> paket pertama yang tersedia dari setiap grup alternatif
+  local tok alt out=""
+  for tok in $1; do
+    if [ "${tok#*/}" != "$tok" ]; then
+      local pick=""; for alt in ${tok//\// }; do pkg_avail "$alt" && { pick=$alt; break; }; done
+      out="$out ${pick:-${tok%%/*}}"
+    else out="$out $tok"; fi
+  done
+  echo $out
 }
 pm_install() { # paket... (sengaja tidak di-quote supaya terpecah per paket)
   case $PM in
@@ -808,7 +828,7 @@ inst_ohmyzsh() {
 install_one() { # $1 = index ; return code = hasil
   local i=$1
   case "${K_TYPE[$i]}" in
-    native) pm_install ${K_ID[$i]} ;;
+    native) pm_install $(expand_alts "${K_ID[$i]}") ;;
     aur) aur_install ${K_ID[$i]} ;;
     flatpak) ensure_flatpak && flatpak install --user -y --noninteractive flathub "${K_ID[$i]}" ;;
     script) "inst_${K_ID[$i]}" ;;

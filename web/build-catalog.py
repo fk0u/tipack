@@ -76,7 +76,7 @@ for line in lx_raw.splitlines():
         elif v.startswith("sh:"):
             methods[pm] = {"via": "script/repo resmi", "cmd": "(dipasang oleh installer TIPACK)"}
         else:
-            methods[pm] = {"via": pm, "cmd": PMCMD[pm].format(v)}
+            methods[pm] = {"via": pm, "cmd": PMCMD[pm].format(" ".join(t.split("/")[0] for t in v.split()))}
     if flat != "-":
         methods["flatpak"] = {"via": "Flathub", "cmd": f"flatpak install flathub {flat}"}
     info = uni[5:] if uni.startswith("info:") else None

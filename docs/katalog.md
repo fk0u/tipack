@@ -91,12 +91,12 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| **IntelliJ IDEA Community** | winget | brew cask | Flathub · pacman | IDE terbaik untuk Java/Kotlin. Wajib kalau ada matkul PBO. Mahasiswa bisa dapat Ultimate gratis lewat JetBrains Student Pack. |
-| **PyCharm Community** | winget | brew cask | Flathub · pacman | IDE khusus Python dengan debugger dan pengelola virtualenv yang nyaman. |
+| **IntelliJ IDEA Community** | winget | brew cask | Flathub | IDE terbaik untuk Java/Kotlin. Wajib kalau ada matkul PBO. Mahasiswa bisa dapat Ultimate gratis lewat JetBrains Student Pack. |
+| **PyCharm Community** | winget | brew cask | Flathub | IDE khusus Python dengan debugger dan pengelola virtualenv yang nyaman. |
 | **JetBrains Toolbox** | winget | brew cask | AUR | Satu aplikasi untuk install/update semua IDE JetBrains. Rekomendasi kalau punya lisensi Student. |
 | **Visual Studio 2022 Community** | winget | — | — | IDE berat (8GB+) untuk C#, .NET, C++ Windows dan Unity. Pilih kalau ada matkul C#/.NET. |
 | **Apache NetBeans** | winget | brew cask | Flathub · pacman | IDE Java yang masih sering dipakai dosen untuk Java Swing/GUI. |
-| **Code::Blocks** | winget | — | Flathub · apt · dnf · pacman · zypper | IDE C/C++ klasik, sering dipakai di praktikum Algoritma semester 1. |
+| **Code::Blocks** | winget | — | Flathub · apt · dnf · pacman | IDE C/C++ klasik, sering dipakai di praktikum Algoritma semester 1. |
 | **Embarcadero Dev-C++** | winget | — | — | IDE C++ sederhana yang sering dipakai di praktikum Dasar Pemrograman. |
 | **Xcode (App Store)** | — | manual | — | Wajib untuk develop aplikasi iOS/macOS dan Flutter iOS. Ukuran 10GB+, install dari App Store. |
 
@@ -114,12 +114,12 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **NVM for Windows** | winget | — | — | Untuk gonta-ganti versi Node.js. Pilih ini ATAU Node.js LTS, jangan dua-duanya. |
 | **Bun** | winget | brew | script resmi | Runtime JS super cepat sekaligus package manager. Alternatif modern npm. |
 | ★ **Java JDK 21 (Temurin)** | winget | brew cask | apk · apt · dnf · pacman · zypper | JDK LTS gratis. Wajib untuk PBO/Java dan Android. |
-| **Java JDK 17 (Temurin)** | winget | brew cask | apk · apt · dnf · pacman · zypper | Versi LTS lama, kadang diminta dosen atau proyek lama. |
+| **Java JDK 17 (Temurin)** | winget | brew cask | apk · apt · pacman · zypper | Versi LTS lama, kadang diminta dosen atau proyek lama. |
 | **Go** | winget | brew | apk · apt · dnf · pacman · zypper | Bahasa backend modern: cepat dan simpel. Banyak dipakai startup. |
 | **Rust (rustup)** | winget | brew | pacman | Bahasa sistem yang aman memori. Butuh Visual C++ Build Tools. |
 | **PHP 8.3 (standalone)** | winget | brew | apk · apt · dnf · pacman · zypper | PHP CLI tanpa XAMPP. Tidak perlu kalau sudah pakai XAMPP/Laragon. |
 | **Composer** | winget | brew | apk · apt · dnf · pacman · zypper | Package manager PHP, wajib untuk Laravel. |
-| **.NET SDK 8** | winget | brew cask | apk · apt · dnf · pacman · zypper | Untuk C#, ASP.NET dan Blazor. |
+| **.NET SDK 8** | winget | brew cask | apk · apt · dnf · pacman | Untuk C#, ASP.NET dan Blazor. |
 | **R** | winget | brew cask | apk · apt · dnf · pacman · zypper | Bahasa statistik, sering dipakai di matkul Statistika/Data Mining. |
 | ★ **GCC (g++ asli GNU)** | — | brew | — | Di Mac, perintah g++ sebenarnya clang. GCC asli dibutuhkan kalau dosen memakai bits/stdc++.h. Panggil dengan g++-15. |
 | **fnm (Node version manager)** | — | brew | pacman | Untuk gonta-ganti versi Node.js. Pilih ini ATAU Node.js LTS. |
@@ -184,7 +184,7 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **LM Studio** | winget | brew cask | — | GUI untuk download dan chat dengan LLM lokal. |
 | **Claude Desktop** | winget | brew cask | — | Aplikasi desktop Claude. |
 | **RStudio** | winget | brew cask | — | IDE untuk R (R harus terinstall). |
-| **JupyterLab** | — | — | apt · dnf · pacman · zypper | Notebook untuk data science (alternatif: pip install jupyterlab di venv). |
+| **JupyterLab** | — | — | apt · pacman | Notebook untuk data science (alternatif: pip install jupyterlab di venv). |
 
 ## Mobile & Game
 
@@ -197,7 +197,7 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Unity Hub** | winget | brew cask | AUR | Engine game 2D/3D paling populer, pakai C#. |
 | **Godot Engine** | winget | brew cask | Flathub · dnf · pacman · zypper | Engine game open source, ringan, cocok untuk pemula. |
 | **Blender** | winget | brew cask | Flathub · pacman | Modeling dan animasi 3D gratis. |
-| **Arduino IDE** | winget | brew cask | Flathub · pacman | Untuk matkul IoT/Sistem Embedded. |
+| **Arduino IDE** | winget | brew cask | AUR · Flathub | Untuk matkul IoT/Sistem Embedded. |
 
 ## Jaringan & Keamanan
 
@@ -298,7 +298,7 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **fastfetch** | — | — | apk · apt · dnf · pacman · zypper | Tampilkan info sistem + logo distro di terminal (pengganti neofetch). Wajib buat pamer. |
 | ★ **Timeshift (backup sistem)** | — | — | apt · dnf · pacman | Snapshot sistem: kalau update bikin rusak, tinggal restore. WAJIB untuk pemula Linux. |
 | **GParted** | — | — | apk · apt · dnf · pacman · zypper | Atur partisi disk. |
-| **CopyQ (riwayat clipboard)** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Riwayat copy-paste yang bisa dicari. |
+| **CopyQ (riwayat clipboard)** | — | — | Flathub · apt · dnf · pacman | Riwayat copy-paste yang bisa dicari. |
 | **GNOME Tweaks + Extension Manager** | — | — | Flathub · apt · dnf · pacman · zypper | Kustomisasi tampilan GNOME (font, tema, ekstensi). Hanya untuk desktop GNOME. |
 
 ## Profil

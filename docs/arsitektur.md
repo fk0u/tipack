@@ -102,7 +102,7 @@ jdk|Bahasa & Runtime|Java JDK 21 (OpenJDK)|1|cmd:javac|openjdk-21-jdk|java-21-op
 
 | Kolom | Nilai yang valid |
 |---|---|
-| `apt` … `apk` | `-` (tidak ada di repo), `pkg1 pkg2` (paket native), `aur:pkg` (hanya kolom pacman), `sh:fungsi` (memanggil `inst_fungsi`) |
+| `apt` … `apk` | `-` (tidak ada di repo), `pkg1 pkg2` (paket native), `a/b` (alternatif: pakai yang pertama tersedia), `aur:pkg` (hanya kolom pacman), `sh:fungsi` (memanggil `inst_fungsi`) |
 | `flatpak` | ID Flathub atau `-` |
 | `universal` | `sh:fungsi`, `info:url` atau `-` |
 | `deteksi` | `cmd:perintah`, `dir:path` atau kosong |

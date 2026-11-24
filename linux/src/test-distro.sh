@@ -21,7 +21,7 @@ exists() { # cek paket ada di repo
 nat=0; bad=""; aur=0; flat=0; scr=0; inf=0; none=0
 for ((i=0;i<NCAT;i++)); do
   case "${K_TYPE[$i]}" in
-    native) for p in ${K_ID[$i]}; do nat=$((nat+1)); exists "$p" || bad="$bad ${K_KEY[$i]}:$p"; done ;;
+    native) for p in ${K_ID[$i]}; do nat=$((nat+1)); ok=0; for a in ${p//\// }; do exists "$a" && { ok=1; break; }; done; [ $ok = 1 ] || bad="$bad ${K_KEY[$i]}:$p"; done ;;
     aur) aur=$((aur+1)) ;; flatpak) flat=$((flat+1)) ;; script) scr=$((scr+1)) ;; info) inf=$((inf+1)) ;; *) none=$((none+1)) ;;
   esac
 done

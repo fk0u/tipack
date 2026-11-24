@@ -40,6 +40,8 @@ Untuk setiap aplikasi, TIPACK memilih **satu** cara dengan urutan prioritas:
 
 Aplikasi yang **tidak punya satu pun cara** untuk distro kamu disembunyikan dari semua menu, jadi tidak ada pilihan yang pasti gagal.
 
+**Paket alternatif.** Kolom paket bisa berisi `a/b/c`, artinya pakai yang pertama tersedia di repo. Contohnya JDK: Debian 12 belum punya OpenJDK 21, jadi otomatis dapat 17; Fedora terbaru dapat 25.
+
 Kotak info setiap aplikasi menampilkan metode yang akan dipakai, misalnya `apt: build-essential gdb`, `Flatpak: com.getpostman.Postman`, `AUR: visual-studio-code-bin (lewat yay)`, atau `script/repo resmi (repo Microsoft)`.
 
 Contoh untuk satu aplikasi:
@@ -47,7 +49,7 @@ Contoh untuk satu aplikasi:
 | Aplikasi | apt | dnf | pacman | zypper | apk |
 |---|---|---|---|---|---|
 | Build tools C/C++ | `build-essential gdb` | `gcc gcc-c++ make gdb` | `base-devel gdb` | `gcc gcc-c++ make gdb` | `build-base gdb` |
-| Java JDK 21 | `openjdk-21-jdk` | `java-21-openjdk-devel` | `jdk21-openjdk` | `java-21-openjdk-devel` | `openjdk21` |
+| Java JDK LTS | `openjdk-21-jdk` atau `openjdk-25-jdk` atau `openjdk-17-jdk` | `java-21-openjdk-devel` atau `java-25-openjdk-devel` | `jdk21-openjdk` | `java-21-openjdk-devel` atau `java-25-openjdk-devel` | `openjdk21` atau `openjdk25` |
 | VS Code | repo Microsoft | repo Microsoft | AUR `visual-studio-code-bin` | repo Microsoft | Flatpak |
 | Postman | Flatpak | Flatpak | AUR `postman-bin` | Flatpak | Flatpak |
 
