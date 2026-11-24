@@ -1,0 +1,5 @@
+.claude/
+.DS_Store
+devsetup-log-*.txt
+laporan-status.txt
+__pycache__/

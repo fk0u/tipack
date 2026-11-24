@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIPACK — Setup Laptop Anak IF dengan Satu Perintah</title>
+<meta name="description" content="Installer interaktif berbasis terminal untuk Windows, macOS & Linux (Arch, Debian, Ubuntu, Fedora, openSUSE, Alpine): 120+ tools developer, wizard preferensi, 11 profil, deteksi otomatis aplikasi terpasang.">
+<meta property="og:title" content="TIPACK — Setup Laptop Anak IF dengan Satu Perintah">
+<meta property="og:description" content="120+ tools developer, wizard preferensi, deteksi otomatis. Windows & macOS.">
+<meta name="theme-color" content="#08070d">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f0abfc'/><stop offset='.5' stop-color='%23a855f7'/><stop offset='1' stop-color='%233b82f6'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='%2308070d'/><path d='M8 10l6 6-6 6' stroke='url(%23g)' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/><rect x='16' y='20' width='9' height='3' rx='1.5' fill='url(%23g)'/></svg>">
+<script src="perf.js?v=2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08070d; --bg2:#0e0c16; --panel:#13111d; --panel2:#1a1726; --line:#272338; --line2:#3a3452;
+  --fg:#f2eefb; --dim:#9a93b3; --mute:#635c7d;
+  --m1:#f0abfc; --m2:#d946ef; --v:#a855f7; --b:#3b82f6; --c:#22d3ee;
+  --grad:linear-gradient(100deg,#f0abfc 0%,#d946ef 28%,#a855f7 58%,#3b82f6 100%);
+  --display:'Anton',Impact,'Arial Narrow',sans-serif; --sans:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--m2);color:#fff}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img,svg{display:block}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+.mono{font-family:var(--mono)}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--m1);display:inline-flex;gap:8px;align-items:center}
+.eyebrow::before{content:'[';color:var(--mute)} .eyebrow::after{content:']';color:var(--mute)}
+.h-display{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+.h2{font-size:clamp(34px,4.6vw,58px);margin-top:14px}
+.lead{color:var(--dim);max-width:560px}
+
+/* ambient background */
+.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bg-fx .grid{position:absolute;inset:-2px;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:64px 64px;opacity:.22;mask-image:radial-gradient(ellipse at 50% 0%,#000 10%,transparent 70%)}
+.bg-fx .orb{position:absolute;border-radius:50%;opacity:.5;animation:drift 22s ease-in-out infinite alternate;will-change:transform}
+.orb.a{width:900px;height:900px;background:radial-gradient(circle,#c026d380,transparent 62%);top:-380px;left:-320px}
+.orb.b{width:820px;height:820px;background:radial-gradient(circle,#4f46e570,transparent 62%);top:20vh;right:-360px;animation-delay:-8s}
+@keyframes drift{to{transform:translate(80px,60px) scale(1.15)}}
+.noise{position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.04;background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+.cursor-glow{position:fixed;left:0;top:0;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,#d946ef1c,transparent 65%);will-change:transform;transform:translate3d(-999px,-999px,0)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:999px;font-weight:600;font-size:15px;transition:transform .25s,box-shadow .25s,background .25s}
+.btn-grad{background:var(--grad);color:#fff;box-shadow:0 10px 30px -10px #d946efaa}
+.btn-grad:hover{transform:translateY(-2px);box-shadow:0 16px 40px -10px #d946efcc}
+.btn-ghost{border:1px solid var(--line2);background:#ffffff06}
+.btn-ghost:hover{border-color:var(--m2);background:#d946ef14}
+.btn svg{width:16px;height:16px}
+
+/* nav */
+nav.top{position:fixed;top:14px;left:50%;transform:translateX(-50%);width:min(1240px,calc(100% - 28px));z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 12px 10px 22px;border:1px solid var(--line);border-radius:999px;background:#0b0912b8;backdrop-filter:blur(16px) saturate(1.4);transition:border-color .3s}
+nav.top.scrolled{border-color:var(--line2)}
+.logo{display:flex;align-items:center;gap:10px;font:400 24px/1 var(--display);letter-spacing:.04em}
+.logo .mark{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font:700 14px var(--mono);color:#fff;box-shadow:0 0 22px -4px var(--m2)}
+.nav-links{display:flex;gap:4px}
+.nav-links a{font:500 13px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim);padding:8px 14px;border-radius:999px;transition:.2s}
+.nav-links a:hover{color:#fff;background:#ffffff0d}
+.nav-right{display:flex;gap:8px;align-items:center}
+.nav-right .btn{padding:10px 18px;font-size:14px}
+@media(max-width:900px){.nav-links{display:none}}
+
+/* hero */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;padding:140px 0 80px;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;position:relative;z-index:2}
+.hero-grid>*,.about>*,.services>*,.why>*,.news>*{min-width:0}
+.hero h1{font-size:clamp(40px,5.9vw,84px)}
+.hero h1 .row{display:flex;align-items:center;gap:.22em;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;height:.72em;width:2.1em;border-radius:999px;background:var(--grad);position:relative;overflow:hidden;box-shadow:0 0 40px -8px var(--m2);vertical-align:middle}
+.pill .scan{position:absolute;inset:0;background:repeating-linear-gradient(90deg,#ffffff33 0 2px,transparent 2px 9px);animation:slide 2.2s linear infinite;opacity:.6}
+.pill .txt{position:relative;font:700 .17em var(--mono);color:#fff;letter-spacing:.05em;padding-left:.9em;white-space:nowrap;text-transform:none}
+.pill.alt{background:linear-gradient(100deg,#22d3ee,#3b82f6 50%,#a855f7)}
+@keyframes slide{to{transform:translateX(9px)}}
+.hero .lead{margin:26px 0 30px;font-size:18px}
+.cmd-box{display:flex;align-items:center;gap:6px;background:#0a0811;border:1px solid var(--line2);border-radius:16px;padding:6px;max-width:600px;box-shadow:0 30px 60px -30px #000,inset 0 1px 0 #ffffff0a;position:relative}
+.cmd-box::before{content:'';position:absolute;inset:-1px;border-radius:17px;padding:1px;background:var(--grad);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none}
+.os-switch{display:flex;background:var(--panel);border-radius:11px;padding:3px;flex:none}
+.os-switch button{font:600 12px var(--mono);padding:8px 11px;border-radius:8px;color:var(--dim);transition:.2s;display:flex;gap:6px;align-items:center}
+.os-switch button[aria-pressed=true]{background:var(--panel2);color:#fff;box-shadow:inset 0 0 0 1px var(--line2)}
+.os-switch svg{width:13px;height:13px}
+.cmd-box code{flex:1;font:500 14px var(--mono);white-space:nowrap;overflow-x:auto;padding:0 10px;scrollbar-width:none;color:#e9e3ff}
+.cmd-box code::-webkit-scrollbar{display:none}
+.cmd-box code .p{color:var(--m2)}
+.copy{flex:none;background:var(--grad);color:#fff;font:700 13px var(--mono);padding:11px 16px;border-radius:11px;transition:.2s;min-width:84px}
+.copy.ok{background:#22c55e}
+.hero-meta{display:flex;gap:26px;margin-top:30px;flex-wrap:wrap}
+.hero-meta div{font:500 12px var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.1em}
+.hero-meta b{display:block;font:400 30px/1 var(--display);color:#fff;letter-spacing:.02em;margin-bottom:6px}
+
+/* hero collage: kolom tile miring yang bergerak */
+.collage{position:relative;height:640px;margin-right:-120px;mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent),linear-gradient(transparent,#000 15%,#000 85%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)}
+.collage-inner{position:absolute;inset:-120px -40px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;transform:rotate(-14deg) skewY(2deg)}
+.col{display:flex;flex-direction:column;gap:16px;animation:colUp 38s linear infinite;will-change:transform}
+.col:nth-child(2){animation-name:colDown;animation-duration:44s}
+.col:nth-child(3){animation-duration:34s}
+@keyframes colUp{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes colDown{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+.tile{aspect-ratio:4/5;border-radius:20px;border:1px solid var(--line2);background:var(--panel);position:relative;overflow:hidden;padding:18px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .4s,border-color .4s}
+.tile:hover{transform:scale(1.04);border-color:var(--m2)}
+.tile .glyph{font:700 40px/1 var(--mono);letter-spacing:-.04em}
+.tile .nm{font:400 22px/1 var(--display);text-transform:uppercase;letter-spacing:.03em}
+.tile .cat{font:500 10px var(--mono);color:#ffffffb0;text-transform:uppercase;letter-spacing:.12em}
+.tile::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,#ffffff22,transparent 55%);pointer-events:none}
+.tile .ok{position:absolute;top:14px;right:14px;font:700 10px var(--mono);background:#00000055;border:1px solid #ffffff33;border-radius:999px;padding:3px 8px;color:#fff}
+
+/* marquee */
+.marquee{border-bottom:1px solid var(--line);padding:30px 0;overflow:hidden;position:relative;background:linear-gradient(180deg,#0d0b15,var(--bg))}
+.marquee .track{display:flex;width:max-content;animation:mq 40s linear infinite}
+.marquee .track span{font:400 clamp(48px,7vw,96px)/1 var(--display);text-transform:uppercase;padding-right:.5em;white-space:nowrap;letter-spacing:.01em}
+.marquee .track span:nth-child(odd){-webkit-text-stroke:1.5px #a855f7;color:transparent}
+.marquee .track span:nth-child(even){background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.marquee .track span i{font-style:normal;-webkit-text-stroke:0;color:var(--m2);padding:0 .25em}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+section.sec{padding:120px 0;position:relative}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:56px;flex-wrap:wrap}
+
+/* about */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}
+.stack{position:relative;height:520px}
+.term{background:#0a0811;border:1px solid var(--line2);border-radius:16px;overflow:hidden;box-shadow:0 40px 80px -30px #000}
+.term .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);background:#100e19}
+.term .bar i{width:11px;height:11px;border-radius:50%;background:#2c2840}
+.term .bar i:nth-child(1){background:#ff5f57}.term .bar i:nth-child(2){background:#febc2e}.term .bar i:nth-child(3){background:#28c840}
+.term .bar span{margin-left:8px;font:500 12px var(--mono);color:var(--mute)}
+.term pre{font:500 12.5px/1.55 var(--mono);padding:16px 18px;color:#d9d3ec;white-space:pre;overflow:hidden}
+.stack .t1{position:absolute;inset:0 70px 90px 0}
+.stack .t1 pre{height:100%}
+.stack .t2{position:absolute;right:0;bottom:0;width:58%;transform:rotate(3deg)}
+.badge-spin{position:absolute;left:-30px;top:40%;width:120px;height:120px;z-index:3;display:grid;place-items:center}
+.badge-spin svg{position:absolute;inset:0;animation:spin 14s linear infinite}
+.badge-spin .core{width:62px;height:62px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font:400 22px var(--display);box-shadow:0 0 40px -6px var(--m2)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.c-m{color:#e879f9}.c-c{color:#67e8f9}.c-g{color:#86efac}.c-y{color:#fde047}.c-d{color:#5d5677}.c-w{color:#fff;font-weight:700}.c-b{color:#93c5fd}.c-r{color:#fca5a5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:36px 0}
+.stat{border:1px solid var(--line);border-radius:18px;padding:20px;background:linear-gradient(180deg,var(--panel),transparent)}
+.stat .ico{width:38px;height:38px;border-radius:11px;background:#d946ef1c;border:1px solid #d946ef44;display:grid;place-items:center;margin-bottom:16px;color:var(--m1)}
+.stat .ico svg{width:18px;height:18px}
+.stat b{font:400 44px/1 var(--display);display:block;letter-spacing:.01em}
+.stat span{font:500 11px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+.platforms{display:flex;flex-wrap:wrap;gap:10px;margin-top:70px;padding-top:40px;border-top:1px solid var(--line);justify-content:space-between}
+.platforms div{display:flex;align-items:center;gap:10px;font:400 22px var(--display);text-transform:uppercase;color:var(--dim);letter-spacing:.04em;transition:.3s}
+.platforms div:hover{color:#fff}
+.platforms svg{width:26px;height:26px;color:var(--m2)}
+
+/* services / fitur */
+.services{display:grid;grid-template-columns:.9fr 1.1fr;gap:60px;align-items:center}
+.svc-visual{position:relative;aspect-ratio:1;max-width:520px}
+.svc-visual .ring{position:absolute;inset:0;border-radius:50%;border:1px dashed var(--line2);animation:spin 60s linear infinite}
+.svc-visual .ring.r2{inset:12%;border-style:solid;border-color:var(--line);animation-direction:reverse;animation-duration:40s}
+.svc-visual .ring.r3{inset:24%;background:radial-gradient(circle,#a855f733,transparent 70%);border:none}
+.svc-visual .orbit{position:absolute;width:56px;height:56px;border-radius:16px;background:var(--panel2);border:1px solid var(--line2);display:grid;place-items:center;font:700 15px var(--mono);box-shadow:0 10px 30px -10px #000}
+.svc-visual .core{position:absolute;inset:34%;border-radius:32px;background:var(--grad);display:grid;place-items:center;box-shadow:0 0 90px -10px var(--m2)}
+.svc-visual .core svg{width:42%;height:42%;color:#fff}
+.svc-list{display:flex;flex-direction:column;gap:12px}
+.svc{border:1px solid var(--line);border-radius:18px;background:var(--panel);transition:border-color .3s,background .3s;overflow:hidden}
+.svc button{width:100%;display:flex;align-items:center;gap:18px;padding:20px 22px;text-align:left}
+.svc .num{font:600 12px var(--mono);color:var(--mute)}
+.svc .ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line2);flex:none;transition:.3s}
+.svc .ic svg{width:22px;height:22px}
+.svc h3{font:400 24px/1 var(--display);text-transform:uppercase;letter-spacing:.02em;flex:1}
+.svc .plus{width:30px;height:30px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;transition:.3s;flex:none}
+.svc .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.2,.8,.2,1)}
+.svc .body>div{overflow:hidden}
+.svc .body p{color:var(--dim);padding:0 22px 0 106px;font-size:15px}
+.svc .body ul{display:flex;flex-wrap:wrap;gap:8px;padding:14px 22px 22px 106px;list-style:none}
+.svc .body li{font:500 12px var(--mono);border:1px solid var(--line2);border-radius:999px;padding:5px 11px;color:#d6cff0}
+.svc.open{border-color:#a855f780;background:linear-gradient(135deg,#1c1530,var(--panel) 60%)}
+.svc.open .body{grid-template-rows:1fr}
+.svc.open .ic{background:var(--grad);border-color:transparent;color:#fff}
+.svc.open .plus{transform:rotate(45deg);background:var(--m2);border-color:var(--m2)}
+@media(max-width:700px){.svc .body p,.svc .body ul{padding-left:22px}}
+
+/* profiles accordion horizontal */
+.prof-row{display:flex;gap:8px;height:540px}
+.prof{flex:0 0 56px;min-width:0;border:1px solid var(--line);border-radius:22px;background:var(--panel);position:relative;overflow:hidden;cursor:pointer;transition:flex .6s cubic-bezier(.2,.8,.2,1),border-color .4s}
+.prof:hover{border-color:var(--line2)}
+.prof.active{flex:1 1 auto;border-color:#a855f780;cursor:default}
+.prof .side{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:22px 0;transition:opacity .3s}
+.prof .side .n{font:600 11px var(--mono);color:var(--mute)}
+.prof .side .t{writing-mode:vertical-rl;transform:rotate(180deg);font:400 22px var(--display);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;color:var(--dim)}
+.prof.active .side{opacity:0;pointer-events:none}
+.prof .full{position:absolute;inset:0;padding:34px;display:flex;flex-direction:column;opacity:0;transform:translateY(20px);transition:opacity .4s .15s,transform .5s .15s;pointer-events:none}
+.prof.active .full{opacity:1;transform:none;pointer-events:auto}
+.prof .full::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 100% 0%,var(--tint,#a855f7)44,transparent 55%);z-index:-1}
+.prof .big{font:400 clamp(150px,18vw,240px)/.8 var(--display);position:absolute;right:20px;bottom:-14px;opacity:.06;pointer-events:none}
+.prof .full h3{font:400 clamp(32px,3.4vw,46px)/1 var(--display);text-transform:uppercase;margin:14px 0 12px;max-width:520px}
+.prof .full p{color:var(--dim);max-width:480px}
+.prof .apps{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0;max-width:620px}
+.prof .apps span{font:500 12.5px var(--mono);background:#ffffff08;border:1px solid var(--line2);border-radius:10px;padding:6px 11px}
+.prof .run{margin-top:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.prof .run code{font:500 13px var(--mono);background:#0a0811;border:1px solid var(--line2);border-radius:12px;padding:11px 14px;color:#e9e3ff}
+.prof .run code b{color:var(--m1);font-weight:600}
+@media(max-width:900px){.prof-row{flex-direction:column;height:auto}.prof{min-height:64px;flex:none}.prof.active{min-height:560px}.prof .side{flex-direction:row;padding:0 24px}.prof .side .t{writing-mode:horizontal-tb;transform:none}.prof .full{min-width:0;padding:24px}}
+
+/* rewards -> kenapa */
+.why{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.awards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.award{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:26px 20px;text-align:center;position:relative;overflow:hidden;transition:transform .4s,border-color .4s}
+.award:nth-child(even){margin-top:34px;margin-bottom:-34px}
+.award:hover{border-color:var(--m2)}
+.award .medal{width:78px;height:78px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 30%,#f5d0fe,#d946ef 45%,#6d28d9);box-shadow:0 0 0 6px #d946ef1a,0 0 40px -6px #d946ef}
+.award .medal svg{width:34px;height:34px;color:#fff}
+.award h4{font:400 22px/1.05 var(--display);text-transform:uppercase;letter-spacing:.03em}
+.award p{font-size:13.5px;color:var(--dim);margin-top:8px}
+.award .laurel{position:absolute;inset:auto 0 12px;font:500 10px var(--mono);color:var(--mute);letter-spacing:.2em}
+.bars{margin-top:34px;display:flex;flex-direction:column;gap:20px}
+.barrow .lbl{display:flex;justify-content:space-between;font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.barrow .lbl span:last-child{color:var(--m1)}
+.barrow .track{height:6px;border-radius:9px;background:var(--panel2);overflow:hidden}
+.barrow .fill{height:100%;width:0;border-radius:9px;background:var(--grad);transition:width 1.4s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 14px #d946ef}
+
+/* install (case study accordion) */
+.cases{display:flex;flex-direction:column;gap:12px}
+.case{border:1px solid var(--line);border-radius:22px;background:var(--panel);overflow:hidden;transition:border-color .3s}
+.case>button{width:100%;display:flex;align-items:center;gap:24px;padding:24px 28px;text-align:left}
+.case .num{font:600 12px var(--mono);color:var(--mute);width:50px}
+.case h3{font:400 clamp(24px,3vw,36px)/1 var(--display);text-transform:uppercase;flex:1;letter-spacing:.02em}
+.case .tag{font:500 12px var(--mono);color:var(--dim)}
+.case .arr{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;transition:.4s}
+.case .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1)}
+.case .body>div{overflow:hidden}
+.case-inner{display:grid;grid-template-columns:1.1fr 1fr;gap:34px;padding:4px 28px 30px}
+.case.open{border-color:#a855f780;background:linear-gradient(160deg,#1a1430,var(--panel) 55%)}
+.case.open .body{grid-template-rows:1fr}
+.case.open .arr{transform:rotate(-45deg);background:var(--grad);border-color:transparent}
+.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:14px;margin:6px 0 22px}
+.steps li{counter-increment:s;display:flex;gap:14px;color:#d6cff0}
+.steps li::before{content:counter(s,decimal-leading-zero);font:600 12px var(--mono);color:var(--m1);border:1px solid #d946ef55;border-radius:8px;padding:3px 7px;height:fit-content;flex:none}
+kbd{font:600 12px var(--mono);background:var(--panel2);border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:1px 7px;color:#fff}
+.meta3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.meta3 div{border-top:1px solid var(--line2);padding-top:10px;font:500 11px var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.1em}
+.meta3 b{display:block;color:#fff;font:400 18px var(--display);letter-spacing:.03em;margin-top:4px}
+.dl-list{display:flex;flex-wrap:wrap;gap:10px}
+.dl-list a{font:500 13px var(--mono);border:1px solid var(--line2);border-radius:12px;padding:10px 14px;display:flex;gap:8px;align-items:center;transition:.2s}
+.dl-list a:hover{border-color:var(--m2);background:#d946ef14}
+.dl-list svg{width:14px;height:14px;color:var(--m1)}
+.case-inner>*{min-width:0}
+@media(max-width:900px){.case-inner{grid-template-columns:1fr}}
+@media(max-width:700px){.case .tag,.case .num{display:none}.case>button{padding:18px 20px;gap:14px}.case-inner{padding:4px 18px 24px}.nav-right .btn{padding:9px 14px;font-size:13px}.hero{padding-top:120px}.hero-meta{gap:18px}.stats{grid-template-columns:1fr 1fr 1fr;gap:8px}.stat{padding:14px}.stat b{font-size:32px}.awards{gap:10px}.platforms div{font-size:17px}}
+
+/* CTA */
+.cta{border:1px solid var(--line);border-radius:32px;background:radial-gradient(circle at 15% 50%,#c026d355,transparent 45%),radial-gradient(circle at 90% 10%,#3b82f633,transparent 40%),var(--panel);display:grid;grid-template-columns:.8fr 1.2fr;align-items:center;overflow:hidden;position:relative}
+.cta-art{position:relative;height:100%;min-height:380px;display:grid;place-items:center}
+.cta-art .cube{width:190px;height:190px;position:relative;transform-style:preserve-3d;animation:cube 14s linear infinite}
+.cta-art .face{position:absolute;inset:0;border:1px solid #f0abfc88;background:linear-gradient(135deg,#d946ef33,#3b82f622);backdrop-filter:blur(2px);display:grid;place-items:center;font:400 34px var(--display);color:#fff}
+.face.f1{transform:translateZ(95px)}.face.f2{transform:rotateY(180deg) translateZ(95px)}.face.f3{transform:rotateY(90deg) translateZ(95px)}.face.f4{transform:rotateY(-90deg) translateZ(95px)}.face.f5{transform:rotateX(90deg) translateZ(95px)}.face.f6{transform:rotateX(-90deg) translateZ(95px)}
+@keyframes cube{to{transform:rotateX(360deg) rotateY(720deg)}}
+.cta-body{padding:60px 56px 60px 0}
+.cta-body h2{font-size:clamp(40px,5vw,68px)}
+.store{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+.store button{display:flex;align-items:center;gap:12px;background:#fff;color:#0b0912;border-radius:14px;padding:10px 18px;text-align:left;transition:transform .25s}
+.store button:hover{transform:translateY(-3px)}
+.store button small{display:block;font:500 10px var(--mono);opacity:.6;text-transform:uppercase}
+.store button b{font:700 16px var(--sans)}
+.store svg{width:26px;height:26px}
+@media(max-width:900px){.cta{grid-template-columns:1fr}.cta-body{padding:0 28px 50px}.cta-art{min-height:280px}}
+
+/* news -> catatan/FAQ */
+.news{display:grid;grid-template-columns:.7fr 1.3fr;gap:60px}
+.news-list{display:flex;flex-direction:column}
+.post{display:grid;grid-template-columns:150px 1fr;gap:26px;padding:24px 0;border-bottom:1px solid var(--line);align-items:center;transition:.3s}
+.post:first-child{padding-top:0}
+.post .thumb{aspect-ratio:1;border-radius:18px;border:1px solid var(--line2);display:grid;place-items:center;position:relative;overflow:hidden}
+.post .thumb span{font:400 54px var(--display);color:#fff;position:relative;z-index:1}
+.post .thumb::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,#ffffff0a 0 2px,transparent 2px 10px)}
+.post .tagline{font:500 11px var(--mono);color:var(--m1);text-transform:uppercase;letter-spacing:.1em;display:flex;gap:14px}
+.post .tagline span:last-child{color:var(--mute)}
+.post h3{font:400 26px/1.05 var(--display);text-transform:uppercase;margin:10px 0 8px;letter-spacing:.02em;transition:.3s}
+.post p{color:var(--dim);font-size:14.5px}
+.post:hover h3{color:var(--m1)}
+@media(max-width:900px){.news{grid-template-columns:1fr}.post{grid-template-columns:90px 1fr;gap:18px}.post .thumb span{font-size:34px}}
+
+footer{border-top:1px solid var(--line);margin-top:120px;background:linear-gradient(180deg,var(--bg2),#06050a)}
+.foot{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding:70px 0 50px}
+.foot h5{font:600 12px var(--mono);color:var(--m1);text-transform:uppercase;letter-spacing:.12em;margin-bottom:18px}
+.foot ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.foot li a{color:var(--dim);font-size:14.5px;transition:.2s}
+.foot li a:hover{color:#fff}
+.foot p{color:var(--dim);font-size:14.5px;margin:16px 0;max-width:330px}
+.foot-big{font:400 clamp(70px,17vw,240px)/.8 var(--display);text-align:center;letter-spacing:.02em;background:linear-gradient(180deg,#a855f733,transparent 85%);-webkit-background-clip:text;background-clip:text;color:transparent;user-select:none;margin-bottom:-.12em}
+.copyright{border-top:1px solid var(--line);padding:22px 0;font:500 12px var(--mono);color:var(--mute);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+@media(max-width:900px){.foot{grid-template-columns:1fr 1fr}}
+
+/* ===== optimisasi ===== */
+.anim-off,.anim-off *,.tab-hidden *{animation-play-state:paused!important}
+.collage,.svc-visual,.stack,.cta-art,.marquee{contain:layout paint}
+section.sec{content-visibility:auto;contain-intrinsic-size:auto 900px}
+.perf-lite .bg-fx .orb,.perf-lite .col,.perf-lite .ring,.perf-lite .pill .scan,.perf-lite .badge-spin svg{animation:none!important}
+.perf-lite .cube{animation:none!important;transform:rotateX(-22deg) rotateY(38deg)}
+.perf-lite .cursor-glow,.perf-lite .noise{display:none}
+.perf-lite nav.top{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0b0912f5}
+.perf-lite .marquee .track{animation-duration:90s}
+.perf-lite .rv{transition-duration:.35s;transform:translateY(16px)}
+.perf-lite .rv.in{transform:none}
+.perf-lite .tile:hover,.perf-lite .award:hover{transform:none}
+.perf-lite .term{box-shadow:none}
+.perf-toggle{display:inline-flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
+.perf-toggle button{font:600 11px var(--mono);padding:5px 10px;border-radius:999px;color:var(--mute)}
+.perf-toggle button[aria-pressed=true]{background:var(--panel2);color:#fff}
+.orbit{left:0;top:0;will-change:transform}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+
+@media(max-width:1000px){
+  .hero-grid,.about,.services,.why{grid-template-columns:1fr}
+  .collage{height:380px;margin:0 -28px}
+  .stack{height:440px}
+  .svc-visual{max-width:380px;margin:0 auto}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"><div class="grid"></div><div class="orb a"></div><div class="orb b"></div></div>
+<div class="noise" aria-hidden="true"></div>
+<div class="cursor-glow" id="glow" aria-hidden="true"></div>
+
+<!-- ================= NAV ================= -->
+<nav class="top" id="nav">
+  <a href="#" class="logo"><span class="mark">&gt;_</span>TIPACK</a>
+  <div class="nav-links">
+    <a href="#tentang">Tentang</a><a href="#fitur">Fitur</a><a href="#profil">Profil</a><a href="katalog.html">Katalog</a><a href="#install">Install</a><a href="#catatan">Catatan</a>
+  </div>
+  <div class="nav-right">
+    <a href="#install" class="btn btn-grad">Install Sekarang
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow rv">DEVSETUP IF · v2.0 · Windows · macOS · Linux</span>
+      <h1 class="h-display rv d1" style="margin-top:22px">
+        <span class="row">Next-Gen <span class="pill"><span class="scan"></span><span class="txt">winget ✓</span></span></span>
+        <span class="row"><span class="grad-text">Setup</span> Laptop</span>
+        <span class="row">With <span class="pill alt"><span class="scan"></span><span class="txt">brew ✓</span></span> One CMD</span>
+      </h1>
+      <p class="lead rv d2">Laptop baru tinggal satu perintah. Pilih tools lewat wizard yang menjelaskan setiap aplikasi, lalu biarkan TIPACK menginstall 120+ aplikasi developer. Yang sudah terpasang otomatis dilewati.</p>
+      <div class="cmd-box rv d3">
+        <div class="os-switch" role="group" aria-label="Pilih sistem operasi">
+          <button data-os="win" aria-pressed="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l7.5-1v7H3zM11.5 4.3L21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg>Win</button>
+          <button data-os="mac" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.5 1.3-.1 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.5.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-4.1zM13.9 4.9c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>Mac</button>
+          <button data-os="linux" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2.2 0-3.6 1.9-3.6 4.6 0 1.3.3 2.3-.5 3.6-1 1.6-2.6 3.6-2.6 6 0 .8.2 1.5.5 2.1-.6.3-1.3.6-1.3 1.3 0 .9 1.4 1 2.6 1.3 1 .3 1.7 1.1 2.7 1.1.8 0 1.3-.5 1.6-1h1.2c.3.5.8 1 1.6 1 1 0 1.7-.8 2.7-1.1 1.2-.3 2.6-.4 2.6-1.3 0-.7-.7-1-1.3-1.3.3-.6.5-1.3.5-2.1 0-2.4-1.6-4.4-2.6-6-.8-1.3-.5-2.3-.5-3.6C15.6 3.9 14.2 2 12 2zm-1.6 4.2c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zm3.2 0c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zM12 9.3c.8 0 1.9.5 1.9 1s-1.1 1-1.9 1-1.9-.5-1.9-1 1.1-1 1.9-1z"/></svg>Linux</button>
+        </div>
+        <code id="heroCmd"></code>
+        <button class="copy" data-copy="hero">Copy</button>
+      </div>
+      <div class="hero-meta rv d3">
+        <div><b data-count="160">0</b>Aplikasi</div>
+        <div><b data-count="11">0</b>Profil</div>
+        <div><b data-count="20">0</b>Pertanyaan wizard</div>
+        <div><b>0 Rp</b>Gratis</div>
+      </div>
+    </div>
+    <div class="collage" aria-hidden="true" data-anim><div class="collage-inner" id="collage"></div></div>
+  </div>
+</header>
+
+<!-- ================= MARQUEE ================= -->
+<div class="marquee" aria-hidden="true" data-anim><div class="track" id="mq"></div></div>
+
+<!-- ================= ABOUT ================= -->
+<section class="sec" id="tentang">
+  <div class="wrap">
+    <div class="about">
+      <div class="stack rv" data-anim id="stack">
+        <div class="badge-spin">
+          <svg viewBox="0 0 120 120"><defs><path id="circ" d="M60 60m-48 0a48 48 0 1 1 96 0a48 48 0 1 1-96 0"/></defs><text font-family="JetBrains Mono" font-size="10.5" font-weight="700" letter-spacing="3.2" fill="#f0abfc"><textPath href="#circ">· 120+ TOOLS · ONE COMMAND · TIPACK </textPath></text></svg>
+          <div class="core">IF</div>
+        </div>
+        <div class="term t1"><div class="bar"><i></i><i></i><i></i><span>devsetup — boot</span></div><pre id="bootTerm"></pre></div>
+        <div class="term t2"><div class="bar"><i></i><i></i><i></i><span>install</span></div><pre id="instTerm"></pre></div>
+      </div>
+      <div>
+        <span class="eyebrow rv">Kenapa dibuat</span>
+        <h2 class="h-display h2 rv d1">Setup laptop anak IF<br><span class="grad-text">tanpa drama</span></h2>
+        <p class="lead rv d2" style="margin-top:20px">Tiap semester ada saja teman yang bingung: Python belum masuk PATH, XAMPP bentrok port, WSL tidak jalan. TIPACK menjawab semua itu lewat wizard di terminal: setiap pilihan ada penjelasan dan rekomendasinya, setiap aplikasi dicek dulu sebelum diinstall.</p>
+        <div class="stats">
+          <div class="stat rv d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div><b data-count="17">0</b><span>Kategori</span></div>
+          <div class="stat rv d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg></div><b data-count="28">0</b><span>Ekstensi VS Code</span></div>
+          <div class="stat rv d3"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 .9-5.1 4.8 1.3 7L12 17.8 5.8 21.2l1.3-7L2 9.4l7-.9z"/></svg></div><b data-count="3">0</b><span>Sistem operasi</span></div>
+        </div>
+        <a href="#install" class="btn btn-ghost rv">Mulai install <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+    <div class="platforms rv">
+      <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l7.5-1v7H3zM11.5 4.3L21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg>Windows</div>
+      <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.5 1.3-.1 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.5.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-4.1zM13.9 4.9c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>macOS</div>
+      <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-2.2 0-3.6 1.9-3.6 4.6 0 1.3.3 2.3-.5 3.6-1 1.6-2.6 3.6-2.6 6 0 .8.2 1.5.5 2.1-.6.3-1.3.6-1.3 1.3 0 .9 1.4 1 2.6 1.3 1 .3 1.7 1.1 2.7 1.1.8 0 1.3-.5 1.6-1h1.2c.3.5.8 1 1.6 1 1 0 1.7-.8 2.7-1.1 1.2-.3 2.6-.4 2.6-1.3 0-.7-.7-1-1.3-1.3.3-.6.5-1.3.5-2.1 0-2.4-1.6-4.4-2.6-6-.8-1.3-.5-2.3-.5-3.6C15.6 3.9 14.2 2 12 2zm-1.6 4.2c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zm3.2 0c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zM12 9.3c.8 0 1.9.5 1.9 1s-1.1 1-1.9 1-1.9-.5-1.9-1 1.1-1 1.9-1z"/></svg>Linux</div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/></svg>winget</div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l-1 6a5 5 0 01-10 0zM12 14v4M8 21h8"/></svg>Homebrew</div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>WSL2</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FITUR ================= -->
+<section class="sec" id="fitur" style="background:linear-gradient(180deg,transparent,#0d0b1588 30%,transparent)">
+  <div class="wrap services">
+    <div class="svc-visual rv" id="orbit" data-anim>
+      <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+      <div class="core"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5-5 5M12 17h7"/></svg></div>
+    </div>
+    <div>
+      <span class="eyebrow rv">Fitur</span>
+      <h2 class="h-display h2 rv d1">Bukan sekadar<br><span class="grad-text">script install</span></h2>
+      <div class="svc-list" id="svcList" style="margin-top:36px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROFIL ================= -->
+<section class="sec" id="profil">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow rv">11 profil siap pakai</span><h2 class="h-display h2 rv d1">Pilih jalur <span class="grad-text">ngodingmu</span></h2></div>
+      <p class="lead rv d2">Klik salah satu kartu untuk melihat isinya. Setiap profil bisa dijalankan dari menu, atau langsung lewat parameter preset.</p>
+    </div>
+    <div class="prof-row rv" id="profRow"></div>
+  </div>
+</section>
+
+<!-- ================= KENAPA ================= -->
+<section class="sec">
+  <div class="wrap why">
+    <div class="awards">
+      <div class="award rv"><div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><h4>100% Gratis</h4><p>Hanya memasang aplikasi gratis atau versi trial resminya.</p></div>
+      <div class="award rv d1"><div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h4>Sumber Resmi</h4><p>Semua lewat winget dan Homebrew, bukan file acak dari internet.</p></div>
+      <div class="award rv d2"><div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h4>Bisa Diaudit</h4><p>Script bisa dibaca dulu sebelum dijalankan. Tidak ada yang disembunyikan.</p></div>
+      <div class="award rv d3"><div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div><h4>Anti Dobel</h4><p>Aplikasi yang sudah terpasang dideteksi dan dilewati.</p></div>
+    </div>
+    <div>
+      <span class="eyebrow rv">Isi katalog</span>
+      <h2 class="h-display h2 rv d1">Semua yang dipakai<br><span class="grad-text">selama kuliah</span></h2>
+      <p class="lead rv d2" style="margin-top:18px">Dari semester satu (compiler C++) sampai skripsi (Zotero). Jumlah aplikasi per kategori di versi Windows:</p>
+      <div class="bars" id="bars"></div>
+      <a href="katalog.html" class="btn btn-ghost rv" style="margin-top:30px">Lihat semua aplikasi <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= INSTALL ================= -->
+<section class="sec" id="install">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow rv">Cara install</span><h2 class="h-display h2 rv d1">Tiga OS, <span class="grad-text">satu perintah</span></h2></div>
+      <p class="lead rv d2">Cukup jalankan perintah satu baris. Kalau mau membaca script-nya dulu (disarankan), download manual juga tersedia.</p>
+    </div>
+    <div class="cases rv" id="cases"></div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="sec" style="padding-top:20px">
+  <div class="wrap">
+    <div class="cta rv">
+      <div class="cta-art" style="perspective:900px" aria-hidden="true" data-anim>
+        <div class="cube"><div class="face f1">&gt;_</div><div class="face f2">IF</div><div class="face f3">⌘</div><div class="face f4">⊞</div><div class="face f5">{ }</div><div class="face f6">#!</div></div>
+      </div>
+      <div class="cta-body">
+        <span class="eyebrow">Siap ngoding?</span>
+        <h2 class="h-display h2">Pasang sekali,<br><span class="grad-text">fokus belajar.</span></h2>
+        <p class="lead" style="margin-top:16px">Pilih sistem operasimu. Perintahnya langsung tersalin, tinggal paste di terminal.</p>
+        <div class="store">
+          <button data-quick="win"><svg viewBox="0 0 24 24" fill="#0b0912"><path d="M3 5.5l7.5-1v7H3zM11.5 4.3L21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg><span><small>Copy perintah</small><b>Windows</b></span></button>
+          <button data-quick="mac"><svg viewBox="0 0 24 24" fill="#0b0912"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.5 1.3-.1 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.5.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-4.1zM13.9 4.9c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg><span><small>Copy perintah</small><b>macOS</b></span></button>
+          <button data-quick="linux"><svg viewBox="0 0 24 24" fill="#0b0912"><path d="M12 2c-2.2 0-3.6 1.9-3.6 4.6 0 1.3.3 2.3-.5 3.6-1 1.6-2.6 3.6-2.6 6 0 .8.2 1.5.5 2.1-.6.3-1.3.6-1.3 1.3 0 .9 1.4 1 2.6 1.3 1 .3 1.7 1.1 2.7 1.1.8 0 1.3-.5 1.6-1h1.2c.3.5.8 1 1.6 1 1 0 1.7-.8 2.7-1.1 1.2-.3 2.6-.4 2.6-1.3 0-.7-.7-1-1.3-1.3.3-.6.5-1.3.5-2.1 0-2.4-1.6-4.4-2.6-6-.8-1.3-.5-2.3-.5-3.6C15.6 3.9 14.2 2 12 2zm-1.6 4.2c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zm3.2 0c.4 0 .7.5.7 1.1s-.3 1.1-.7 1.1-.7-.5-.7-1.1.3-1.1.7-1.1zM12 9.3c.8 0 1.9.5 1.9 1s-1.1 1-1.9 1-1.9-.5-1.9-1 1.1-1 1.9-1z"/></svg><span><small>Copy perintah</small><b>Linux</b></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CATATAN ================= -->
+<section class="sec" id="catatan" style="padding-top:60px">
+  <div class="wrap news">
+    <div><span class="eyebrow rv">Catatan penting</span><h2 class="h-display h2 rv d1">Baca dulu<br><span class="grad-text">sebelum install</span></h2><p class="lead rv d2" style="margin-top:18px">Hal-hal yang paling sering ditanyakan saat setup laptop baru.</p></div>
+    <div class="news-list" id="news"></div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div><a href="#" class="logo"><span class="mark">&gt;_</span>TIPACK</a><p>Installer toolkit untuk mahasiswa Teknik Informatika dan abang IT. Satu perintah untuk menyiapkan laptop baru di Windows atau macOS.</p><span class="mono" style="font-size:13px;color:var(--mute)">tipack.kousozo.tech</span></div>
+      <div><h5>Navigasi</h5><ul><li><a href="katalog.html">Katalog aplikasi</a></li><li><a href="#tentang">Tentang</a></li><li><a href="#fitur">Fitur</a></li><li><a href="#profil">Profil</a></li><li><a href="#install">Install</a></li></ul></div>
+      <div><h5>Download</h5><ul><li><a href="/windows/setup.ps1" download>setup.ps1</a></li><li><a href="/windows/JALANKAN.bat" download>JALANKAN.bat</a></li><li><a href="/macos/setup.sh" download>setup.sh (macOS)</a></li><li><a href="/linux/setup.sh" download>setup.sh (Linux)</a></li><li><a href="/install.ps1">install.ps1</a></li><li><a href="/install.sh">install.sh</a></li></ul></div>
+      <div><h5>Gratis untuk mahasiswa</h5><ul><li><a href="https://education.github.com/pack" target="_blank" rel="noopener">GitHub Student Pack</a></li><li><a href="https://www.jetbrains.com/community/education/" target="_blank" rel="noopener">JetBrains Student</a></li><li><a href="https://www.figma.com/education/" target="_blank" rel="noopener">Figma Education</a></li><li><a href="https://azure.microsoft.com/free/students" target="_blank" rel="noopener">Azure for Students</a></li></ul></div>
+    </div>
+    <div class="foot-big" aria-hidden="true">TIPACK</div>
+  </div>
+  <div class="wrap copyright"><span>© 2026 TIPACK · DEVSETUP IF</span><span class="perf-toggle" id="perfToggle" title="Mode animasi"><button data-p="auto">Auto</button><button data-p="lite">Lite</button><button data-p="full">Full</button></span></div>
+</footer>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const CMD = {
+  win: { raw: 'irm https://tipack.kousozo.tech/install.ps1 | iex', html: '<span class="p">PS&gt;</span> irm https://tipack.kousozo.tech/install.ps1 | iex' },
+  mac: { raw: 'curl -fsSL https://tipack.kousozo.tech/install.sh | bash', html: '<span class="p">$</span> curl -fsSL https://tipack.kousozo.tech/install.sh | bash' },
+  linux: { raw: 'curl -fsSL https://tipack.kousozo.tech/install.sh | bash', html: '<span class="p">$</span> curl -fsSL https://tipack.kousozo.tech/install.sh | bash' }
+};
+const UA = navigator.platform + ' ' + navigator.userAgent;
+let os = /Mac|iPhone|iPad/.test(UA) ? 'mac' : (/Linux|X11|CrOS/.test(UA) && !/Android/.test(UA)) ? 'linux' : 'win';
+
+async function copyText(t, btn) {
+  try { await navigator.clipboard.writeText(t); } catch { const ta = document.createElement('textarea'); ta.value = t; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  if (btn) { const o = btn.innerHTML; btn.classList.add('ok'); if (btn.classList.contains('copy')) btn.textContent = 'Copied ✓'; setTimeout(() => { btn.classList.remove('ok'); btn.innerHTML = o; }, 1600); }
+}
+function setOS(o) { os = o; $('#heroCmd').innerHTML = CMD[o].html; $$('.os-switch button').forEach(b => b.setAttribute('aria-pressed', b.dataset.os === o)); }
+$$('.os-switch button').forEach(b => b.onclick = () => setOS(b.dataset.os));
+$('[data-copy=hero]').onclick = e => copyText(CMD[os].raw, e.currentTarget);
+$$('[data-quick]').forEach(b => b.onclick = () => { copyText(CMD[b.dataset.quick].raw); const s = b.querySelector('small'); s.textContent = 'Tersalin ✓'; setTimeout(() => s.textContent = 'Copy perintah', 1600); });
+setOS(os);
+
+/* nav */
+addEventListener('scroll', () => $('#nav').classList.toggle('scrolled', scrollY > 30), { passive: true });
+
+/* cursor glow */
+const glow = $('#glow');
+if (matchMedia('(pointer:fine)').matches) addEventListener('pointermove', PERF.raf(e => { if (!PERF.lite) glow.style.transform = `translate3d(${e.clientX - 210}px,${e.clientY - 210}px,0)`; }), { passive: true });
+else glow.remove();
+
+/* hero collage */
+const TILES = [
+  ['VS', 'VS Code', 'Editor', '#2563eb,#0ea5e9'], ['Py', 'Python', 'Bahasa', '#2563eb,#facc15'], ['git', 'Git', 'Version control', '#ea580c,#dc2626'],
+  ['JS', 'Node.js', 'Runtime', '#16a34a,#65a30d'], ['☕', 'Java JDK', 'Bahasa', '#b45309,#dc2626'], ['C++', 'MinGW', 'Compiler', '#4f46e5,#0891b2'],
+  ['🐳', 'Docker', 'DevOps', '#0284c7,#1d4ed8'], ['DB', 'DBeaver', 'Database', '#7c3aed,#a16207'], ['🐧', 'WSL2', 'Linux', '#ca8a04,#18181b'],
+  ['Fg', 'Figma', 'Desain', '#db2777,#7c3aed'], ['API', 'Postman', 'API', '#ea580c,#f97316'], ['7z', '7-Zip', 'Arsip', '#27272a,#52525b'],
+  ['AS', 'Android', 'Mobile', '#16a34a,#0d9488'], ['Ws', 'Wireshark', 'Jaringan', '#1d4ed8,#0ea5e9'], ['go', 'Go', 'Bahasa', '#0891b2,#06b6d4'],
+  ['XP', 'XAMPP', 'Web server', '#ea580c,#b91c1c'], ['gh', 'GitHub CLI', 'Git', '#18181b,#6d28d9'], ['AI', 'Ollama', 'LLM lokal', '#18181b,#c026d3']
+];
+const tileHTML = (t, i) => `<div class="tile" style="background:linear-gradient(150deg,${t[3]})">${i % 3 === 0 ? '<span class="ok">✓ terpasang</span>' : ''}<div class="glyph">${t[0]}</div><div><div class="cat">${t[2]}</div><div class="nm">${t[1]}</div></div></div>`;
+$('#collage').innerHTML = [0, 1, 2].map(c => { const set = TILES.filter((_, i) => i % 3 === c); const h = set.map(tileHTML).join(''); return `<div class="col">${h}${h}</div>`; }).join('');
+
+/* marquee */
+const mqText = ['Installer anak IF', 'Satu perintah', '120+ tools', 'Wizard interaktif', 'Windows · macOS · Linux', 'Arch · Debian · Fedora', 'Gratis'];
+const mqH = mqText.map(t => `<span>${t}<i>✦</i></span>`).join('');
+$('#mq').innerHTML = mqH + mqH;
+
+/* terminal demo */
+const BOOT = [
+  ['<span class="c-d">$</span> <span class="c-w">curl -fsSL tipack.kousozo.tech/install.sh | bash</span>', 500],
+  ['', 120],
+  ['<span class="c-m">██████╗ ███████╗██╗   ██╗</span>', 60], ['<span class="c-m">██╔══██╗██╔════╝██║   ██║</span>', 60], ['<span class="c-b">██║  ██║█████╗  ╚██╗ ██╔╝</span>', 60], ['<span class="c-b">██████╔╝███████╗ ╚████╔╝ </span>', 60], ['<span class="c-c">╚═════╝ ╚══════╝  ╚═══╝  </span>  <span class="c-d">IF v2.0</span>', 300],
+  ['', 100],
+  ['  <span class="c-g">[  OK  ]</span> Membaca informasi sistem', 280], ['  <span class="c-g">[  OK  ]</span> Koneksi internet', 280], ['  <span class="c-g">[  OK  ]</span> Homebrew', 280],
+  ['  <span class="c-y">[ WARN ]</span> Xcode CLT <span class="c-d">(akan dipasang)</span>', 400],
+  ['', 100],
+  ['     <span class="c-c">RAM    : 16 GB   Disk: 312 GB kosong</span>', 200],
+  ['   <span class="c-g">✓ Pemindaian selesai: 22/113 sudah terpasang</span>', 700],
+  ['', 100],
+  ['<span class="c-m">▓▒░</span> <span class="c-w">DEVSETUP IF</span> <span class="c-d">│</span> <span class="c-c">Menu Utama</span>', 200],
+  [' <span class="c-y">❯</span> <span class="c-w">🧙 Wizard Preferensi</span>      <span class="c-y">★ mulai di sini</span>', 150],
+  ['   📦 Profil Siap Pakai', 120], ['   🗂  Pilih Manual per Kategori', 120], ['   🔍 Cek Status Mac           <span class="c-g">22/113</span>', 120], ['   🛒 Keranjang &amp; Install', 2600]
+];
+const INST = [
+  ['<span class="c-m">█████████████░░░░░  72%</span> <span class="c-d">[8/11]</span>', 0],
+  ['   <span class="c-g">✓ Visual Studio Code  (34s)</span>', 0], ['   <span class="c-g">✓ Python 3  (21s)</span>', 0], ['   <span class="c-g">✓ Node.js 22 LTS  (18s)</span>', 0],
+  ['   <span class="c-d">= Git  (sudah terpasang)</span>', 0], ['   <span class="c-c">⠹ Menginstall Postman  00:12</span>', 0]
+];
+function typeTerm(el, lines, loop) {
+  let i = 0, buf = [];
+  const host = $('#stack');
+  const step = () => {
+    if (!PERF.isVisible(host)) return setTimeout(step, 500);
+    if (i >= lines.length) { if (loop) { i = 0; buf = []; } else return; }
+    buf.push(lines[i][0]); el.innerHTML = buf.slice(-17).join('\n') + '<span class="c-m">▋</span>';
+    setTimeout(step, lines[i++][1]);
+  };
+  step();
+}
+$('#instTerm').innerHTML = INST.map(l => l[0]).join('\n');
+const spinF = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'; let sf = 0;
+setInterval(() => { if (PERF.lite || !PERF.isVisible($('#stack'))) return; const l = INST.slice(); l[5] = [`   <span class="c-c">${spinF[sf++ % 10]} Menginstall Postman  00:${String(12 + Math.floor(sf / 10) % 40).padStart(2, '0')}</span>`]; $('#instTerm').innerHTML = l.map(x => x[0]).join('\n'); }, 100);
+
+/* orbit icons */
+const ORB = ['VS', 'Py', 'git', 'JS', 'C++', '☕', 'DB', '🐧'];
+ORB.forEach((t, i) => { const d = document.createElement('div'); d.className = 'orbit'; d.textContent = t; d.dataset.a = (i / ORB.length) * Math.PI * 2; $('#orbit').append(d); });
+let ang = 0, oSize = 0;
+const oBox = $('#orbit'), oEls = $$('.orbit', oBox);
+const placeOrbit = () => { const r = oSize * .44, c = oSize / 2; oEls.forEach(o => { const a = +o.dataset.a + ang; o.style.transform = `translate3d(${c + Math.cos(a) * r - 28}px,${c + Math.sin(a) * r - 28}px,0)`; }); };
+new ResizeObserver(([e]) => { oSize = e.contentRect.width; placeOrbit(); }).observe(oBox);
+PERF.loop(oBox, (t, dt) => { ang += 0.00015 * dt; placeOrbit(); });
+
+/* fitur accordion */
+const SVC = [
+  ['Wizard Preferensi', '<path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5"/>', 'Sekitar 20 pertanyaan dengan penjelasan dan rekomendasi di setiap pilihan. Esc untuk kembali ke pertanyaan sebelumnya.', ['WinRAR vs 7-Zip', 'WSL ya/tidak', 'Pengganti WSA', 'Editor & IDE', 'XAMPP vs Laragon']],
+  ['Deteksi Otomatis', '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11l2 2 4-4"/>', 'Sebelum install, semua aplikasi dicek lewat winget export / brew list, perintah di PATH, dan folder instalasi. Yang sudah ada ditandai ✓.', ['winget export', 'brew list', 'PATH probe', 'Folder probe', 'Status WSL']],
+  ['Keranjang Pintar', '<path d="M3 3h2l2.4 12.2a2 2 0 002 1.8h8.6a2 2 0 002-1.6L21 7H6"/><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/>', 'Ditinjau sebelum install. Ada peringatan untuk kombinasi yang bentrok dan paket yang terlalu berat untuk RAM laptop.', ['Node vs NVM', 'XAMPP vs MySQL', 'Docker vs OrbStack', 'Cek RAM']],
+  ['Progress & Log', '<path d="M3 12h4l3 8 4-16 3 8h4"/>', 'Progress bar, spinner dengan timer per aplikasi, ringkasan akhir, file log lengkap, dan link untuk aplikasi yang harus diinstall manual.', ['Progress bar', 'Timer per app', 'Log file', 'Retry yang gagal']],
+  ['Setup Lanjutan', '<path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>', 'Setelah install: ekstensi VS Code, Git + SSH key langsung ke GitHub, tweak OS untuk developer, update semua aplikasi.', ['28 ekstensi VS Code', 'SSH key → GitHub', 'Long Paths', 'Dark mode', 'Show hidden files']]
+];
+$('#svcList').innerHTML = SVC.map((s, i) => `
+  <div class="svc rv d${i % 3}${i === 0 ? ' open' : ''}">
+    <button aria-expanded="${i === 0}"><span class="num">[0${i + 1}]</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${s[1]}</svg></span><h3>${s[0]}</h3><span class="plus"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
+    <div class="body"><div><p>${s[2]}</p><ul>${s[3].map(t => `<li>${t}</li>`).join('')}</ul></div></div>
+  </div>`).join('');
+$$('.svc button').forEach(b => b.onclick = () => { const p = b.parentElement, was = p.classList.contains('open'); $$('.svc').forEach(x => { x.classList.remove('open'); $('button', x).setAttribute('aria-expanded', false); }); if (!was) { p.classList.add('open'); b.setAttribute('aria-expanded', true); } });
+
+/* profil */
+const PROF = [
+  ['starter', 'Starter Pack IF', 'Semester 1-2', 'Paket aman untuk semua mahasiswa IF baru: browser, editor, compiler C/C++, Python, Java, Node, Git, XAMPP, tool diagram, komunikasi kuliah dan WSL Ubuntu.', 'Chrome, 7-Zip, Everything, Windows Terminal, VS Code, MinGW, Python, Java JDK 21, Node.js, Git, GitHub Desktop, XAMPP, DBeaver, Postman, draw.io, Figma, Discord, Zoom, PowerToys, WSL Ubuntu', '#d946ef'],
+  ['cpp', 'C/C++ & Algoritma', 'Praktikum', 'Untuk Dasar Pemrograman, Algoritma dan Struktur Data.', 'MinGW (GCC/G++), CMake, Code::Blocks, Dev-C++, VS Code, Git', '#3b82f6'],
+  ['java', 'Java & PBO', 'OOP', 'Untuk matkul Pemrograman Berorientasi Objek.', 'Java JDK 21, IntelliJ IDEA, NetBeans, VS Code, Git', '#f97316'],
+  ['web', 'Web Fullstack', 'Laravel · React', 'Laravel/PHP, Node.js/React, database, API testing, Docker dan tunneling untuk demo ke dosen.', 'Chrome, Firefox Dev, VS Code, Node.js, Bun, Git, GitHub CLI, Laragon, Composer, DBeaver, PostgreSQL, Postman, Docker, WSL Ubuntu, Figma, ngrok', '#22d3ee'],
+  ['mobile', 'Mobile Dev', 'Android · Flutter', 'Android Studio + emulator, JDK, Flutter dan emulator pengganti WSA.', 'Android Studio, Java JDK, Flutter SDK, VS Code, Git, GitHub CLI, Figma, BlueStacks, Postman', '#22c55e'],
+  ['data', 'Data & AI', 'Python · LLM', 'Python + uv/conda, R/RStudio, database, LLM lokal (Ollama, LM Studio).', 'Python, uv, Miniconda, R, RStudio, VS Code, Git, DBeaver, PostgreSQL, Ollama, LM Studio, WSL Ubuntu', '#facc15'],
+  ['net', 'Jaringan & Security', 'Jarkom · CTF', 'Packet Tracer, Wireshark, Nmap, SSH tools, Burp, VM dan Kali Linux WSL.', 'Cisco Packet Tracer, Wireshark, Nmap, PuTTY, MobaXterm, WinSCP, Advanced IP Scanner, Burp Suite, VirtualBox, Kali WSL, WireGuard', '#ef4444'],
+  ['devops', 'DevOps & Cloud', 'Container · IaC', 'Docker, Kubernetes, Terraform dan CLI ketiga cloud besar.', 'Docker, kubectl, Terraform, AWS CLI, Google Cloud SDK, Azure CLI, WSL Ubuntu, Git, GitHub CLI, lazygit, VS Code, MobaXterm', '#0ea5e9'],
+  ['game', 'Game Dev', 'Unity · Godot', 'Unity, Godot, Blender, Visual Studio dan tool aset.', 'Unity Hub, Godot, Blender, Visual Studio 2022, VS Code, GIMP, Inkscape, Git, OBS Studio', '#a855f7'],
+  ['design', 'UI/UX & Konten', 'Figma · OBS', 'Figma, desain vektor/raster, rekam layar.', 'Figma, draw.io, GIMP, Inkscape, OBS Studio, ShareX, VLC, Blender', '#ec4899'],
+  ['tech', 'Abang IT', 'Teknisi', 'Toolkit servis: cek hardware, flashdisk bootable, remote desktop, uninstaller.', '7-Zip, Everything, PowerToys, Revo Uninstaller, CPU-Z, HWiNFO, CrystalDiskInfo, Rufus, Ventoy, AnyDesk, RustDesk, Advanced IP Scanner, LocalSend', '#14b8a6']
+];
+$('#profRow').innerHTML = PROF.map((p, i) => `
+  <div class="prof${i === 0 ? ' active' : ''}" style="--tint:${p[5]}" tabindex="0" role="button" aria-label="Profil ${p[1]}">
+    <div class="side"><span class="n">0${i + 1}</span><span class="t">${p[1]}</span><span class="n" style="color:${p[5]}">●</span></div>
+    <div class="full">
+      <span class="big" style="color:${p[5]}">0${i + 1}</span>
+      <span class="eyebrow">${p[2]}</span>
+      <h3>${p[1]}</h3><p>${p[3]}</p>
+      <div class="apps">${p[4].split(', ').map(a => `<span>${a}</span>`).join('')}</div>
+      <div class="run"><code>setup.ps1 -Preset <b>${p[0]}</b></code><code>./setup.sh --preset <b>${p[0]}</b></code></div>
+    </div>
+  </div>`).join('');
+$$('.prof').forEach(p => { const act = () => { $$('.prof').forEach(x => x.classList.remove('active')); p.classList.add('active'); }; p.onclick = act; p.onkeydown = e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), act()); });
+
+/* bars */
+const BARS = [['Bahasa & Runtime', 17], ['Web Server & Database', 11], ['Utilitas Sistem', 11], ['Jaringan & Keamanan', 10], ['Mobile & Game', 8], ['Editor & IDE', 14]];
+$('#bars').innerHTML = BARS.map(b => `<div class="barrow rv"><div class="lbl"><span>${b[0]}</span><span>${b[1]} app</span></div><div class="track"><div class="fill" data-w="${b[1] / 17 * 100}"></div></div></div>`).join('');
+
+/* install cases */
+const steps = { win: ['Tekan <kbd>Win</kbd> + <kbd>X</kbd>, pilih <b>Terminal</b> atau <b>Windows PowerShell</b>.', 'Paste perintah lalu tekan <kbd>Enter</kbd>.', 'Klik <b>Yes</b> di popup Administrator.', 'Ikuti menu: mulai dari <b>Wizard Preferensi</b>.'],
+  linux: ['Buka terminal: <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd> (atau cari "Terminal").', 'Paste perintah lalu tekan <kbd>Enter</kbd>. Jangan pakai <b>sudo</b> di depannya.', 'Masukkan password sudo saat mulai install.', 'Distro terdeteksi otomatis. Mulai dari <b>Wizard Preferensi</b>.'],
+  mac: ['Tekan <kbd>⌘</kbd> + <kbd>Space</kbd>, ketik <b>Terminal</b>, lalu Enter.', 'Paste perintah lalu tekan <kbd>Enter</kbd>.', 'Masukkan password Mac kalau diminta (untuk Homebrew).', 'Ikuti menu: mulai dari <b>Wizard Preferensi</b>.'] };
+const caseCmd = o => `<div class="cmd-box" style="max-width:none"><code>${CMD[o].html}</code><button class="copy" data-c="${o}">Copy</button></div>`;
+const CASES = [
+  ['Windows 10 / 11', 'PowerShell · winget', `<div><ol class="steps">${steps.win.map(s => `<li><span>${s}</span></li>`).join('')}</ol>${caseCmd('win')}</div>
+    <div><div class="term"><div class="bar"><i></i><i></i><i></i><span>Administrator: PowerShell</span></div><pre><span class="c-m">PS&gt;</span> irm https://tipack.kousozo.tech/install.ps1 | iex
+<span class="c-c">Mengunduh DEVSETUP IF ke C:\\Users\\kamu\\devsetup-if ...</span>
+<span class="c-y">Membuka jendela Administrator...</span>
+
+  <span class="c-g">[  OK  ]</span> Hak akses Administrator
+  <span class="c-g">[  OK  ]</span> Package manager winget
+  <span class="c-g">[  OK  ]</span> Koneksi internet
+   <span class="c-g">√ 4 dari 128 aplikasi sudah terpasang.</span></pre></div>
+    <div class="meta3"><div>Mesin<b>winget</b></div><div>Butuh<b>Admin</b></div><div>Extra<b>WSL2</b></div></div></div>`],
+  ['macOS', 'Terminal · Homebrew', `<div><ol class="steps">${steps.mac.map(s => `<li><span>${s}</span></li>`).join('')}</ol>${caseCmd('mac')}</div>
+    <div><div class="term"><div class="bar"><i></i><i></i><i></i><span>zsh</span></div><pre><span class="c-m">$</span> curl -fsSL https://tipack.kousozo.tech/install.sh | bash
+<span class="c-c">Mengunduh DEVSETUP IF ke /Users/kamu/devsetup-if ...</span>
+
+  <span class="c-g">[  OK  ]</span> Membaca informasi sistem
+  <span class="c-g">[  OK  ]</span> Koneksi internet
+  <span class="c-g">[  OK  ]</span> Homebrew
+   <span class="c-g">✓ 22 dari 113 aplikasi sudah terpasang.</span></pre></div>
+    <div class="meta3"><div>Mesin<b>Homebrew</b></div><div>Chip<b>M-series/Intel</b></div><div>Pengganti WSL<b>OrbStack</b></div></div></div>`],
+  ['Linux', 'apt · dnf · pacman · zypper · apk', `<div><ol class="steps">${steps.linux.map(s => `<li><span>${s}</span></li>`).join('')}</ol>${caseCmd('linux')}<p style="margin-top:12px;font-size:13.5px;color:var(--mute)">Tidak ada curl? <code class="mono" style="color:var(--m1)">wget -qO- https://tipack.kousozo.tech/install.sh | bash</code></p></div>
+    <div><div class="term"><div class="bar"><i></i><i></i><i></i><span>bash</span></div><pre><span class="c-m">$</span> curl -fsSL https://tipack.kousozo.tech/install.sh | bash
+<span class="c-c">Mengunduh DEVSETUP IF (linux) ke /home/kamu/devsetup-if ...</span>
+
+  <span class="c-g">[  OK  ]</span> Distro: Arch Linux
+  <span class="c-g">[  OK  ]</span> Package manager: pacman + AUR
+  <span class="c-g">[  OK  ]</span> Koneksi internet
+  <span class="c-y">[ WARN ]</span> AUR helper belum ada <span class="c-d">(yay dipasang otomatis)</span>
+   <span class="c-g">✓ 104 dari 110 aplikasi tersedia untuk distro ini</span></pre></div>
+    <div class="meta3"><div>Distro<b>Semua besar</b></div><div>Fallback<b>Flatpak</b></div><div>Arch<b>+ AUR</b></div></div></div>`],
+  ['Download manual', 'Baca script dulu', `<div><p class="lead" style="margin-bottom:20px">Cara paling aman: download, baca isinya, lalu jalankan sendiri. Untuk Windows, klik kanan <b>JALANKAN.bat</b> lalu pilih <b>Run as administrator</b>. Untuk Mac dan Linux, jalankan <code class="mono">bash setup.sh</code>.</p>
+    <div class="dl-list">${[['/windows/setup.ps1', 'setup.ps1', 'Windows'], ['/windows/JALANKAN.bat', 'JALANKAN.bat', 'Windows'], ['/macos/setup.sh', 'setup.sh', 'macOS'], ['/linux/setup.sh', 'setup.sh', 'Linux']].map(d => `<a href="${d[0]}" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 4v12M6 11l6 6 6-6M5 21h14"/></svg>${d[1]} <span style="color:var(--mute)">· ${d[2]}</span></a>`).join('')}</div></div>
+    <div><div class="meta3" style="margin-top:0"><div>Lisensi<b>Gratis</b></div><div>Ukuran<b>~70 KB</b></div><div>Bahasa<b>Indonesia</b></div></div></div>`]
+];
+$('#cases').innerHTML = CASES.map((c, i) => `
+  <div class="case${i === ({ win: 0, mac: 1, linux: 2 }[os]) ? ' open' : ''}">
+    <button aria-expanded="false"><span class="num">[0${i + 1}]</span><h3>${c[0]}</h3><span class="tag">${c[1]}</span><span class="arr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
+    <div class="body"><div><div class="case-inner">${c[2]}</div></div></div>
+  </div>`).join('');
+$$('.case>button').forEach(b => b.onclick = () => { const p = b.parentElement, was = p.classList.contains('open'); $$('.case').forEach(x => x.classList.remove('open')); if (!was) p.classList.add('open'); });
+$$('[data-c]').forEach(b => b.onclick = () => copyText(CMD[b.dataset.c].raw, b));
+
+/* catatan */
+const NEWS = [
+  ['WSA', 'Android', 'Windows', 'WSA sudah dihentikan', 'Microsoft menghentikan Windows Subsystem for Android pada 5 Maret 2025. Di wizard, pilihan ini diarahkan ke Android Studio Emulator atau BlueStacks.', '#16a34a,#0d9488'],
+  ['VT', 'WSL2', 'Windows', 'WSL butuh virtualisasi BIOS', 'Aktifkan Intel VT-x / AMD SVM di BIOS lalu restart. Statusnya langsung tampil di layar pembuka TIPACK.', '#ca8a04,#7c2d12'],
+  ['🐧', 'Linux', 'Semua distro', 'Linux: distro dideteksi otomatis', 'apt (Debian, Ubuntu, Mint, Pop!_OS, Kali), dnf (Fedora, RHEL), pacman + AUR (Arch, Manjaro, EndeavourOS, CachyOS), zypper (openSUSE) dan apk (Alpine). Aplikasi yang tidak ada di repo diambil dari Flatpak. Jalankan sebagai user biasa, bukan sudo.', '#ca8a04,#1d4ed8'],
+  ['⌘', 'Mac', 'macOS', 'Di Mac tidak ada WSL', 'Penggantinya OrbStack (Docker + Linux VM yang ringan), UTM untuk VM dengan GUI, atau Multipass untuk Ubuntu dari terminal.', '#6d28d9,#1d4ed8'],
+  ['ⓘ', 'Manual', 'Semua OS', 'Ada yang harus download manual', 'Cisco Packet Tracer (akun NetAcad), Microsoft 365 (email kampus), Google Antigravity, dan Xcode (App Store). Link-nya dibuka otomatis di akhir instalasi.', '#c026d3,#7c3aed']
+];
+$('#news').innerHTML = NEWS.map((n, i) => `<article class="post rv d${i % 3}"><div class="thumb" style="background:linear-gradient(150deg,${n[5]})"><span>${n[0]}</span></div><div><div class="tagline"><span>[${n[1]}]</span><span>${n[2]}</span></div><h3>${n[3]}</h3><p>${n[4]}</p></div></article>`).join('');
+
+/* reveal + counters + bars */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  const el = e.target; el.classList.add('in'); io.unobserve(el);
+  $$('[data-count]', el).concat(el.dataset.count ? [el] : []).forEach(c => {
+    const to = +c.dataset.count, t0 = performance.now();
+    const tick = t => { const k = Math.min(1, (t - t0) / 1400); c.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))) + (to >= 100 ? '+' : ''); if (k < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  });
+  $$('.fill', el).forEach(f => f.style.width = f.dataset.w + '%');
+  if (el.querySelector('#bootTerm') && !el.dataset.typed) { el.dataset.typed = 1; typeTerm($('#bootTerm'), BOOT, true); }
+}), { threshold: .15 });
+$$('.rv').forEach(el => io.observe(el));
+$$('.hero-meta [data-count]').forEach(c => io.observe(c.closest('.rv')));
+
+/* toggle mode animasi */
+const pt = $('#perfToggle');
+const syncPT = () => { const sv = localStorage.getItem('tipack-perf') || 'auto'; $$('button', pt).forEach(b => b.setAttribute('aria-pressed', b.dataset.p === sv)); pt.title = 'Mode animasi: ' + (PERF.lite ? 'lite' : 'penuh') + (PERF.fps ? ' (' + PERF.fps + ' fps)' : ''); };
+$$('button', pt).forEach(b => b.onclick = () => { if (b.dataset.p === 'auto') { localStorage.setItem('tipack-perf', ''); localStorage.clear(); PERF.setLite(PERF.reduced, false); } else PERF.setLite(b.dataset.p === 'lite', true); syncPT(); });
+PERF.onChange(syncPT); syncPT();
+PERF.watch();
+
+/* tilt halus untuk kartu */
+if (matchMedia('(pointer:fine)').matches) $$('.award,.stat,.tile').forEach(c => {
+  c.addEventListener('pointermove', PERF.raf(e => { if (PERF.lite) return; const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; c.style.transform = `perspective(700px) rotateX(${-y * 8}deg) rotateY(${x * 8}deg) translateY(-4px)`; }));
+  c.addEventListener('pointerleave', () => c.style.transform = '');
+});
+</script>
+</body>
+</html>
