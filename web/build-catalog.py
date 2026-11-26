@@ -28,7 +28,7 @@ for line in win_raw.splitlines():
     if len(p) < 6:
         continue
     key, cat, wid, name, rec, tip = p
-    kind = "wsl" if wid.startswith("wsl:") else "feat" if wid.startswith("feat:") else "info" if wid.startswith("info:") else "winget"
+    kind = "wsl" if wid.startswith("wsl:") else "feat" if wid.startswith("feat:") else "info" if wid.startswith("info:") else "msstore" if wid.startswith("msstore:") else "winget"
     a = get(key, name, cat, tip, rec == "1")
     if kind == "winget":
         cmd = f"winget install --id {wid} -e"
@@ -36,6 +36,8 @@ for line in win_raw.splitlines():
         cmd = "wsl --install --no-distribution" if wid == "wsl:core" else f"wsl --install -d {wid[4:]}"
     elif kind == "feat":
         cmd = f"Enable-WindowsOptionalFeature -Online -FeatureName {wid[5:]} -All"
+    elif kind == "msstore":
+        cmd = f"winget install --id {wid[8:]} --source msstore"
     else:
         cmd = None
     a["win"] = {"kind": kind, "id": wid.split(":", 1)[1] if kind != "winget" else wid, "cmd": cmd, "name": name}
@@ -127,7 +129,7 @@ def md_cell(a, o):
         return "manual"
     if o == "linux":
         return " · ".join(sorted({m["via"].split("/")[0] for m in d["methods"].values()}))
-    return {"winget": "winget", "wsl": "WSL", "feat": "fitur Windows", "formula": "brew", "cask": "brew cask", "custom": "installer"}.get(d["kind"], d["kind"])
+    return {"winget": "winget", "msstore": "Microsoft Store", "wsl": "WSL", "feat": "fitur Windows", "formula": "brew", "cask": "brew cask", "custom": "installer"}.get(d["kind"], d["kind"])
 
 prof_name = {p["key"]: p["name"] for p in profiles}
 L = ["# Katalog Aplikasi", "",

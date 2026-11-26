@@ -2,7 +2,7 @@
 
 > File ini dibuat otomatis oleh `web/build-catalog.py` dari isi ketiga installer. Jangan diedit manual.
 
-Total **188** aplikasi unik: Windows 128, macOS 113, Linux 105.
+Total **245** aplikasi unik: Windows 186, macOS 153, Linux 142.
 
 Legenda: ★ = rekomendasi · `—` = tidak tersedia di OS itu · `manual` = download manual (link dibuka di akhir instalasi).
 
@@ -27,6 +27,12 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 - [Komunikasi](#komunikasi)
 - [Kuliah & Produktivitas](#kuliah--produktivitas)
 - [Utilitas Sistem](#utilitas-sistem)
+- [Media & Hiburan](#media--hiburan)
+- [Keamanan & Privasi](#keamanan--privasi)
+- [Cloud & Sinkronisasi](#cloud--sinkronisasi)
+- [Gaming](#gaming)
+- [Download & Transfer](#download--transfer)
+- [Runtime & Driver](#runtime--driver)
 
 ## Browser
 
@@ -37,6 +43,11 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Firefox Developer Edition** | winget | brew cask | — | Firefox khusus developer dengan fitur DevTools eksperimental. |
 | **Brave** | winget | brew cask | AUR · Flathub | Berbasis Chromium dengan adblock bawaan. Lebih hemat RAM dari Chrome, ekstensi Chrome tetap jalan. |
 | **Opera GX** | winget | — | — | Browser "gaming" dengan pembatas RAM/CPU. Cocok untuk laptop RAM 8GB yang suka buka banyak tab. |
+| **Zen Browser** | winget | brew cask | AUR · Flathub | Browser berbasis Firefox dengan tab vertikal dan workspace ala Arc. Arc sudah tidak dikembangkan, Zen penggantinya yang sedang naik daun. |
+| **Vivaldi** | winget | brew cask | Flathub · pacman | Browser Chromium yang sangat bisa dikustom: tab bertumpuk, panel samping, email dan kalender bawaan. |
+| **Opera** | winget | brew cask | AUR · Flathub | Browser dengan VPN gratis bawaan dan sidebar WhatsApp/Telegram. |
+| **Microsoft Edge** | winget | brew cask | AUR · Flathub | Bawaan Windows. Di Mac/Linux berguna untuk tes tampilan web di Edge. |
+| **Tor Browser** | winget | brew cask | Flathub · apt · pacman | Browsing anonim lewat jaringan Tor. |
 | **Arc** | — | brew cask | — | Browser dengan sidebar dan workspace, favorit banyak developer Mac. |
 | **Chromium** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Versi open source Chrome, tanpa layanan Google. |
 
@@ -63,7 +74,6 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Oh My Posh** | winget | — | — | Tema prompt keren: tampilkan branch git, versi bahasa, waktu eksekusi. Butuh Nerd Font. |
 | **JetBrains Mono Nerd Font** | winget | brew cask | pacman · script | Font coding dengan ligature dan ikon, dipakai Oh My Posh dan terminal modern. |
 | ★ **iTerm2** | — | brew cask | — | Terminal Mac paling populer: split pane, pencarian, profil. Lebih lengkap dari Terminal bawaan. |
-| **Warp** | — | brew cask | — | Terminal modern dengan AI dan blok perintah ala IDE. |
 | **Ghostty** | — | brew cask | — | Terminal super cepat berbasis GPU, minimalis. |
 | ★ **Oh My Zsh + autosuggest + syntax highlight** | — | installer | script | Framework zsh dengan tema dan plugin, plus saran perintah otomatis dan pewarnaan perintah. |
 | **Starship prompt** | — | brew | apk · pacman · termux · zypper | Prompt cantik yang menampilkan branch git dan versi bahasa. Butuh Nerd Font. |
@@ -184,6 +194,8 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **LM Studio** | winget | brew cask | — | GUI untuk download dan chat dengan LLM lokal. |
 | **Claude Desktop** | winget | brew cask | — | Aplikasi desktop Claude. |
 | **RStudio** | winget | brew cask | — | IDE untuk R (R harus terinstall). |
+| **ChatGPT Desktop** | Microsoft Store | brew cask | manual | Aplikasi resmi ChatGPT dengan shortcut cepat dan mode suara. |
+| **Jan** | winget | brew cask | Flathub | Chat dengan LLM lokal yang open source dan 100% offline. Alternatif LM Studio. |
 | **JupyterLab** | — | — | apt · pacman | Notebook untuk data science (alternatif: pip install jupyterlab di venv). |
 
 ## Mobile & Game
@@ -245,6 +257,11 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **OBS Studio** | winget | brew cask | Flathub · apt · dnf · pacman · zypper | Rekam layar/presentasi dan live streaming. Berguna untuk video demo tugas. |
 | ★ **ShareX** | winget | — | — | Screenshot, rekam layar, GIF dan OCR. Jauh lebih lengkap dari Snipping Tool. |
 | ★ **VLC Media Player** | winget | — | Flathub · apk · apt · pacman · zypper | Pemutar semua format video. |
+| **Krita** | winget | brew cask | Flathub · apt · dnf · pacman · zypper | Aplikasi menggambar digital gratis, favorit ilustrator dan pengguna pen tablet. |
+| **Paint.NET** | winget | — | — | Editor gambar ringan dan cepat, di antara Paint dan Photoshop. |
+| **Affinity (gratis)** | manual | manual | — | Desain foto, vektor dan layout setara Adobe, sekarang gratis setelah diakuisisi Canva. |
+| ★ **Canva** | winget | brew cask | manual | Desain poster, presentasi dan konten sosmed dengan template. Mahasiswa sering dapat Canva Pro gratis lewat kampus. |
+| **Upscayl** | winget | brew cask | Flathub | Perbesar dan pertajam foto dengan AI secara offline dan gratis. |
 | ★ **IINA** | — | brew cask | — | Video player modern untuk Mac, semua format. |
 | ★ **Flameshot** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Screenshot dengan anotasi (panah, kotak, blur). Pengganti Snipping Tool. |
 
@@ -257,7 +274,9 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Telegram** | winget | brew cask | Flathub · pacman | Banyak grup/komunitas IT dan bot. |
 | **Slack** | winget | brew cask | AUR · Flathub | Komunikasi tim ala industri, sering dipakai saat magang. |
 | **Microsoft Teams** | winget | brew cask | — | Dipakai beberapa kampus untuk kelas online. |
-| **WhatsApp** | — | brew cask | — | Grup kelas dan koordinasi tugas. |
+| ★ **WhatsApp Desktop** | Microsoft Store | brew cask | manual | WhatsApp resmi untuk laptop: chat, telepon dan video call. Di Linux pakai web.whatsapp.com. |
+| **Signal** | winget | brew cask | Flathub · pacman | Chat terenkripsi end-to-end, standar privasi tertinggi. |
+| **Thunderbird** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | Aplikasi email gratis untuk banyak akun sekaligus (Gmail, email kampus, Outlook). |
 
 ## Kuliah & Produktivitas
 
@@ -271,6 +290,9 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | ★ **SumatraPDF** | winget | — | — | Pembaca PDF super ringan, modul kuliah terbuka instan. |
 | **Adobe Acrobat Reader** | winget | — | — | Pembaca PDF standar dengan fitur tanda tangan dan form. |
 | **Google Drive** | winget | brew cask | — | Sinkronisasi file tugas ke cloud secara otomatis. |
+| **WPS Office** | winget | brew cask | AUR · Flathub | Office gratis yang sangat mirip Microsoft Office, populer di Indonesia. Ringan untuk laptop lama. |
+| **ONLYOFFICE** | winget | brew cask | AUR · Flathub | Office gratis open source dengan kompatibilitas file Word/Excel/PowerPoint terbaik. |
+| **Anki** | winget | brew cask | Flathub · apt · pacman | Flashcard dengan pengulangan berjeda: cara belajar paling efektif untuk hafalan dan ujian. |
 | **Okular (PDF)** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Pembaca PDF lengkap dengan anotasi dan tanda tangan. |
 
 ## Utilitas Sistem
@@ -288,6 +310,12 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Ventoy** | winget | — | AUR | Satu flashdisk untuk banyak ISO sekaligus. Wajib untuk abang IT. |
 | **AnyDesk** | winget | — | — | Remote desktop untuk bantu teman dari jauh. |
 | **RustDesk** | winget | — | — | Remote desktop open source, alternatif AnyDesk. |
+| ★ **WizTree** | winget | — | — | Lihat folder apa yang menghabiskan disk dalam hitungan detik. Wajib untuk laptop yang disknya penuh. |
+| **Flow Launcher** | winget | — | — | Launcher cepat ala Spotlight/Raycast untuk Windows (Alt+Spasi). |
+| **Ditto (riwayat clipboard)** | winget | — | — | Riwayat copy-paste yang bisa dicari, jauh lebih lengkap dari Win+V. |
+| **TeraCopy** | winget | — | — | Copy file besar lebih cepat dan bisa dijeda/dilanjutkan, dengan verifikasi hasil copy. |
+| **Twinkle Tray** | winget | — | — | Atur brightness monitor eksternal langsung dari taskbar. |
+| **Parsec** | winget | brew cask | Flathub | Remote desktop super mulus (bisa untuk main game dari laptop lain). |
 | ★ **Rectangle** | — | brew cask | — | Atur jendela kiri/kanan dengan shortcut, seperti Snap di Windows. WAJIB. |
 | **AltTab** | — | brew cask | — | Alt-Tab ala Windows dengan preview jendela. |
 | ★ **Stats** | — | brew cask | — | Monitor CPU, RAM, suhu dan jaringan di menu bar. |
@@ -300,6 +328,71 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **GParted** | — | — | apk · apt · dnf · pacman · zypper | Atur partisi disk. |
 | **CopyQ (riwayat clipboard)** | — | — | Flathub · apt · dnf · pacman | Riwayat copy-paste yang bisa dicari. |
 | **GNOME Tweaks + Extension Manager** | — | — | Flathub · apt · dnf · pacman · zypper | Kustomisasi tampilan GNOME (font, tema, ekstensi). Hanya untuk desktop GNOME. |
+
+## Media & Hiburan
+
+| Aplikasi | Windows | macOS | Linux | Keterangan |
+|---|---|---|---|---|
+| ★ **Spotify** | winget | brew cask | AUR · Flathub | Streaming musik dan podcast. |
+| **Audacity** | winget | brew cask | Flathub · apt · dnf · pacman · zypper | Rekam dan edit audio gratis: podcast, voice over, tugas presentasi. |
+| **HandBrake** | winget | brew cask | Flathub · apt · pacman | Kompres dan konversi video (misal video tugas terlalu besar untuk diunggah). |
+| **CapCut** | winget | brew cask | — | Editor video populer untuk konten TikTok/Reels/YouTube Shorts. |
+| **DaVinci Resolve** | manual | brew cask | manual | Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup. |
+| **Kdenlive** | winget | brew cask | Flathub · apt · dnf · pacman · zypper | Editor video open source yang ringan, alternatif gratis untuk editing serius. |
+| **K-Lite Codec Pack** | winget | — | — | Codec video lengkap supaya semua format bisa diputar di pemutar bawaan Windows. |
+
+## Keamanan & Privasi
+
+| Aplikasi | Windows | macOS | Linux | Keterangan |
+|---|---|---|---|---|
+| ★ **Bitwarden** | winget | brew cask | Flathub · pacman | Password manager gratis dan open source. Satu password kuat untuk semua akun, sinkron ke HP. |
+| **KeePassXC** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | Password manager offline, database terenkripsi disimpan sendiri. |
+| **Proton VPN** | winget | brew cask | Flathub | VPN gratis tanpa batas kuota dari pembuat Proton Mail. Aman untuk WiFi publik. |
+| **Cloudflare WARP (1.1.1.1)** | winget | brew cask | manual | DNS cepat + enkripsi koneksi dari Cloudflare. Sering membantu kalau internet kampus/ISP lambat membuka situs tertentu. |
+| **Malwarebytes** | winget | brew cask | — | Pemindai malware/adware gratis, pendamping Windows Defender untuk membersihkan laptop yang terinfeksi. |
+| **VeraCrypt** | winget | brew cask | pacman | Enkripsi flashdisk/folder supaya data aman kalau hilang. |
+
+## Cloud & Sinkronisasi
+
+| Aplikasi | Windows | macOS | Linux | Keterangan |
+|---|---|---|---|---|
+| **Dropbox** | winget | brew cask | AUR · Flathub | Sinkronisasi file ke cloud. |
+| **OneDrive** | winget | brew cask | — | Cloud Microsoft, 1 TB gratis dengan Microsoft 365 email kampus. |
+| **MEGA** | winget | brew cask | Flathub | Cloud dengan 20 GB gratis dan enkripsi end-to-end. |
+| **Syncthing** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Sinkron folder antar laptop/HP langsung tanpa cloud, open source. |
+
+## Gaming
+
+| Aplikasi | Windows | macOS | Linux | Keterangan |
+|---|---|---|---|---|
+| ★ **Steam** | winget | brew cask | Flathub | Toko dan launcher game PC terbesar. Di Linux, banyak game Windows jalan lewat Proton. |
+| **Epic Games Launcher** | winget | brew cask | — | Launcher Epic dengan game gratis setiap minggu. |
+| **Heroic Games Launcher** | winget | brew cask | AUR · Flathub | Launcher open source untuk game Epic, GOG dan Amazon. Cara terbaik main game Epic di Linux. |
+| **GOG Galaxy** | winget | brew cask | — | Launcher GOG, game tanpa DRM. |
+| **EA app** | winget | — | — | Launcher game EA (FC, Battlefield, The Sims). |
+| **Ubisoft Connect** | winget | — | — | Launcher game Ubisoft (Assassin's Creed, Rainbow Six). |
+| **Playnite** | winget | — | — | Satu perpustakaan untuk semua game dari semua launcher. |
+| **MSI Afterburner** | winget | — | — | Pantau FPS, suhu GPU/CPU di dalam game, dan atur kipas. |
+| **Prism Launcher (Minecraft)** | winget | brew cask | Flathub · pacman | Launcher Minecraft Java open source: banyak instance dan modpack dengan mudah. |
+| **Lutris** | — | — | Flathub · apt · dnf · pacman · zypper | Pengelola game Linux: menjalankan game Windows, emulator dan launcher lain. |
+
+## Download & Transfer
+
+| Aplikasi | Windows | macOS | Linux | Keterangan |
+|---|---|---|---|---|
+| **qBittorrent** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | Klien torrent open source tanpa iklan. Unduh ISO Linux dengan cepat. |
+| **Internet Download Manager** | winget | — | — | Download manager paling populer di Indonesia: mempercepat dan melanjutkan unduhan. Berbayar (trial 30 hari). |
+| **Free Download Manager** | winget | brew cask | manual | Download manager gratis: percepat unduhan, jadwal, dan lanjutkan unduhan putus. |
+| **JDownloader 2** | winget | brew cask | Flathub | Download manager untuk banyak file sekaligus dari situs hosting. |
+
+## Runtime & Driver
+
+| Aplikasi | Windows | macOS | Linux | Keterangan |
+|---|---|---|---|---|
+| ★ **.NET Desktop Runtime 8** | winget | — | — | Dibutuhkan banyak aplikasi Windows modern. Kalau ada aplikasi minta .NET, ini jawabannya. |
+| **Java Runtime (Temurin JRE 21)** | winget | — | — | Untuk menjalankan aplikasi .jar (misal Minecraft lama, aplikasi kampus berbasis Java). Developer pilih JDK saja. |
+| **DirectX End-User Runtime** | winget | — | — | Library lama yang masih dibutuhkan banyak game. |
+| **NVIDIA App (driver GPU)** | manual | — | — | Update driver GPU NVIDIA dan pengaturan grafis. Hanya untuk laptop dengan GPU NVIDIA. |
 
 ## Profil
 
@@ -316,3 +409,6 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | `game` | Game Developer | Visual Studio Code, Visual Studio 2022 Community, Git, Unity Hub, Godot Engine, Blender, GIMP, Inkscape, OBS Studio |
 | `design` | UI/UX & Konten Kreator | Blender, Figma, draw.io Desktop, GIMP, Inkscape, OBS Studio, ShareX, VLC Media Player, IINA, Flameshot |
 | `tech` | Abang IT / Teknisi Laptop | 7-Zip, Everything, Advanced IP Scanner, VLC Media Player, SumatraPDF, Microsoft PowerToys, Visual C++ Redistributable, LocalSend, Revo Uninstaller, CPU-Z, HWiNFO, CrystalDiskInfo, Rufus, Ventoy, AnyDesk, RustDesk, The Unarchiver, Keka, Raycast, AppCleaner, CLI Power Pack (wget, htop, jq, tldr, dll), Rectangle, AltTab, Stats, Maccy, Hidden Bar, MonitorControl, tmux, OpenSSH server, Remmina (RDP/VNC/SSH), Flatpak + Flathub, fastfetch, Timeshift (backup sistem), GParted, CopyQ (riwayat clipboard), GNOME Tweaks + Extension Manager |
+| `umum` | Paket Umum (ala Ninite) | Google Chrome, Mozilla Firefox, 7-Zip, Everything, ShareX, VLC Media Player, Discord, Zoom, Telegram, LibreOffice, SumatraPDF, Google Drive, Microsoft PowerToys, Visual C++ Redistributable, LocalSend, WhatsApp Desktop, Spotify, WPS Office, Bitwarden, WizTree, .NET Desktop Runtime 8, The Unarchiver, Raycast, AppCleaner, IINA, Rectangle, Stats, Flameshot |
+| `gamer` | Gamer | OBS Studio, Discord, Visual C++ Redistributable, Steam, Epic Games Launcher, Heroic Games Launcher, GOG Galaxy, EA app, Ubisoft Connect, Playnite, MSI Afterburner, Prism Launcher (Minecraft), Parsec, .NET Desktop Runtime 8, DirectX End-User Runtime, Lutris |
+| `kreator` | Konten Kreator | Figma, GIMP, Inkscape, OBS Studio, ShareX, Spotify, Audacity, HandBrake, CapCut, DaVinci Resolve, Kdenlive, Krita, Canva, Upscayl, Flameshot |

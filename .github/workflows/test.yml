@@ -68,7 +68,7 @@ jobs:
         run: |
           $raw = (Get-Content windows\setup.ps1 -Raw -Encoding UTF8) -split "\`$CatalogRaw = @'" | Select-Object -Index 1
           $raw = ($raw -split "'@")[0]
-          $ids = $raw -split "`n" | ForEach-Object { ($_ -split '\|')[2] } | Where-Object { $_ -and $_ -notmatch '^(wsl|feat|info):' }
+          $ids = $raw -split "`n" | ForEach-Object { ($_ -split '\|')[2] } | Where-Object { $_ -and $_ -notmatch '^(wsl|feat|info|msstore):' }
           $bad = @()
           foreach ($id in $ids) {
             $r = winget show --id $id -e --accept-source-agreements --disable-interactivity 2>&1 | Out-String
@@ -108,6 +108,18 @@ jobs:
         env:
           TIPACK_KEYS: "Up,Up,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Enter,Down,Space,Esc,Down,Down,Enter,Enter,Space,Enter,Esc,Down,Enter,Enter,Esc,Esc,Enter,Enter,Esc,Esc"
         run: /bin/bash macos/setup.sh | tail -c 600 | grep -q SELFTEST-TOMBOL-SELESAI
+      - name: Validasi semua ID Homebrew di katalog
+        if: matrix.arch == 'arm64'
+        continue-on-error: true
+        run: |
+          bad=""; n=0
+          while IFS='|' read -r k cat typ id rest; do
+            case "$typ" in cask) n=$((n+1)); brew info --cask "$id" >/dev/null 2>&1 || bad="$bad cask:$id" ;;
+              formula) for f in $id; do n=$((n+1)); brew info --formula "$f" >/dev/null 2>&1 || bad="$bad formula:$f"; done ;; esac
+          done < <(sed -n "/^CATALOG_RAW='/,/^'$/p" macos/setup.sh | sed '1d;$d')
+          echo "Dicek $n ID, tidak ditemukan:${bad:- (semua ada)}"
+          for b in $bad; do echo "::warning::Homebrew ID tidak ditemukan: $b"; done
+          [ -z "$bad" ]
       - name: Install sungguhan lewat Homebrew (--install lazygit)
         run: /bin/bash macos/setup.sh --install lazygit --no-anim
       - name: Simpan log
@@ -154,6 +166,22 @@ jobs:
             echo "== install";    bash /t/setup.sh --install git,python,build,nmap --no-anim
           ' | tee result.txt
           if grep -q "PAKET-TIDAK-ADA: [a-z]" result.txt; then echo "::warning::$(grep PAKET-TIDAK-ADA result.txt)"; fi
+
+  flathub:
+    name: Validasi ID Flathub
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq flatpak >/dev/null
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          bad=""; n=0
+          for id in $(sed -n "/^CATALOG_RAW='/,/^'$/p" linux/src/linux-parts.sh | sed '1d;$d' | awk -F'|' '$12!="-"{print $12}' | sort -u); do
+            n=$((n+1)); flatpak remote-info --user flathub "$id" >/dev/null 2>&1 || { bad="$bad $id"; echo "::warning::Flathub ID tidak ditemukan: $id"; }
+          done
+          echo "Dicek $n ID Flathub, tidak ditemukan:${bad:- (semua ada)}"
+          [ -z "$bad" ]
 
   termux:
     name: Termux (Android x64)

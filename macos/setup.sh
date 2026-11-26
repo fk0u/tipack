@@ -147,6 +147,47 @@ stats|Utilitas Sistem|cask|stats|Stats|1|Stats|Monitor CPU, RAM, suhu dan jaring
 maccy|Utilitas Sistem|cask|maccy|Maccy|0|Maccy|Riwayat clipboard (copy-paste) yang ringan.
 hiddenbar|Utilitas Sistem|cask|hiddenbar|Hidden Bar|0|Hidden Bar|Sembunyikan ikon menu bar yang terlalu ramai.
 monitorcontrol|Utilitas Sistem|cask|monitorcontrol|MonitorControl|0|MonitorControl|Atur brightness/volume monitor eksternal dari keyboard.
+zen|Browser|cask|zen|Zen Browser|0|Zen|Browser berbasis Firefox dengan tab vertikal dan workspace ala Arc. Arc sudah tidak dikembangkan, Zen penggantinya yang sedang naik daun.
+vivaldi|Browser|cask|vivaldi|Vivaldi|0|Vivaldi|Browser Chromium yang sangat bisa dikustom: tab bertumpuk, panel samping, email dan kalender bawaan.
+opera|Browser|cask|opera|Opera|0|Opera|Browser dengan VPN gratis bawaan dan sidebar WhatsApp/Telegram.
+edge|Browser|cask|microsoft-edge|Microsoft Edge|0|Microsoft Edge|Bawaan Windows. Di Mac/Linux berguna untuk tes tampilan web di Edge.
+tor|Browser|cask|tor-browser|Tor Browser|0|Tor Browser|Browsing anonim lewat jaringan Tor.
+signal|Komunikasi|cask|signal|Signal|0|Signal|Chat terenkripsi end-to-end, standar privasi tertinggi.
+thunderbird|Komunikasi|cask|thunderbird|Thunderbird|0|Thunderbird|Aplikasi email gratis untuk banyak akun sekaligus (Gmail, email kampus, Outlook).
+spotify|Media & Hiburan|cask|spotify|Spotify|1|Spotify|Streaming musik dan podcast.
+audacity|Media & Hiburan|cask|audacity|Audacity|0|Audacity|Rekam dan edit audio gratis: podcast, voice over, tugas presentasi.
+handbrake|Media & Hiburan|cask|handbrake-app|HandBrake|0|HandBrake|Kompres dan konversi video (misal video tugas terlalu besar untuk diunggah).
+capcut|Media & Hiburan|cask|capcut|CapCut|0|CapCut|Editor video populer untuk konten TikTok/Reels/YouTube Shorts.
+davinci|Media & Hiburan|cask|davinci-resolve|DaVinci Resolve|0|DaVinci Resolve|Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup.
+kdenlive|Media & Hiburan|cask|kdenlive|Kdenlive|0|kdenlive|Editor video open source yang ringan, alternatif gratis untuk editing serius.
+krita|Desain & Multimedia|cask|krita|Krita|0|krita|Aplikasi menggambar digital gratis, favorit ilustrator dan pengguna pen tablet.
+affinity|Desain & Multimedia|info|https://www.affinity.studio|Affinity (gratis)|0|Affinity|Desain foto, vektor dan layout setara Adobe, sekarang gratis setelah diakuisisi Canva.
+canva|Desain & Multimedia|cask|canva|Canva|1|Canva|Desain poster, presentasi dan konten sosmed dengan template. Mahasiswa sering dapat Canva Pro gratis lewat kampus.
+upscayl|Desain & Multimedia|cask|upscayl|Upscayl|0|Upscayl|Perbesar dan pertajam foto dengan AI secara offline dan gratis.
+wps|Kuliah & Produktivitas|cask|wpsoffice|WPS Office|0|wpsoffice|Office gratis yang sangat mirip Microsoft Office, populer di Indonesia. Ringan untuk laptop lama.
+onlyoffice|Kuliah & Produktivitas|cask|onlyoffice|ONLYOFFICE|0|ONLYOFFICE|Office gratis open source dengan kompatibilitas file Word/Excel/PowerPoint terbaik.
+anki|Kuliah & Produktivitas|cask|anki|Anki|0|Anki|Flashcard dengan pengulangan berjeda: cara belajar paling efektif untuk hafalan dan ujian.
+bitwarden|Keamanan & Privasi|cask|bitwarden|Bitwarden|1|Bitwarden|Password manager gratis dan open source. Satu password kuat untuk semua akun, sinkron ke HP.
+keepassxc|Keamanan & Privasi|cask|keepassxc|KeePassXC|0|KeePassXC|Password manager offline, database terenkripsi disimpan sendiri.
+protonvpn|Keamanan & Privasi|cask|protonvpn|Proton VPN|0|Proton VPN|VPN gratis tanpa batas kuota dari pembuat Proton Mail. Aman untuk WiFi publik.
+malwarebytes|Keamanan & Privasi|cask|malwarebytes|Malwarebytes|0|Malwarebytes|Pemindai malware/adware gratis, pendamping Windows Defender untuk membersihkan laptop yang terinfeksi.
+veracrypt|Keamanan & Privasi|cask|veracrypt|VeraCrypt|0|VeraCrypt|Enkripsi flashdisk/folder supaya data aman kalau hilang.
+dropbox|Cloud & Sinkronisasi|cask|dropbox|Dropbox|0|Dropbox|Sinkronisasi file ke cloud.
+onedrive|Cloud & Sinkronisasi|cask|onedrive|OneDrive|0|OneDrive|Cloud Microsoft, 1 TB gratis dengan Microsoft 365 email kampus.
+mega|Cloud & Sinkronisasi|cask|megasync|MEGA|0|MEGAsync|Cloud dengan 20 GB gratis dan enkripsi end-to-end.
+syncthing|Cloud & Sinkronisasi|formula|syncthing|Syncthing|0|cmd:syncthing|Sinkron folder antar laptop/HP langsung tanpa cloud, open source.
+steam|Gaming|cask|steam|Steam|1|Steam|Toko dan launcher game PC terbesar. Di Linux, banyak game Windows jalan lewat Proton.
+epic|Gaming|cask|epic-games|Epic Games Launcher|0|Epic Games Launcher|Launcher Epic dengan game gratis setiap minggu.
+heroic|Gaming|cask|heroic|Heroic Games Launcher|0|Heroic|Launcher open source untuk game Epic, GOG dan Amazon. Cara terbaik main game Epic di Linux.
+gog|Gaming|cask|gog-galaxy|GOG Galaxy|0|GOG Galaxy|Launcher GOG, game tanpa DRM.
+prism|Gaming|cask|prismlauncher|Prism Launcher (Minecraft)|0|Prism Launcher|Launcher Minecraft Java open source: banyak instance dan modpack dengan mudah.
+chatgpt|AI & Data|cask|chatgpt|ChatGPT Desktop|0|ChatGPT|Aplikasi resmi ChatGPT dengan shortcut cepat dan mode suara.
+jan|AI & Data|cask|jan|Jan|0|Jan|Chat dengan LLM lokal yang open source dan 100% offline. Alternatif LM Studio.
+qbittorrent|Download & Transfer|cask|qbittorrent|qBittorrent|0|qBittorrent|Klien torrent open source tanpa iklan. Unduh ISO Linux dengan cepat.
+fdm|Download & Transfer|cask|free-download-manager|Free Download Manager|0|Free Download Manager|Download manager gratis: percepat unduhan, jadwal, dan lanjutkan unduhan putus.
+jdownloader|Download & Transfer|cask|jdownloader|JDownloader 2|0|JDownloader2|Download manager untuk banyak file sekaligus dari situs hosting.
+parsec|Utilitas Sistem|cask|parsec|Parsec|0|Parsec|Remote desktop super mulus (bisa untuk main game dari laptop lain).
+
 '
 
 i=0
@@ -173,6 +214,9 @@ PROFILES=(
 "game|Game Developer|Unity, Godot, Blender dan tool aset.|unity godot blender vscode gimp inkscape git obs"
 "design|UI/UX & Konten Kreator|Figma, desain vektor/raster, rekam layar.|figma drawio gimp inkscape obs iina blender"
 "tech|Abang IT / Power User Mac|Toolkit wajib Mac: launcher, window manager, monitor, clipboard, uninstaller.|raycast rectangle alttab stats maccy hiddenbar appcleaner unarchiver keka localsend clipack monitorcontrol"
+"umum|Paket Umum (ala Ninite)|Software sehari-hari untuk siapa saja: browser, chat, musik, video, office, PDF, password manager, cloud dan utilitas.|chrome firefox 7zip unarchiver vlc iina spotify whatsapp telegram discord zoom libreoffice wps sumatra bitwarden gdrive localsend sharex flameshot everything powertoys wiztree rectangle stats raycast appcleaner dotnetdesktop vcredist"
+"gamer|Gamer|Launcher game, overlay performa, voice chat, rekam gameplay dan runtime yang dibutuhkan game.|steam epic heroic gog eaapp ubisoft playnite afterburner discord obs vcredist directx dotnetdesktop lutris prism parsec"
+"kreator|Konten Kreator|Edit video, audio dan gambar, desain sosial media dan rekam layar.|obs capcut davinci kdenlive audacity handbrake krita gimp inkscape canva figma upscayl sharex flameshot spotify"
 )
 
 WIZ=(
@@ -195,6 +239,11 @@ WIZ=(
 "Komunikasi?|m|discord zoom whatsapp telegram slack teams|Sesuaikan dengan platform kelas dan dosen."
 "Kuliah & produktivitas?|m|notion obsidian zotero office libreoffice gdrive|Microsoft 365 biasanya gratis dari email kampus. Zotero menyelamatkan saat skripsi."
 "Utilitas Mac?|m|raycast rectangle alttab stats maccy hiddenbar appcleaner localsend monitorcontrol|Rectangle + Raycast + Stats = trio wajib pengguna Mac."
+"Media & hiburan?|m|spotify vlc iina audacity handbrake capcut davinci kdenlive klite|Spotify untuk musik, CapCut/DaVinci/Kdenlive untuk video, Audacity untuk audio, HandBrake untuk kompres video."
+"Keamanan & privasi?|m|bitwarden keepassxc protonvpn warp malwarebytes veracrypt|Password manager (Bitwarden) sangat disarankan untuk semua orang. Proton VPN gratis untuk WiFi publik."
+"Cloud & sinkronisasi?|m|gdrive onedrive dropbox mega syncthing|Google Drive/OneDrive biasanya dapat kuota besar dari email kampus."
+"Gaming?|m|steam epic heroic gog eaapp ubisoft playnite afterburner lutris prism|Steam paling umum. Di Linux, Heroic dan Lutris membantu menjalankan game Windows."
+"Download & transfer?|m|qbittorrent idm fdm jdownloader localsend|Free Download Manager gratis, IDM berbayar tapi populer. LocalSend untuk kirim file HP-laptop."
 )
 
 VSEXT=(

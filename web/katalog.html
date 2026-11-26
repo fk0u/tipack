@@ -260,7 +260,7 @@ function osBlock(a, o) {
     return `<div class="os-block"><div class="hd">${ICON[o]}${OSNAME[o]}<span>installer memilih otomatis sesuai distro</span></div>` +
       Object.entries(d.methods).map(([pm, m]) => `<div class="cmd" style="border-top:1px solid var(--line)"><span class="b" style="flex:none;min-width:150px">${DL[pm] || pm}</span><code>${esc(m.cmd)}</code>${m.cmd.startsWith('(') ? '' : `<button class="cp" data-cmd="${esc(m.cmd)}">Copy</button>`}</div>`).join('') + '</div>';
   }
-  const via = { winget: 'winget', wsl: 'WSL', feat: 'fitur Windows', formula: 'Homebrew', cask: 'Homebrew cask', custom: 'installer TIPACK' }[d.kind] || d.kind;
+  const via = { msstore: 'Microsoft Store', winget: 'winget', wsl: 'WSL', feat: 'fitur Windows', formula: 'Homebrew', cask: 'Homebrew cask', custom: 'installer TIPACK' }[d.kind] || d.kind;
   return `<div class="os-block"><div class="hd">${ICON[o]}${OSNAME[o]}<span>${esc(d.name !== a.name ? d.name + ' · ' : '')}lewat ${esc(via)}</span></div>
     <div class="cmd"><code>${esc(d.cmd)}</code><button class="cp" data-cmd="${esc(d.cmd)}">Copy</button></div></div>`;
 }

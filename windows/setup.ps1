@@ -161,12 +161,71 @@ rufus|Utilitas Sistem|Rufus.Rufus|Rufus|0|Bikin flashdisk bootable untuk install
 ventoy|Utilitas Sistem|Ventoy.Ventoy|Ventoy|0|Satu flashdisk untuk banyak ISO sekaligus. Wajib untuk abang IT.
 anydesk|Utilitas Sistem|AnyDesk.AnyDesk|AnyDesk|0|Remote desktop untuk bantu teman dari jauh.
 rustdesk|Utilitas Sistem|RustDesk.RustDesk|RustDesk|0|Remote desktop open source, alternatif AnyDesk.
+zen|Browser|Zen-Team.Zen-Browser|Zen Browser|0|Browser berbasis Firefox dengan tab vertikal dan workspace ala Arc. Arc sudah tidak dikembangkan, Zen penggantinya yang sedang naik daun.
+vivaldi|Browser|Vivaldi.Vivaldi|Vivaldi|0|Browser Chromium yang sangat bisa dikustom: tab bertumpuk, panel samping, email dan kalender bawaan.
+opera|Browser|Opera.Opera|Opera|0|Browser dengan VPN gratis bawaan dan sidebar WhatsApp/Telegram.
+edge|Browser|Microsoft.Edge|Microsoft Edge|0|Bawaan Windows. Di Mac/Linux berguna untuk tes tampilan web di Edge.
+tor|Browser|TorProject.TorBrowser|Tor Browser|0|Browsing anonim lewat jaringan Tor.
+whatsapp|Komunikasi|msstore:9NKSQGP7F2NH|WhatsApp Desktop|1|WhatsApp resmi untuk laptop: chat, telepon dan video call. Di Linux pakai web.whatsapp.com.
+signal|Komunikasi|OpenWhisperSystems.Signal|Signal|0|Chat terenkripsi end-to-end, standar privasi tertinggi.
+thunderbird|Komunikasi|Mozilla.Thunderbird|Thunderbird|0|Aplikasi email gratis untuk banyak akun sekaligus (Gmail, email kampus, Outlook).
+spotify|Media & Hiburan|Spotify.Spotify|Spotify|1|Streaming musik dan podcast.
+audacity|Media & Hiburan|Audacity.Audacity|Audacity|0|Rekam dan edit audio gratis: podcast, voice over, tugas presentasi.
+handbrake|Media & Hiburan|HandBrake.HandBrake|HandBrake|0|Kompres dan konversi video (misal video tugas terlalu besar untuk diunggah).
+capcut|Media & Hiburan|ByteDance.CapCut|CapCut|0|Editor video populer untuk konten TikTok/Reels/YouTube Shorts.
+davinci|Media & Hiburan|info:https://www.blackmagicdesign.com/products/davinciresolve|DaVinci Resolve|0|Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup.
+kdenlive|Media & Hiburan|KDE.Kdenlive|Kdenlive|0|Editor video open source yang ringan, alternatif gratis untuk editing serius.
+klite|Media & Hiburan|CodecGuide.K-LiteCodecPack.Standard|K-Lite Codec Pack|0|Codec video lengkap supaya semua format bisa diputar di pemutar bawaan Windows.
+krita|Desain & Multimedia|KDE.Krita|Krita|0|Aplikasi menggambar digital gratis, favorit ilustrator dan pengguna pen tablet.
+paintnet|Desain & Multimedia|dotPDN.PaintDotNet|Paint.NET|0|Editor gambar ringan dan cepat, di antara Paint dan Photoshop.
+affinity|Desain & Multimedia|info:https://www.affinity.studio|Affinity (gratis)|0|Desain foto, vektor dan layout setara Adobe, sekarang gratis setelah diakuisisi Canva.
+canva|Desain & Multimedia|Canva.Canva|Canva|1|Desain poster, presentasi dan konten sosmed dengan template. Mahasiswa sering dapat Canva Pro gratis lewat kampus.
+upscayl|Desain & Multimedia|Upscayl.Upscayl|Upscayl|0|Perbesar dan pertajam foto dengan AI secara offline dan gratis.
+wps|Kuliah & Produktivitas|Kingsoft.WPSOffice|WPS Office|0|Office gratis yang sangat mirip Microsoft Office, populer di Indonesia. Ringan untuk laptop lama.
+onlyoffice|Kuliah & Produktivitas|ONLYOFFICE.DesktopEditors|ONLYOFFICE|0|Office gratis open source dengan kompatibilitas file Word/Excel/PowerPoint terbaik.
+anki|Kuliah & Produktivitas|Anki.Anki|Anki|0|Flashcard dengan pengulangan berjeda: cara belajar paling efektif untuk hafalan dan ujian.
+bitwarden|Keamanan & Privasi|Bitwarden.Bitwarden|Bitwarden|1|Password manager gratis dan open source. Satu password kuat untuk semua akun, sinkron ke HP.
+keepassxc|Keamanan & Privasi|KeePassXCTeam.KeePassXC|KeePassXC|0|Password manager offline, database terenkripsi disimpan sendiri.
+protonvpn|Keamanan & Privasi|Proton.ProtonVPN|Proton VPN|0|VPN gratis tanpa batas kuota dari pembuat Proton Mail. Aman untuk WiFi publik.
+warp|Keamanan & Privasi|Cloudflare.Warp|Cloudflare WARP (1.1.1.1)|0|DNS cepat + enkripsi koneksi dari Cloudflare. Sering membantu kalau internet kampus/ISP lambat membuka situs tertentu.
+malwarebytes|Keamanan & Privasi|Malwarebytes.Malwarebytes|Malwarebytes|0|Pemindai malware/adware gratis, pendamping Windows Defender untuk membersihkan laptop yang terinfeksi.
+veracrypt|Keamanan & Privasi|IDRIX.VeraCrypt|VeraCrypt|0|Enkripsi flashdisk/folder supaya data aman kalau hilang.
+dropbox|Cloud & Sinkronisasi|Dropbox.Dropbox|Dropbox|0|Sinkronisasi file ke cloud.
+onedrive|Cloud & Sinkronisasi|Microsoft.OneDrive|OneDrive|0|Cloud Microsoft, 1 TB gratis dengan Microsoft 365 email kampus.
+mega|Cloud & Sinkronisasi|Mega.MEGASync|MEGA|0|Cloud dengan 20 GB gratis dan enkripsi end-to-end.
+syncthing|Cloud & Sinkronisasi|Syncthing.Syncthing|Syncthing|0|Sinkron folder antar laptop/HP langsung tanpa cloud, open source.
+steam|Gaming|Valve.Steam|Steam|1|Toko dan launcher game PC terbesar. Di Linux, banyak game Windows jalan lewat Proton.
+epic|Gaming|EpicGames.EpicGamesLauncher|Epic Games Launcher|0|Launcher Epic dengan game gratis setiap minggu.
+heroic|Gaming|HeroicGamesLauncher.HeroicGamesLauncher|Heroic Games Launcher|0|Launcher open source untuk game Epic, GOG dan Amazon. Cara terbaik main game Epic di Linux.
+gog|Gaming|GOG.Galaxy|GOG Galaxy|0|Launcher GOG, game tanpa DRM.
+eaapp|Gaming|ElectronicArts.EADesktop|EA app|0|Launcher game EA (FC, Battlefield, The Sims).
+ubisoft|Gaming|Ubisoft.Connect|Ubisoft Connect|0|Launcher game Ubisoft (Assassin's Creed, Rainbow Six).
+playnite|Gaming|Playnite.Playnite|Playnite|0|Satu perpustakaan untuk semua game dari semua launcher.
+afterburner|Gaming|Guru3D.Afterburner|MSI Afterburner|0|Pantau FPS, suhu GPU/CPU di dalam game, dan atur kipas.
+prism|Gaming|PrismLauncher.PrismLauncher|Prism Launcher (Minecraft)|0|Launcher Minecraft Java open source: banyak instance dan modpack dengan mudah.
+chatgpt|AI & Data|msstore:9NT1R1C2HH7J|ChatGPT Desktop|0|Aplikasi resmi ChatGPT dengan shortcut cepat dan mode suara.
+jan|AI & Data|Jan.Jan|Jan|0|Chat dengan LLM lokal yang open source dan 100% offline. Alternatif LM Studio.
+qbittorrent|Download & Transfer|qBittorrent.qBittorrent|qBittorrent|0|Klien torrent open source tanpa iklan. Unduh ISO Linux dengan cepat.
+idm|Download & Transfer|Tonec.InternetDownloadManager|Internet Download Manager|0|Download manager paling populer di Indonesia: mempercepat dan melanjutkan unduhan. Berbayar (trial 30 hari).
+fdm|Download & Transfer|SoftDeluxe.FreeDownloadManager|Free Download Manager|0|Download manager gratis: percepat unduhan, jadwal, dan lanjutkan unduhan putus.
+jdownloader|Download & Transfer|AppWork.JDownloader|JDownloader 2|0|Download manager untuk banyak file sekaligus dari situs hosting.
+wiztree|Utilitas Sistem|AntibodySoftware.WizTree|WizTree|1|Lihat folder apa yang menghabiskan disk dalam hitungan detik. Wajib untuk laptop yang disknya penuh.
+flowlauncher|Utilitas Sistem|Flow-Launcher.Flow-Launcher|Flow Launcher|0|Launcher cepat ala Spotlight/Raycast untuk Windows (Alt+Spasi).
+ditto|Utilitas Sistem|Ditto.Ditto|Ditto (riwayat clipboard)|0|Riwayat copy-paste yang bisa dicari, jauh lebih lengkap dari Win+V.
+teracopy|Utilitas Sistem|CodeSector.TeraCopy|TeraCopy|0|Copy file besar lebih cepat dan bisa dijeda/dilanjutkan, dengan verifikasi hasil copy.
+twinkletray|Utilitas Sistem|xanderfrangos.twinkletray|Twinkle Tray|0|Atur brightness monitor eksternal langsung dari taskbar.
+parsec|Utilitas Sistem|Parsec.Parsec|Parsec|0|Remote desktop super mulus (bisa untuk main game dari laptop lain).
+dotnetdesktop|Runtime & Driver|Microsoft.DotNet.DesktopRuntime.8|.NET Desktop Runtime 8|1|Dibutuhkan banyak aplikasi Windows modern. Kalau ada aplikasi minta .NET, ini jawabannya.
+javaruntime|Runtime & Driver|EclipseAdoptium.Temurin.21.JRE|Java Runtime (Temurin JRE 21)|0|Untuk menjalankan aplikasi .jar (misal Minecraft lama, aplikasi kampus berbasis Java). Developer pilih JDK saja.
+directx|Runtime & Driver|Microsoft.DirectX|DirectX End-User Runtime|0|Library lama yang masih dibutuhkan banyak game.
+nvidiaapp|Runtime & Driver|info:https://www.nvidia.com/en-us/software/nvidia-app/|NVIDIA App (driver GPU)|0|Update driver GPU NVIDIA dan pengaturan grafis. Hanya untuk laptop dengan GPU NVIDIA.
+
 '@
 
 $Catalog = foreach ($line in ($CatalogRaw -split "`r?`n")) {
   if (-not $line.Trim()) { continue }
   $p = $line.Trim() -split '\|', 6
-  $kind = if ($p[2] -like 'wsl:*') { 'wsl' } elseif ($p[2] -like 'feat:*') { 'feat' } elseif ($p[2] -like 'info:*') { 'info' } else { 'winget' }
+  $kind = if ($p[2] -like 'wsl:*') { 'wsl' } elseif ($p[2] -like 'feat:*') { 'feat' } elseif ($p[2] -like 'info:*') { 'info' } elseif ($p[2] -like 'msstore:*') { 'msstore' } else { 'winget' }
   [pscustomobject]@{ Key = $p[0]; Cat = $p[1]; Id = $p[2]; Name = $p[3]; Rec = ($p[4] -eq '1'); Tip = $p[5]; Kind = $kind; Installed = $false }
 }
 # Penyesuaian arsitektur
@@ -184,6 +243,8 @@ $HeavyKeys = @('docker', 'androidstudio', 'vs2022', 'unity', 'ollama', 'lmstudio
 # Probe tambahan: aplikasi yang mungkin diinstall manual (bukan lewat winget)
 $CmdProbe = @{ git = 'git'; vscode = 'code'; python = 'python'; nodejs = 'node'; jdk = 'java'; mingw = 'g++'; go = 'go'; rust = 'rustc';
   php = 'php'; dotnet = 'dotnet'; cursor = 'cursor'; antigravity = 'antigravity'; docker = 'docker'; ghcli = 'gh'; pwsh = 'pwsh'; uv = 'uv'; bun = 'bun'; cmake = 'cmake' }
+# Nama paket Appx untuk aplikasi Microsoft Store (deteksi terpasang)
+$AppxProbe = @{ whatsapp = '5319275A.WhatsAppDesktop'; chatgpt = 'OpenAI.ChatGPT-Desktop' }
 $PathProbe = @{ xampp = 'C:\xampp\xampp-control.exe'; laragon = 'C:\laragon\laragon.exe'; mingw = 'C:\mingw64\bin\g++.exe';
   antigravity = "$env:LOCALAPPDATA\Programs\Antigravity\Antigravity.exe"; vscode = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe" }
 
@@ -202,6 +263,9 @@ $Profiles = @(
   @{ K = 'design'; N = 'UI/UX & Konten Kreator'; T = 'Figma, desain vektor/raster, rekam layar.'; L = 'figma,drawio,gimp,inkscape,obs,sharex,vlc,blender' }
   @{ K = 'tech'; N = 'Abang IT / Teknisi Laptop'; T = 'Toolkit servis: cek hardware, flashdisk bootable, remote desktop, uninstaller.'
      L = '7zip,everything,powertoys,revo,cpuz,hwinfo,crystaldisk,rufus,ventoy,anydesk,rustdesk,advancedip,localsend,vcredist,sumatra,vlc' }
+  @{ K = 'umum'; N = 'Paket Umum (ala Ninite)'; T = 'Software sehari-hari untuk siapa saja: browser, chat, musik, video, office, PDF, password manager, cloud dan utilitas.'; L = 'chrome,firefox,7zip,unarchiver,vlc,iina,spotify,whatsapp,telegram,discord,zoom,libreoffice,wps,sumatra,bitwarden,gdrive,localsend,sharex,flameshot,everything,powertoys,wiztree,rectangle,stats,raycast,appcleaner,dotnetdesktop,vcredist' }
+  @{ K = 'gamer'; N = 'Gamer'; T = 'Launcher game, overlay performa, voice chat, rekam gameplay dan runtime yang dibutuhkan game.'; L = 'steam,epic,heroic,gog,eaapp,ubisoft,playnite,afterburner,discord,obs,vcredist,directx,dotnetdesktop,lutris,prism,parsec' }
+  @{ K = 'kreator'; N = 'Konten Kreator'; T = 'Edit video, audio dan gambar, desain sosial media dan rekam layar.'; L = 'obs,capcut,davinci,kdenlive,audacity,handbrake,krita,gimp,inkscape,canva,figma,upscayl,sharex,flameshot,spotify' }
 )
 
 $Wizard = @(
@@ -225,6 +289,11 @@ $Wizard = @(
   @{ Q = 'Komunikasi?'; M = $true; L = 'discord,zoom,telegram,slack,teams'; T = 'Sesuaikan dengan platform yang dipakai kelas dan dosen.' }
   @{ Q = 'Kuliah & produktivitas?'; M = $true; L = 'notion,obsidian,zotero,office,libreoffice,sumatra,acrobat,gdrive'; T = 'Microsoft 365 biasanya gratis dari email kampus. Zotero menyelamatkan saat skripsi.' }
   @{ Q = 'Utilitas sistem?'; M = $true; L = 'powertoys,vcredist,localsend,everything,revo,cpuz,hwinfo,crystaldisk,rufus,ventoy,anydesk,rustdesk'; T = 'PowerToys + Everything + LocalSend = trio wajib. Sisanya untuk abang IT.' }
+  @{ Q = 'Media & hiburan?'; M = $true; L = 'spotify,vlc,iina,audacity,handbrake,capcut,davinci,kdenlive,klite'; T = 'Spotify untuk musik, CapCut/DaVinci/Kdenlive untuk video, Audacity untuk audio, HandBrake untuk kompres video.' }
+  @{ Q = 'Keamanan & privasi?'; M = $true; L = 'bitwarden,keepassxc,protonvpn,warp,malwarebytes,veracrypt'; T = 'Password manager (Bitwarden) sangat disarankan untuk semua orang. Proton VPN gratis untuk WiFi publik.' }
+  @{ Q = 'Cloud & sinkronisasi?'; M = $true; L = 'gdrive,onedrive,dropbox,mega,syncthing'; T = 'Google Drive/OneDrive biasanya dapat kuota besar dari email kampus.' }
+  @{ Q = 'Gaming?'; M = $true; L = 'steam,epic,heroic,gog,eaapp,ubisoft,playnite,afterburner,lutris,prism'; T = 'Steam paling umum. Di Linux, Heroic dan Lutris membantu menjalankan game Windows.' }
+  @{ Q = 'Download & transfer?'; M = $true; L = 'qbittorrent,idm,fdm,jdownloader,localsend'; T = 'Free Download Manager gratis, IDM berbayar tapi populer. LocalSend untuk kirim file HP-laptop.' }
 )
 
 $VSExt = @(
@@ -386,7 +455,7 @@ function CatItem([string]$k) {
   if ($c.Kind -eq 'info') { $b += '{DarkYellow}i manual  ' }
   if ($c.Kind -eq 'wsl' -or $c.Kind -eq 'feat') { $b += '{DarkCyan}fitur Windows  ' }
   if ($HeavyKeys -contains $k -and $Sys.Ram -and $Sys.Ram -lt 12) { $b += '{Red}! berat untuk RAM ' + $Sys.Ram + 'GB' }
-  $src = switch ($c.Kind) { 'winget' { "winget: $($c.Id)" } 'wsl' { 'wsl --install' } 'feat' { 'Windows Optional Feature' } 'info' { 'Download manual: ' + $c.Id.Substring(5) } }
+  $src = switch ($c.Kind) { 'winget' { "winget: $($c.Id)" } 'msstore' { "Microsoft Store: $($c.Id.Substring(8))" } 'wsl' { 'wsl --install' } 'feat' { 'Windows Optional Feature' } 'info' { 'Download manual: ' + $c.Id.Substring(5) } }
   $st = if ($c.Installed) { 'Status: SUDAH TERPASANG di laptop ini.' } else { 'Status: belum terpasang.' }
   MkItem $c.Name ("$($c.Tip)`n$st  |  $src") $k $b $Cart.Contains($k) $c.Installed $c.Rec
 }
@@ -591,11 +660,13 @@ function Scan-Installed([switch]$Quiet) {
   # WSL dideteksi dari registry & file; wsl.exe TIDAK dipanggil karena stub-nya bisa menunggu "press any key"
   $wslOk = (Test-Path "$env:ProgramFiles\WSL\wsl.exe") -or (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LxssManager')
   $distros = @(Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss' -ErrorAction SilentlyContinue | ForEach-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DistributionName } | Where-Object { $_ })
+  $appx = @(); try { $appx = @(Get-AppxPackage -ErrorAction Stop | ForEach-Object Name) } catch {}
   Log "scan: winget=$($ids.Count) paket, WSL=$wslOk, distro=$($distros -join ',')"
   foreach ($c in $Catalog) {
     $hit = $false
     switch ($c.Kind) {
       'winget' { $hit = $ids.ContainsKey($c.Id.ToLower()) }
+      'msstore' { $hit = [bool]($appx | Where-Object { $_ -like "$($AppxProbe[$c.Key])*" }) }
       'wsl' { $hit = if ($c.Id -eq 'wsl:core') { $wslOk } else { [bool]($distros | Where-Object { $_ -like "$($c.Id.Substring(4))*" }) } }
       'feat' { if ($IsAdmin) { try { $hit = (Get-WindowsOptionalFeature -Online -FeatureName $c.Id.Substring(5) -ErrorAction Stop).State -eq 'Enabled' } catch {} } }
     }
@@ -775,7 +846,7 @@ function Review-Install {
 function Install-Cart {
   $list = @($Cart.Keys | ForEach-Object { $Apps[$_] })
   # urutan: fitur Windows dulu, lalu winget, lalu info manual
-  $list = @($list | Sort-Object { switch ($_.Kind) { 'feat' { 0 } 'wsl' { 1 } 'winget' { 2 } 'info' { 3 } } })
+  $list = @($list | Sort-Object { switch ($_.Kind) { 'feat' { 0 } 'wsl' { 1 } 'winget' { 2 } 'msstore' { 2 } 'info' { 3 } } })
   Clear-Scr; Set-Cursor $false
   Write-Host ''
   for ($i = 0; $i -lt $Banner.Count; $i++) { Write-Host ('  ' + $Banner[$i]) -ForegroundColor $BannerColors[$i] }
@@ -815,6 +886,11 @@ function Install-Cart {
           try { $f = Enable-WindowsOptionalFeature -Online -FeatureName $c.Id.Substring(5) -All -NoRestart -ErrorAction Stop; $status = 'ok'; if ($f.RestartNeeded) { $reboot = $true; $msg = 'perlu restart' } }
           catch { $msg = 'tidak tersedia di edisi Windows ini (butuh Pro/Education)' }
         }
+      }
+      'msstore' {
+        $r = Invoke-Spin 'winget' "install --id $($c.Id.Substring(8)) --source msstore --silent --accept-package-agreements --accept-source-agreements --disable-interactivity" "Menginstall $($c.Name) (Microsoft Store)"
+        $secs = $r.Secs
+        switch ($r.Code) { 0 { $status = 'ok' } -1978335189 { $status = 'skip'; $msg = 'sudah versi terbaru' } -1978335135 { $status = 'skip'; $msg = 'sudah terpasang' } default { $msg = 'kode {0} (0x{0:X8}); pastikan login Microsoft Store' -f $r.Code } }
       }
       'info' { $status = 'info'; $Notes.Add("$($c.Name): $($c.Id.Substring(5))") }
     }

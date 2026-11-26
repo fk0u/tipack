@@ -152,6 +152,44 @@ localsend|Utilitas Sistem|LocalSend|1||-|-|aur:localsend-bin|-|-|-|org.localsend
 copyq|Utilitas Sistem|CopyQ (riwayat clipboard)|0|cmd:copyq|copyq|copyq|copyq|-|-|-|com.github.hluk.copyq|-|Riwayat copy-paste yang bisa dicari.
 ventoy|Utilitas Sistem|Ventoy|0||-|-|aur:ventoy-bin|-|-|-|-|info:https://www.ventoy.net/en/download.html|Satu flashdisk untuk banyak ISO sekaligus. Wajib untuk abang IT.
 gnometweaks|Utilitas Sistem|GNOME Tweaks + Extension Manager|0|cmd:gnome-tweaks|gnome-tweaks gnome-shell-extension-manager|gnome-tweaks|gnome-tweaks|gnome-tweaks|-|-|com.mattjakeman.ExtensionManager|-|Kustomisasi tampilan GNOME (font, tema, ekstensi). Hanya untuk desktop GNOME.
+zen|Browser|Zen Browser|0||-|-|aur:zen-browser-bin|-|-|-|app.zen_browser.zen|-|Browser berbasis Firefox dengan tab vertikal dan workspace ala Arc. Arc sudah tidak dikembangkan, Zen penggantinya yang sedang naik daun.
+vivaldi|Browser|Vivaldi|0||-|-|vivaldi|-|-|-|com.vivaldi.Vivaldi|-|Browser Chromium yang sangat bisa dikustom: tab bertumpuk, panel samping, email dan kalender bawaan.
+opera|Browser|Opera|0||-|-|aur:opera|-|-|-|com.opera.Opera|-|Browser dengan VPN gratis bawaan dan sidebar WhatsApp/Telegram.
+edge|Browser|Microsoft Edge|0||-|-|aur:microsoft-edge-stable-bin|-|-|-|com.microsoft.Edge|-|Bawaan Windows. Di Mac/Linux berguna untuk tes tampilan web di Edge.
+tor|Browser|Tor Browser|0||torbrowser-launcher|-|torbrowser-launcher|-|-|-|org.torproject.torbrowser-launcher|-|Browsing anonim lewat jaringan Tor.
+whatsapp|Komunikasi|WhatsApp Desktop|1||-|-|-|-|-|-|-|info:https://web.whatsapp.com|WhatsApp resmi untuk laptop: chat, telepon dan video call. Di Linux pakai web.whatsapp.com.
+signal|Komunikasi|Signal|0||-|-|signal-desktop|-|-|-|org.signal.Signal|-|Chat terenkripsi end-to-end, standar privasi tertinggi.
+thunderbird|Komunikasi|Thunderbird|0||thunderbird|thunderbird|thunderbird|MozillaThunderbird|thunderbird|-|org.mozilla.Thunderbird|-|Aplikasi email gratis untuk banyak akun sekaligus (Gmail, email kampus, Outlook).
+spotify|Media & Hiburan|Spotify|1||-|-|aur:spotify|-|-|-|com.spotify.Client|-|Streaming musik dan podcast.
+audacity|Media & Hiburan|Audacity|0||audacity|audacity|audacity|audacity|-|-|org.audacityteam.Audacity|-|Rekam dan edit audio gratis: podcast, voice over, tugas presentasi.
+handbrake|Media & Hiburan|HandBrake|0||handbrake|-|handbrake|-|-|-|fr.handbrake.ghb|-|Kompres dan konversi video (misal video tugas terlalu besar untuk diunggah).
+davinci|Media & Hiburan|DaVinci Resolve|0||-|-|-|-|-|-|-|info:https://www.blackmagicdesign.com/products/davinciresolve|Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup.
+kdenlive|Media & Hiburan|Kdenlive|0||kdenlive|kdenlive|kdenlive|kdenlive|-|-|org.kde.kdenlive|-|Editor video open source yang ringan, alternatif gratis untuk editing serius.
+krita|Desain & Multimedia|Krita|0||krita|krita|krita|krita|-|-|org.kde.krita|-|Aplikasi menggambar digital gratis, favorit ilustrator dan pengguna pen tablet.
+canva|Desain & Multimedia|Canva|1||-|-|-|-|-|-|-|info:https://www.canva.com|Desain poster, presentasi dan konten sosmed dengan template. Mahasiswa sering dapat Canva Pro gratis lewat kampus.
+upscayl|Desain & Multimedia|Upscayl|0||-|-|-|-|-|-|org.upscayl.Upscayl|-|Perbesar dan pertajam foto dengan AI secara offline dan gratis.
+wps|Kuliah & Produktivitas|WPS Office|0||-|-|aur:wps-office|-|-|-|com.wps.Office|-|Office gratis yang sangat mirip Microsoft Office, populer di Indonesia. Ringan untuk laptop lama.
+onlyoffice|Kuliah & Produktivitas|ONLYOFFICE|0||-|-|aur:onlyoffice-bin|-|-|-|org.onlyoffice.desktopeditors|-|Office gratis open source dengan kompatibilitas file Word/Excel/PowerPoint terbaik.
+anki|Kuliah & Produktivitas|Anki|0||anki|-|anki|-|-|-|net.ankiweb.Anki|-|Flashcard dengan pengulangan berjeda: cara belajar paling efektif untuk hafalan dan ujian.
+bitwarden|Keamanan & Privasi|Bitwarden|1||-|-|bitwarden|-|-|-|com.bitwarden.desktop|-|Password manager gratis dan open source. Satu password kuat untuk semua akun, sinkron ke HP.
+keepassxc|Keamanan & Privasi|KeePassXC|0||keepassxc|keepassxc|keepassxc|keepassxc|keepassxc|-|org.keepassxc.KeePassXC|-|Password manager offline, database terenkripsi disimpan sendiri.
+protonvpn|Keamanan & Privasi|Proton VPN|0||-|-|-|-|-|-|com.protonvpn.www|-|VPN gratis tanpa batas kuota dari pembuat Proton Mail. Aman untuk WiFi publik.
+warp|Keamanan & Privasi|Cloudflare WARP (1.1.1.1)|0||-|-|-|-|-|-|-|info:https://pkg.cloudflareclient.com|DNS cepat + enkripsi koneksi dari Cloudflare. Sering membantu kalau internet kampus/ISP lambat membuka situs tertentu.
+veracrypt|Keamanan & Privasi|VeraCrypt|0||-|-|veracrypt|-|-|-|-|info:https://www.veracrypt.fr/en/Downloads.html|Enkripsi flashdisk/folder supaya data aman kalau hilang.
+dropbox|Cloud & Sinkronisasi|Dropbox|0||-|-|aur:dropbox|-|-|-|com.dropbox.Client|-|Sinkronisasi file ke cloud.
+mega|Cloud & Sinkronisasi|MEGA|0||-|-|-|-|-|-|nz.mega.MEGAsync|-|Cloud dengan 20 GB gratis dan enkripsi end-to-end.
+syncthing|Cloud & Sinkronisasi|Syncthing|0||syncthing|syncthing|syncthing|syncthing|syncthing|syncthing|-|-|Sinkron folder antar laptop/HP langsung tanpa cloud, open source.
+steam|Gaming|Steam|1||-|-|-|-|-|-|com.valvesoftware.Steam|-|Toko dan launcher game PC terbesar. Di Linux, banyak game Windows jalan lewat Proton.
+heroic|Gaming|Heroic Games Launcher|0||-|-|aur:heroic-games-launcher-bin|-|-|-|com.heroicgameslauncher.hgl|-|Launcher open source untuk game Epic, GOG dan Amazon. Cara terbaik main game Epic di Linux.
+lutris|Gaming|Lutris|0||lutris|lutris|lutris|lutris|-|-|net.lutris.Lutris|-|Pengelola game Linux: menjalankan game Windows, emulator dan launcher lain.
+prism|Gaming|Prism Launcher (Minecraft)|0||-|-|prismlauncher|-|-|-|org.prismlauncher.PrismLauncher|-|Launcher Minecraft Java open source: banyak instance dan modpack dengan mudah.
+chatgpt|AI & Data|ChatGPT Desktop|0||-|-|-|-|-|-|-|info:https://chatgpt.com|Aplikasi resmi ChatGPT dengan shortcut cepat dan mode suara.
+jan|AI & Data|Jan|0||-|-|-|-|-|-|ai.jan.Jan|-|Chat dengan LLM lokal yang open source dan 100% offline. Alternatif LM Studio.
+qbittorrent|Download & Transfer|qBittorrent|0||qbittorrent|qbittorrent|qbittorrent|qbittorrent|qbittorrent|-|org.qbittorrent.qBittorrent|-|Klien torrent open source tanpa iklan. Unduh ISO Linux dengan cepat.
+fdm|Download & Transfer|Free Download Manager|0||-|-|-|-|-|-|-|info:https://www.freedownloadmanager.org/download.htm|Download manager gratis: percepat unduhan, jadwal, dan lanjutkan unduhan putus.
+jdownloader|Download & Transfer|JDownloader 2|0||-|-|-|-|-|-|org.jdownloader.JDownloader|-|Download manager untuk banyak file sekaligus dari situs hosting.
+parsec|Utilitas Sistem|Parsec|0||-|-|-|-|-|-|com.parsecgaming.parsec|-|Remote desktop super mulus (bisa untuk main game dari laptop lain).
+
 '
 
 i=0
@@ -179,6 +217,9 @@ PROFILES=(
 "game|Game Developer|Godot, Blender, Unity dan tool aset.|godot blender unity vscode gimp inkscape git obs"
 "design|UI/UX & Konten Kreator|Figma, desain vektor/raster, rekam layar.|figma drawio gimp inkscape obs flameshot vlc blender"
 "tech|Abang IT / Linux Power User|Toolkit servis dan kustomisasi: backup, partisi, flashdisk bootable, remote, info sistem.|clipack fastfetch timeshift gparted ventoy remmina openssh localsend copyq tmux gnometweaks flatpak"
+"umum|Paket Umum (ala Ninite)|Software sehari-hari untuk siapa saja: browser, chat, musik, video, office, PDF, password manager, cloud dan utilitas.|chrome firefox 7zip unarchiver vlc iina spotify whatsapp telegram discord zoom libreoffice wps sumatra bitwarden gdrive localsend sharex flameshot everything powertoys wiztree rectangle stats raycast appcleaner dotnetdesktop vcredist"
+"gamer|Gamer|Launcher game, overlay performa, voice chat, rekam gameplay dan runtime yang dibutuhkan game.|steam epic heroic gog eaapp ubisoft playnite afterburner discord obs vcredist directx dotnetdesktop lutris prism parsec"
+"kreator|Konten Kreator|Edit video, audio dan gambar, desain sosial media dan rekam layar.|obs capcut davinci kdenlive audacity handbrake krita gimp inkscape canva figma upscayl sharex flameshot spotify"
 )
 
 WIZ=(
@@ -198,6 +239,11 @@ WIZ=(
 "Komunikasi?|m|discord zoom telegram slack|Sesuaikan dengan platform kelas dan dosen."
 "Kuliah & produktivitas?|m|libreoffice okular obsidian zotero notion office|Microsoft 365 di Linux hanya versi web. LibreOffice untuk offline."
 "Utilitas sistem?|m|flatpak fastfetch timeshift gparted localsend copyq ventoy gnometweaks|Timeshift = penyelamat kalau sistem rusak setelah update. Pasang di hari pertama."
+"Media & hiburan?|m|spotify vlc iina audacity handbrake capcut davinci kdenlive klite|Spotify untuk musik, CapCut/DaVinci/Kdenlive untuk video, Audacity untuk audio, HandBrake untuk kompres video."
+"Keamanan & privasi?|m|bitwarden keepassxc protonvpn warp malwarebytes veracrypt|Password manager (Bitwarden) sangat disarankan untuk semua orang. Proton VPN gratis untuk WiFi publik."
+"Cloud & sinkronisasi?|m|gdrive onedrive dropbox mega syncthing|Google Drive/OneDrive biasanya dapat kuota besar dari email kampus."
+"Gaming?|m|steam epic heroic gog eaapp ubisoft playnite afterburner lutris prism|Steam paling umum. Di Linux, Heroic dan Lutris membantu menjalankan game Windows."
+"Download & transfer?|m|qbittorrent idm fdm jdownloader localsend|Free Download Manager gratis, IDM berbayar tapi populer. LocalSend untuk kirim file HP-laptop."
 )
 
 VSEXT=(
