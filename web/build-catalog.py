@@ -56,19 +56,19 @@ for line in mac_raw.splitlines():
         cmd = "(dipasang oleh installer TIPACK)"
     a["mac"] = {"kind": typ, "id": mid, "cmd": cmd, "name": name, "tip": tip}
 
-# ---- Linux: key|Kategori|Nama|Rek|deteksi|apt|dnf|pacman|zypper|apk|flatpak|universal|Tooltip
-PMCMD = {"apt": "sudo apt install {}", "dnf": "sudo dnf install {}", "pacman": "sudo pacman -S {}", "zypper": "sudo zypper install {}", "apk": "sudo apk add {}"}
+# ---- Linux: key|Kategori|Nama|Rek|deteksi|apt|dnf|pacman|zypper|apk|termux|flatpak|universal|Tooltip
+PMCMD = {"termux": "pkg install {}", "apt": "sudo apt install {}", "dnf": "sudo dnf install {}", "pacman": "sudo pacman -S {}", "zypper": "sudo zypper install {}", "apk": "sudo apk add {}"}
 lx_raw = re.search(r"^CATALOG_RAW='\n(.*?)\n'", lx, re.S | re.M).group(1)
 for line in lx_raw.splitlines():
-    p = line.strip().split("|", 12)
-    if len(p) < 13:
+    p = line.strip().split("|", 13)
+    if len(p) < 14:
         continue
     key, cat, name, rec, _det, *cols, flat, uni, tip = p
     a = get(key, name, cat, tip, rec == "1")
     if a["win"] is None and a["mac"] is None:
         a["tip"] = tip
     methods = {}
-    for pm, v in zip(["apt", "dnf", "pacman", "zypper", "apk"], cols):
+    for pm, v in zip(["apt", "dnf", "pacman", "zypper", "apk", "termux"], cols):
         if v == "-":
             continue
         if v.startswith("aur:"):

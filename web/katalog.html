@@ -256,7 +256,7 @@ function osBlock(a, o) {
   if (!d) return `<div class="os-block"><div class="hd">${ICON[o]}${OSNAME[o]}</div><div class="na">Tidak tersedia di ${OSNAME[o]}.</div></div>`;
   if (d.kind === 'info') return `<div class="os-block"><div class="hd">${ICON[o]}${OSNAME[o]}<span>download manual</span></div><div class="na">Tidak bisa dipasang otomatis. Download dari <a href="${esc(d.id)}" target="_blank" rel="noopener">${esc(d.id.replace(/^https?:\/\//, ''))}</a></div></div>`;
   if (d.kind === 'multi') {
-    const DL = { apt: 'Debian · Ubuntu · Mint', dnf: 'Fedora · RHEL', pacman: 'Arch · Manjaro', zypper: 'openSUSE', apk: 'Alpine', flatpak: 'Semua distro (Flatpak)', semua: 'Semua distro' };
+    const DL = { apt: 'Debian · Ubuntu · Mint', dnf: 'Fedora · RHEL', pacman: 'Arch · Manjaro', zypper: 'openSUSE', apk: 'Alpine', termux: 'Termux (Android)', flatpak: 'Semua distro (Flatpak)', semua: 'Semua distro' };
     return `<div class="os-block"><div class="hd">${ICON[o]}${OSNAME[o]}<span>installer memilih otomatis sesuai distro</span></div>` +
       Object.entries(d.methods).map(([pm, m]) => `<div class="cmd" style="border-top:1px solid var(--line)"><span class="b" style="flex:none;min-width:150px">${DL[pm] || pm}</span><code>${esc(m.cmd)}</code>${m.cmd.startsWith('(') ? '' : `<button class="cp" data-cmd="${esc(m.cmd)}">Copy</button>`}</div>`).join('') + '</div>';
   }

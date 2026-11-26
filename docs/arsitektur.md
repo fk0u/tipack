@@ -207,6 +207,21 @@ Nama tombol: `Up Down Enter Esc Space PgUp PgDn Home End Back`, atau satu huruf 
 - Browser tidak dibuka.
 - Saat antrean habis, script mencetak `SELFTEST-TOMBOL-SELESAI` dan keluar dengan kode 0. Error apa pun akan menghasilkan kode selain 0.
 
+## Merilis versi baru
+
+1. Pastikan CI di `main` hijau.
+2. Perbarui `CHANGELOG.md` (pindahkan isi *Belum dirilis* ke versi baru) dan teks versi di banner ketiga script bila perlu.
+3. Rakit & regenerasi: `bash linux/src/build.sh && python3 web/build-catalog.py`. Commit hasilnya.
+4. Siapkan lampiran dan checksum:
+   ```bash
+   mkdir -p dist && cp windows/setup.ps1 dist/tipack-windows-setup.ps1 && cp windows/JALANKAN.bat dist/
+   cp macos/setup.sh dist/tipack-macos-setup.sh && cp linux/setup.sh dist/tipack-linux-setup.sh
+   cp web/install.sh web/install.ps1 dist/ && (cd dist && shasum -a 256 * > SHA256SUMS.txt)
+   ```
+   Catatan: `JALANKAN.bat` memanggil `setup.ps1`, jadi pengguna yang memakai lampiran rilis perlu mengganti nama `tipack-windows-setup.ps1` menjadi `setup.ps1` (atau memakai bootstrap `install.ps1`).
+5. Buat tag & rilis: `gh release create vX.Y.Z dist/* --title "TIPACK vX.Y.Z" --notes-file catatan.md`.
+6. Deploy situs (lihat [website.md](website.md#deploy)) dan verifikasi checksum file di server.
+
 ## Aturan gaya
 
 - **Bahasa UI:** Bahasa Indonesia yang santai tapi jelas. Tooltip menjelaskan *fungsinya* dan *kapan dipilih*.

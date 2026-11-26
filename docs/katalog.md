@@ -2,7 +2,7 @@
 
 > File ini dibuat otomatis oleh `web/build-catalog.py` dari isi ketiga installer. Jangan diedit manual.
 
-Total **188** aplikasi unik: Windows 128, macOS 113, Linux 99.
+Total **188** aplikasi unik: Windows 128, macOS 113, Linux 105.
 
 Legenda: ★ = rekomendasi · `—` = tidak tersedia di OS itu · `manual` = download manual (link dibuka di akhir instalasi).
 
@@ -32,13 +32,13 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| ★ **Google Chrome** | winget | brew cask | AUR · script | Browser paling umum dengan DevTools terlengkap. Wajib untuk debugging web. Rekomendasi utama. |
-| **Mozilla Firefox** | winget | brew cask | apk · apt · dnf · pacman · zypper | Open source dan lebih menjaga privasi. DevTools untuk CSS Grid/Flexbox paling enak. Cocok jadi browser kedua untuk tes kompatibilitas. |
+| ★ **Google Chrome** | winget | brew cask | AUR · Flathub · script | Browser paling umum dengan DevTools terlengkap. Wajib untuk debugging web. Rekomendasi utama. |
+| **Mozilla Firefox** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | Open source dan lebih menjaga privasi. DevTools untuk CSS Grid/Flexbox paling enak. Cocok jadi browser kedua untuk tes kompatibilitas. |
 | **Firefox Developer Edition** | winget | brew cask | — | Firefox khusus developer dengan fitur DevTools eksperimental. |
-| **Brave** | winget | brew cask | AUR | Berbasis Chromium dengan adblock bawaan. Lebih hemat RAM dari Chrome, ekstensi Chrome tetap jalan. |
+| **Brave** | winget | brew cask | AUR · Flathub | Berbasis Chromium dengan adblock bawaan. Lebih hemat RAM dari Chrome, ekstensi Chrome tetap jalan. |
 | **Opera GX** | winget | — | — | Browser "gaming" dengan pembatas RAM/CPU. Cocok untuk laptop RAM 8GB yang suka buka banyak tab. |
 | **Arc** | — | brew cask | — | Browser dengan sidebar dan workspace, favorit banyak developer Mac. |
-| **Chromium** | — | — | apk · apt · dnf · pacman · zypper | -/Versi open source Chrome, tanpa layanan Google. |
+| **Chromium** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Versi open source Chrome, tanpa layanan Google. |
 
 ## Arsip & File
 
@@ -65,38 +65,38 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | ★ **iTerm2** | — | brew cask | — | Terminal Mac paling populer: split pane, pencarian, profil. Lebih lengkap dari Terminal bawaan. |
 | **Warp** | — | brew cask | — | Terminal modern dengan AI dan blok perintah ala IDE. |
 | **Ghostty** | — | brew cask | — | Terminal super cepat berbasis GPU, minimalis. |
-| ★ **Oh My Zsh + autosuggest + syntax highlight** | — | installer | Flathub · script | Framework zsh dengan tema dan plugin, plus saran perintah otomatis dan pewarnaan perintah. |
-| **Starship prompt** | — | brew | Flathub · apk · pacman · zypper | Prompt cantik yang menampilkan branch git dan versi bahasa. Butuh Nerd Font. |
-| ★ **CLI Power Pack (wget, htop, jq, tldr, dll)** | — | brew | Flathub · apk · apt · dnf · pacman · zypper | Paket 11 tool terminal wajib: wget, tree, htop, btop, jq, tldr (contoh perintah), ripgrep, bat, eza, fzf, zoxide. |
-| **Zsh** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Shell yang lebih nyaman dari bash. Dibutuhkan Oh My Zsh. |
-| **Fish shell** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Shell ramah pemula dengan autosuggestion bawaan tanpa konfigurasi. |
-| **tmux** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Terminal multiplexer: split pane dan sesi yang tetap hidup walau SSH putus. |
-| **Kitty terminal** | — | — | apk · apt · dnf · pacman · zypper | -/Terminal cepat berbasis GPU dengan tab dan split. |
-| **Alacritty** | — | — | apk · apt · dnf · pacman · zypper | -/Terminal minimalis berbasis GPU, sangat ringan. |
+| ★ **Oh My Zsh + autosuggest + syntax highlight** | — | installer | script | Framework zsh dengan tema dan plugin, plus saran perintah otomatis dan pewarnaan perintah. |
+| **Starship prompt** | — | brew | apk · pacman · termux · zypper | Prompt cantik yang menampilkan branch git dan versi bahasa. Butuh Nerd Font. |
+| ★ **CLI Power Pack (wget, htop, jq, tldr, dll)** | — | brew | apk · apt · dnf · pacman · termux · zypper | Paket 11 tool terminal wajib: wget, tree, htop, btop, jq, tldr (contoh perintah), ripgrep, bat, eza, fzf, zoxide. |
+| **Zsh** | — | — | apk · apt · dnf · pacman · termux · zypper | Shell yang lebih nyaman dari bash. Dibutuhkan Oh My Zsh. |
+| **Fish shell** | — | — | apk · apt · dnf · pacman · termux · zypper | Shell ramah pemula dengan autosuggestion bawaan tanpa konfigurasi. |
+| **tmux** | — | — | apk · apt · dnf · pacman · termux · zypper | Terminal multiplexer: split pane dan sesi yang tetap hidup walau SSH putus. |
+| **Kitty terminal** | — | — | apk · apt · dnf · pacman · zypper | Terminal cepat berbasis GPU dengan tab dan split. |
+| **Alacritty** | — | — | apk · apt · dnf · pacman · zypper | Terminal minimalis berbasis GPU, sangat ringan. |
 
 ## Editor Kode
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| ★ **Visual Studio Code** | winget | brew cask | AUR · script | Editor paling populer: ringan dan ekstensinya melimpah. Standar mahasiswa IF. |
+| ★ **Visual Studio Code** | winget | brew cask | AUR · Flathub · script | Editor paling populer: ringan dan ekstensinya melimpah. Standar mahasiswa IF. |
 | **Cursor** | winget | brew cask | AUR | Fork VS Code dengan AI terintegrasi (chat, autocomplete multi-baris). Ada tier gratis. |
-| **Google Antigravity** | manual | manual | — | IDE agentic dari Google (berbasis VS Code). Download manual dari situs resminya. |
-| **Zed** | winget | brew cask | pacman | Editor super cepat (ditulis dengan Rust) dengan kolaborasi realtime. |
-| **Sublime Text 4** | winget | brew cask | AUR | Editor ringan dan sangat cepat. Cocok untuk laptop spek rendah. |
+| **Google Antigravity** | manual | manual | manual | IDE agentic dari Google (berbasis VS Code). Download manual dari situs resminya. |
+| **Zed** | winget | brew cask | Flathub · pacman | Editor super cepat (ditulis dengan Rust) dengan kolaborasi realtime. |
+| **Sublime Text 4** | winget | brew cask | AUR · Flathub | Editor ringan dan sangat cepat. Cocok untuk laptop spek rendah. |
 | ★ **Notepad++** | winget | — | — | Editor teks ringan untuk edit cepat file config/log. Pengganti Notepad. |
-| **Neovim** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Editor di terminal untuk yang mau jadi "keyboard warrior". Kurva belajarnya tinggi. |
-| **VSCodium** | — | — | AUR | -/VS Code versi open source tanpa telemetri Microsoft. |
+| **Neovim** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Editor di terminal untuk yang mau jadi "keyboard warrior". Kurva belajarnya tinggi. |
+| **VSCodium** | — | — | AUR · Flathub | VS Code versi open source tanpa telemetri Microsoft. |
 
 ## IDE
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| **IntelliJ IDEA Community** | winget | brew cask | — | IDE terbaik untuk Java/Kotlin. Wajib kalau ada matkul PBO. Mahasiswa bisa dapat Ultimate gratis lewat JetBrains Student Pack. |
-| **PyCharm Community** | winget | brew cask | — | IDE khusus Python dengan debugger dan pengelola virtualenv yang nyaman. |
+| **IntelliJ IDEA Community** | winget | brew cask | Flathub | IDE terbaik untuk Java/Kotlin. Wajib kalau ada matkul PBO. Mahasiswa bisa dapat Ultimate gratis lewat JetBrains Student Pack. |
+| **PyCharm Community** | winget | brew cask | Flathub | IDE khusus Python dengan debugger dan pengelola virtualenv yang nyaman. |
 | **JetBrains Toolbox** | winget | brew cask | AUR | Satu aplikasi untuk install/update semua IDE JetBrains. Rekomendasi kalau punya lisensi Student. |
 | **Visual Studio 2022 Community** | winget | — | — | IDE berat (8GB+) untuk C#, .NET, C++ Windows dan Unity. Pilih kalau ada matkul C#/.NET. |
-| **Apache NetBeans** | winget | brew cask | pacman | IDE Java yang masih sering dipakai dosen untuk Java Swing/GUI. |
-| **Code::Blocks** | winget | — | apt · dnf · pacman | IDE C/C++ klasik, sering dipakai di praktikum Algoritma semester 1. |
+| **Apache NetBeans** | winget | brew cask | Flathub · pacman | IDE Java yang masih sering dipakai dosen untuk Java Swing/GUI. |
+| **Code::Blocks** | winget | — | Flathub · apt · dnf · pacman | IDE C/C++ klasik, sering dipakai di praktikum Algoritma semester 1. |
 | **Embarcadero Dev-C++** | winget | — | — | IDE C++ sederhana yang sering dipakai di praktikum Dasar Pemrograman. |
 | **Xcode (App Store)** | — | manual | — | Wajib untuk develop aplikasi iOS/macOS dan Flutter iOS. Ukuran 10GB+, install dari App Store. |
 
@@ -106,38 +106,38 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 |---|---|---|---|---|
 | ★ **WinLibs MinGW-w64 (GCC/G++)** | winget | — | — | Compiler C/C++ (gcc, g++, gdb). Wajib untuk Algoritma dan Struktur Data. |
 | **MSYS2** | winget | — | — | Lingkungan mirip Unix + pacman untuk toolchain GCC/Clang. Alternatif MinGW yang lebih fleksibel. |
-| **CMake** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Build system untuk proyek C/C++ besar. |
-| ★ **Python 3.12** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Bahasa wajib untuk algoritma, data science, AI dan scripting. PATH diatur otomatis. |
-| **uv (Python package manager)** | winget | brew | Flathub · apk · dnf · pacman | Pengganti pip + venv yang 10-100x lebih cepat. Modern, cocok untuk proyek baru. |
+| **CMake** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Build system untuk proyek C/C++ besar. |
+| ★ **Python 3.12** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Bahasa wajib untuk algoritma, data science, AI dan scripting. PATH diatur otomatis. |
+| **uv (Python package manager)** | winget | brew | apk · dnf · pacman · termux | Pengganti pip + venv yang 10-100x lebih cepat. Modern, cocok untuk proyek baru. |
 | **Miniconda** | winget | brew cask | — | Manajer environment Python untuk data science/ML. Lebih ringan dari Anaconda full. |
-| ★ **Node.js LTS** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Runtime JavaScript + npm. Wajib untuk web dev (React, Vue, Express). JANGAN dipasang bareng NVM. |
+| ★ **Node.js LTS** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Runtime JavaScript + npm. Wajib untuk web dev (React, Vue, Express). JANGAN dipasang bareng NVM. |
 | **NVM for Windows** | winget | — | — | Untuk gonta-ganti versi Node.js. Pilih ini ATAU Node.js LTS, jangan dua-duanya. |
-| **Bun** | winget | brew | — | Runtime JS super cepat sekaligus package manager. Alternatif modern npm. |
-| ★ **Java JDK 21 (Temurin)** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | JDK LTS gratis. Wajib untuk PBO/Java dan Android. |
+| **Bun** | winget | brew | script resmi | Runtime JS super cepat sekaligus package manager. Alternatif modern npm. |
+| ★ **Java JDK 21 (Temurin)** | winget | brew cask | apk · apt · dnf · pacman · termux · zypper | JDK LTS gratis. Wajib untuk PBO/Java dan Android. |
 | **Java JDK 17 (Temurin)** | winget | brew cask | apk · apt · pacman · zypper | Versi LTS lama, kadang diminta dosen atau proyek lama. |
-| **Go** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Bahasa backend modern: cepat dan simpel. Banyak dipakai startup. |
-| **Rust (rustup)** | winget | brew | Flathub · pacman | Bahasa sistem yang aman memori. Butuh Visual C++ Build Tools. |
-| **PHP 8.3 (standalone)** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | PHP CLI tanpa XAMPP. Tidak perlu kalau sudah pakai XAMPP/Laragon. |
-| **Composer** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Package manager PHP, wajib untuk Laravel. |
+| **Go** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Bahasa backend modern: cepat dan simpel. Banyak dipakai startup. |
+| **Rust (rustup)** | winget | brew | pacman · termux | Bahasa sistem yang aman memori. Butuh Visual C++ Build Tools. |
+| **PHP 8.3 (standalone)** | winget | brew | apk · apt · dnf · pacman · termux · zypper | PHP CLI tanpa XAMPP. Tidak perlu kalau sudah pakai XAMPP/Laragon. |
+| **Composer** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Package manager PHP, wajib untuk Laravel. |
 | **.NET SDK 8** | winget | brew cask | apk · apt · dnf · pacman | Untuk C#, ASP.NET dan Blazor. |
 | **R** | winget | brew cask | apk · apt · dnf · pacman · zypper | Bahasa statistik, sering dipakai di matkul Statistika/Data Mining. |
 | ★ **GCC (g++ asli GNU)** | — | brew | — | Di Mac, perintah g++ sebenarnya clang. GCC asli dibutuhkan kalau dosen memakai bits/stdc++.h. Panggil dengan g++-15. |
 | **fnm (Node version manager)** | — | brew | pacman | Untuk gonta-ganti versi Node.js. Pilih ini ATAU Node.js LTS. |
 | **CocoaPods** | — | brew | — | Dependency manager iOS, dibutuhkan Flutter untuk build iOS. |
-| ★ **Build tools C/C++ (gcc, g++, make, gdb)** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Compiler C/C++ dan debugger. Wajib untuk Algoritma dan Struktur Data. |
-| **Clang + LLVM** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Compiler C/C++ alternatif dengan pesan error lebih jelas, plus clangd untuk editor. |
+| ★ **Build tools C/C++ (gcc, g++, make, gdb)** | — | — | apk · apt · dnf · pacman · termux · zypper | Compiler C/C++ dan debugger. Wajib untuk Algoritma dan Struktur Data. |
+| **Clang + LLVM** | — | — | apk · apt · dnf · pacman · termux · zypper | Compiler C/C++ alternatif dengan pesan error lebih jelas, plus clangd untuk editor. |
 
 ## Web Server & Database
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| ★ **XAMPP 8.2** | winget | manual | — | Apache + MariaDB + PHP + phpMyAdmin dalam satu paket. Standar praktikum Pemrograman Web. |
+| ★ **XAMPP 8.2** | winget | manual | manual | Apache + MariaDB + PHP + phpMyAdmin dalam satu paket. Standar praktikum Pemrograman Web. |
 | **Laragon** | winget | — | — | Alternatif XAMPP yang lebih ringan dan cepat, dengan virtual host otomatis (proyek.test). Favorit anak Laravel. |
 | **MySQL Server** | winget | brew | — | MySQL resmi versi standalone. Jangan dipasang bareng XAMPP karena bentrok port 3306. |
-| **PostgreSQL 16** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Database relasional open source paling canggih, banyak dipakai industri. |
+| **PostgreSQL 16** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Database relasional open source paling canggih, banyak dipakai industri. |
 | **MongoDB Community Server** | winget | — | — | Database NoSQL berbasis dokumen, populer di stack MERN. |
-| **SQLite CLI** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Database satu file, cocok untuk aplikasi kecil dan mobile. |
-| ★ **DBeaver Community** | winget | brew cask | pacman | Satu aplikasi untuk SEMUA database (MySQL, Postgres, SQLite, Oracle...). Bisa bikin ERD otomatis. |
+| **SQLite CLI** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Database satu file, cocok untuk aplikasi kecil dan mobile. |
+| ★ **DBeaver Community** | winget | brew cask | Flathub · pacman | Satu aplikasi untuk SEMUA database (MySQL, Postgres, SQLite, Oracle...). Bisa bikin ERD otomatis. |
 | **HeidiSQL** | winget | — | — | Client MySQL/MariaDB yang super ringan. |
 | **MySQL Workbench** | winget | brew cask | AUR | Tool resmi MySQL. Kuat untuk desain ERD dan forward engineering. |
 | **MongoDB Compass** | winget | brew cask | — | GUI untuk MongoDB. |
@@ -146,58 +146,58 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **MAMP** | — | brew cask | — | Apache + MySQL + PHP, mirip XAMPP versi Mac. Cocok untuk praktikum Pemrograman Web. |
 | ★ **DBngin** | — | brew cask | — | Jalankan MySQL/PostgreSQL/Redis dengan satu klik, bisa banyak versi. Paling praktis di Mac. |
 | **Sequel Ace** | — | brew cask | — | Client MySQL/MariaDB gratis, native dan ringan. |
-| **Apache + PHP (LAMP)** | — | — | apk · apt · dnf · pacman · zypper | -/Web server Apache dengan PHP, setara XAMPP versi native. Folder web: /var/www/html. |
-| ★ **MariaDB (MySQL)** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Database MySQL-compatible. Setelah install: sudo systemctl enable --now mariadb. |
-| **Redis / Valkey** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Database key-value di memori untuk cache dan antrean. |
+| **Apache + PHP (LAMP)** | — | — | apk · apt · dnf · pacman · zypper | Web server Apache dengan PHP, setara XAMPP versi native. Folder web: /var/www/html. |
+| ★ **MariaDB (MySQL)** | — | — | apk · apt · dnf · pacman · termux · zypper | Database MySQL-compatible. Setelah install: sudo systemctl enable --now mariadb. |
+| **Redis / Valkey** | — | — | apk · apt · dnf · pacman · termux · zypper | Database key-value di memori untuk cache dan antrean. |
 
 ## Git & API
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| ★ **Git** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Version control wajib, sudah termasuk Git Bash. |
-| ★ **GitHub Desktop** | winget | brew cask | AUR | Git versi GUI, cocok untuk pemula sebelum lancar command line. |
-| ★ **GitHub CLI (gh)** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Login GitHub, clone, bikin repo dan PR langsung dari terminal. 'gh auth login' cara autentikasi paling mudah. |
-| **lazygit** | winget | brew | Flathub · apk · pacman · zypper | UI Git di terminal. Cepat untuk staging, commit dan rebase. |
-| ★ **Postman** | winget | brew cask | AUR | Tes REST API. Standar industri untuk matkul Web Service/Backend. |
-| **Bruno** | winget | brew cask | AUR | Alternatif Postman yang open source dan offline. Koleksinya disimpan sebagai file sehingga bisa masuk git. |
+| ★ **Git** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Version control wajib, sudah termasuk Git Bash. |
+| ★ **GitHub Desktop** | winget | brew cask | AUR · Flathub | Git versi GUI, cocok untuk pemula sebelum lancar command line. |
+| ★ **GitHub CLI (gh)** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Login GitHub, clone, bikin repo dan PR langsung dari terminal. 'gh auth login' cara autentikasi paling mudah. |
+| **lazygit** | winget | brew | apk · pacman · termux · zypper | UI Git di terminal. Cepat untuk staging, commit dan rebase. |
+| ★ **Postman** | winget | brew cask | AUR · Flathub | Tes REST API. Standar industri untuk matkul Web Service/Backend. |
+| **Bruno** | winget | brew cask | AUR · Flathub | Alternatif Postman yang open source dan offline. Koleksinya disimpan sebagai file sehingga bisa masuk git. |
 
 ## DevOps & Cloud
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
 | **Docker Desktop** | winget | brew cask | apk · pacman · script · zypper | Container untuk menjalankan database/app tanpa install manual. Butuh WSL2 dan RAM 8GB+. |
-| **kubectl** | winget | brew | Flathub · apk · pacman · zypper | CLI untuk Kubernetes. |
+| **kubectl** | winget | brew | apk · pacman · termux · zypper | CLI untuk Kubernetes. |
 | **Terraform** | winget | brew | — | Infrastructure as Code. |
 | **AWS CLI** | winget | brew | — | CLI Amazon Web Services. Mahasiswa bisa ikut AWS Academy. |
 | **Google Cloud SDK** | winget | brew cask | — | CLI Google Cloud. |
 | **Azure CLI** | winget | brew | — | CLI Microsoft Azure. Mahasiswa dapat kredit gratis lewat Azure for Students. |
 | **ngrok** | winget | brew cask | AUR | Membuat localhost bisa diakses publik. Berguna untuk demo ke dosen atau tes webhook. |
 | ★ **OrbStack** | — | brew cask | — | Docker + Linux VM untuk Mac. Jauh lebih ringan dan cepat dari Docker Desktop. Juga bisa jadi pengganti WSL di Mac. |
-| **Podman** | — | — | apk · apt · dnf · pacman · zypper | -/Alternatif Docker tanpa daemon dan tanpa root. Bawaan Fedora. |
-| **Distrobox** | — | — | apk · apt · dnf · pacman · zypper | -/Jalankan distro lain (Ubuntu di Arch, Arch di Fedora, dll) dalam container terintegrasi. |
+| **Podman** | — | — | apk · apt · dnf · pacman · zypper | Alternatif Docker tanpa daemon dan tanpa root. Bawaan Fedora. |
+| **Distrobox** | — | — | apk · apt · dnf · pacman · zypper | Jalankan distro lain (Ubuntu di Arch, Arch di Fedora, dll) dalam container terintegrasi. |
 
 ## AI & Data
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| **Ollama** | winget | brew cask | Flathub · pacman | Jalankan LLM (Llama, Gemma, Qwen) secara lokal dan offline. Nyaman di RAM 16GB. |
+| **Ollama** | winget | brew cask | pacman · termux | Jalankan LLM (Llama, Gemma, Qwen) secara lokal dan offline. Nyaman di RAM 16GB. |
 | **LM Studio** | winget | brew cask | — | GUI untuk download dan chat dengan LLM lokal. |
 | **Claude Desktop** | winget | brew cask | — | Aplikasi desktop Claude. |
 | **RStudio** | winget | brew cask | — | IDE untuk R (R harus terinstall). |
-| **JupyterLab** | — | — | apt · pacman | info:https://jupyter.org/install/Notebook untuk data science (alternatif: pip install jupyterlab di venv). |
+| **JupyterLab** | — | — | apt · pacman | Notebook untuk data science (alternatif: pip install jupyterlab di venv). |
 
 ## Mobile & Game
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| **Android Studio** | winget | brew cask | AUR | IDE resmi Android + emulator. Berat: RAM minimal 8GB, nyaman 16GB. |
+| **Android Studio** | winget | brew cask | AUR · Flathub | IDE resmi Android + emulator. Berat: RAM minimal 8GB, nyaman 16GB. |
 | **Flutter SDK** | manual | brew cask | AUR | Framework mobile cross-platform. Install manual, atau lewat ekstensi VS Code "Flutter" yang bisa download SDK otomatis. |
 | **Windows Subsystem for Android (WSA)** | manual | — | — | SUDAH DIHENTIKAN Microsoft sejak 5 Maret 2025 dan tidak bisa diinstall lagi. Alternatif: Android Studio Emulator, BlueStacks, atau Google Play Games. |
 | **BlueStacks** | winget | — | — | Emulator Android untuk menjalankan APK di Windows. Pengganti WSA. |
 | **Unity Hub** | winget | brew cask | AUR | Engine game 2D/3D paling populer, pakai C#. |
-| **Godot Engine** | winget | brew cask | dnf · pacman · zypper | Engine game open source, ringan, cocok untuk pemula. |
-| **Blender** | winget | brew cask | pacman | Modeling dan animasi 3D gratis. |
-| **Arduino IDE** | winget | brew cask | AUR | Untuk matkul IoT/Sistem Embedded. |
+| **Godot Engine** | winget | brew cask | Flathub · dnf · pacman · zypper | Engine game open source, ringan, cocok untuk pemula. |
+| **Blender** | winget | brew cask | Flathub · pacman | Modeling dan animasi 3D gratis. |
+| **Arduino IDE** | winget | brew cask | AUR · Flathub | Untuk matkul IoT/Sistem Embedded. |
 
 ## Jaringan & Keamanan
 
@@ -205,19 +205,19 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 |---|---|---|---|---|
 | **Cisco Packet Tracer** | manual | manual | AUR | Simulasi jaringan Cisco untuk matkul Jaringan Komputer. Download manual (butuh akun NetAcad gratis). |
 | **Wireshark** | winget | brew cask | apk · apt · dnf · pacman · zypper | Analisis paket jaringan. Wajib untuk matkul Jarkom/Keamanan. |
-| **Nmap** | winget | brew | Flathub · apk · apt · dnf · pacman · zypper | Port scanner. Pakai hanya di jaringan milik sendiri atau yang sudah diizinkan. |
+| **Nmap** | winget | brew | apk · apt · dnf · pacman · termux · zypper | Port scanner. Pakai hanya di jaringan milik sendiri atau yang sudah diizinkan. |
 | **PuTTY** | winget | — | — | Klien SSH/Telnet/Serial klasik. Windows sudah punya ssh bawaan. |
 | **MobaXterm** | winget | — | — | Terminal SSH all-in-one dengan SFTP browser dan X11. Favorit abang server. |
 | **WinSCP** | winget | — | — | Transfer file ke server lewat SFTP/SCP dengan GUI. |
-| **FileZilla** | winget | — | apk · apt · dnf · pacman · zypper | Klien FTP/SFTP untuk upload ke hosting. |
+| **FileZilla** | winget | — | Flathub · apk · apt · dnf · pacman · zypper | Klien FTP/SFTP untuk upload ke hosting. |
 | **Advanced IP Scanner** | winget | — | — | Scan perangkat di jaringan lokal dan cek IP yang terpakai. |
 | **Burp Suite Community** | winget | brew cask | AUR | Proxy untuk pentest aplikasi web. Gunakan secara etis. |
-| **WireGuard** | winget | — | Flathub · apk · apt · dnf · pacman · zypper | VPN modern yang cepat. |
+| **WireGuard** | winget | — | apk · apt · dnf · pacman · termux · zypper | VPN modern yang cepat. |
 | **Termius** | — | brew cask | — | Klien SSH cantik dengan SFTP. Gratis untuk mahasiswa (GitHub Student Pack). |
 | **Cyberduck** | — | brew cask | — | Klien FTP/SFTP/S3 untuk upload ke server. |
-| **Network tools (dig, traceroute, whois, iperf3)** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Perkakas diagnosa jaringan untuk praktikum Jarkom. |
-| **OpenSSH server** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Supaya laptop bisa diakses lewat SSH (praktikum server). |
-| **Remmina (RDP/VNC/SSH)** | — | — | apk · apt · dnf · pacman · zypper | -/Remote desktop ke Windows (RDP), VNC dan SSH. |
+| **Network tools (dig, traceroute, whois, iperf3)** | — | — | apk · apt · dnf · pacman · termux · zypper | Perkakas diagnosa jaringan untuk praktikum Jarkom. |
+| **OpenSSH server** | — | — | apk · apt · dnf · pacman · termux · zypper | Supaya laptop bisa diakses lewat SSH (praktikum server). |
+| **Remmina (RDP/VNC/SSH)** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Remote desktop ke Windows (RDP), VNC dan SSH. |
 
 ## Virtualisasi & Linux
 
@@ -231,31 +231,31 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **VirtualBox** | winget | — | apt · pacman · zypper | Mesin virtual gratis untuk install Linux/Windows lain (matkul Sistem Operasi). |
 | ★ **UTM** | — | brew cask | — | Mesin virtual gratis untuk Mac (Apple Silicon & Intel). Install Ubuntu/Kali/Windows ARM. |
 | **Multipass** | — | brew cask | — | VM Ubuntu instan dari terminal (multipass launch). Cocok untuk matkul SO/Server. |
-| ★ **virt-manager + QEMU/KVM** | — | — | apt · dnf · pacman · zypper | -/Mesin virtual native Linux (paling cepat, pakai KVM). Untuk matkul Sistem Operasi. |
-| **GNOME Boxes** | — | — | apt · dnf · pacman · zypper | -/VM paling mudah: pilih ISO, klik, jadi. |
+| ★ **virt-manager + QEMU/KVM** | — | — | apt · dnf · pacman · zypper | Mesin virtual native Linux (paling cepat, pakai KVM). Untuk matkul Sistem Operasi. |
+| **GNOME Boxes** | — | — | Flathub · apt · dnf · pacman · zypper | VM paling mudah: pilih ISO, klik, jadi. |
 
 ## Desain & Multimedia
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| ★ **Figma** | winget | brew cask | AUR | Desain UI/UX dan prototipe. Ada Figma Education gratis. |
-| ★ **draw.io Desktop** | winget | brew cask | AUR | Flowchart, UML, ERD dan DFD secara offline. Wajib untuk matkul RPL/Analisis Sistem. |
-| **GIMP** | winget | brew cask | apk · apt · dnf · pacman · zypper | Edit foto gratis, alternatif Photoshop. |
-| **Inkscape** | winget | brew cask | apk · apt · dnf · pacman · zypper | Desain vektor gratis, alternatif Illustrator. |
-| **OBS Studio** | winget | brew cask | apt · dnf · pacman · zypper | Rekam layar/presentasi dan live streaming. Berguna untuk video demo tugas. |
+| ★ **Figma** | winget | brew cask | AUR · Flathub | Desain UI/UX dan prototipe. Ada Figma Education gratis. |
+| ★ **draw.io Desktop** | winget | brew cask | AUR · Flathub | Flowchart, UML, ERD dan DFD secara offline. Wajib untuk matkul RPL/Analisis Sistem. |
+| **GIMP** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | Edit foto gratis, alternatif Photoshop. |
+| **Inkscape** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | Desain vektor gratis, alternatif Illustrator. |
+| **OBS Studio** | winget | brew cask | Flathub · apt · dnf · pacman · zypper | Rekam layar/presentasi dan live streaming. Berguna untuk video demo tugas. |
 | ★ **ShareX** | winget | — | — | Screenshot, rekam layar, GIF dan OCR. Jauh lebih lengkap dari Snipping Tool. |
-| ★ **VLC Media Player** | winget | — | apk · apt · pacman · zypper | Pemutar semua format video. |
+| ★ **VLC Media Player** | winget | — | Flathub · apk · apt · pacman · zypper | Pemutar semua format video. |
 | ★ **IINA** | — | brew cask | — | Video player modern untuk Mac, semua format. |
-| ★ **Flameshot** | — | — | apk · apt · dnf · pacman · zypper | -/Screenshot dengan anotasi (panah, kotak, blur). Pengganti Snipping Tool. |
+| ★ **Flameshot** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Screenshot dengan anotasi (panah, kotak, blur). Pengganti Snipping Tool. |
 
 ## Komunikasi
 
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
-| ★ **Discord** | winget | brew cask | pacman | Grup kelas, komunitas programmer, voice call kerja kelompok. |
-| ★ **Zoom** | winget | brew cask | AUR | Kuliah online dan sidang. |
-| **Telegram** | winget | brew cask | pacman | Banyak grup/komunitas IT dan bot. |
-| **Slack** | winget | brew cask | AUR | Komunikasi tim ala industri, sering dipakai saat magang. |
+| ★ **Discord** | winget | brew cask | Flathub · pacman | Grup kelas, komunitas programmer, voice call kerja kelompok. |
+| ★ **Zoom** | winget | brew cask | AUR · Flathub | Kuliah online dan sidang. |
+| **Telegram** | winget | brew cask | Flathub · pacman | Banyak grup/komunitas IT dan bot. |
+| **Slack** | winget | brew cask | AUR · Flathub | Komunikasi tim ala industri, sering dipakai saat magang. |
 | **Microsoft Teams** | winget | brew cask | — | Dipakai beberapa kampus untuk kelas online. |
 | **WhatsApp** | — | brew cask | — | Grup kelas dan koordinasi tugas. |
 
@@ -264,14 +264,14 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | Aplikasi | Windows | macOS | Linux | Keterangan |
 |---|---|---|---|---|
 | **Notion** | winget | brew cask | AUR | Catatan, task manager dan wiki. Ada plan Education gratis. |
-| **Obsidian** | winget | brew cask | pacman | Catatan Markdown offline dengan graph view. Cocok jadi second brain. |
-| **Zotero** | winget | brew cask | AUR | Manajer referensi dan sitasi otomatis untuk skripsi/jurnal. |
-| **Microsoft 365 (email kampus)** | manual | manual | — | Biasanya GRATIS pakai email kampus. Login di office.com lalu klik Install Apps. |
-| ★ **LibreOffice** | winget | brew cask | apk · apt · dnf · pacman · zypper | Office gratis. Tidak perlu kalau sudah punya Microsoft 365 dari kampus. |
+| **Obsidian** | winget | brew cask | Flathub · pacman | Catatan Markdown offline dengan graph view. Cocok jadi second brain. |
+| **Zotero** | winget | brew cask | AUR · Flathub | Manajer referensi dan sitasi otomatis untuk skripsi/jurnal. |
+| **Microsoft 365 (email kampus)** | manual | manual | manual | Biasanya GRATIS pakai email kampus. Login di office.com lalu klik Install Apps. |
+| ★ **LibreOffice** | winget | brew cask | Flathub · apk · apt · dnf · pacman · zypper | Office gratis. Tidak perlu kalau sudah punya Microsoft 365 dari kampus. |
 | ★ **SumatraPDF** | winget | — | — | Pembaca PDF super ringan, modul kuliah terbuka instan. |
 | **Adobe Acrobat Reader** | winget | — | — | Pembaca PDF standar dengan fitur tanda tangan dan form. |
 | **Google Drive** | winget | brew cask | — | Sinkronisasi file tugas ke cloud secara otomatis. |
-| **Okular (PDF)** | — | — | apk · apt · dnf · pacman · zypper | -/Pembaca PDF lengkap dengan anotasi dan tanda tangan. |
+| **Okular (PDF)** | — | — | Flathub · apk · apt · dnf · pacman · zypper | Pembaca PDF lengkap dengan anotasi dan tanda tangan. |
 
 ## Utilitas Sistem
 
@@ -279,7 +279,7 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 |---|---|---|---|---|
 | ★ **Microsoft PowerToys** | winget | — | — | Kumpulan tool: PowerToys Run (launcher), FancyZones, Color Picker, Text Extractor (OCR). |
 | ★ **Visual C++ Redistributable** | winget | — | — | Library runtime yang dibutuhkan banyak aplikasi dan game. Install saja. |
-| ★ **LocalSend** | winget | brew cask | AUR | Kirim file HP ke laptop lewat WiFi tanpa kabel/internet, mirip AirDrop. |
+| ★ **LocalSend** | winget | brew cask | AUR · Flathub | Kirim file HP ke laptop lewat WiFi tanpa kabel/internet, mirip AirDrop. |
 | **Revo Uninstaller** | winget | — | — | Uninstall aplikasi sampai bersih ke sisa registri. |
 | **CPU-Z** | winget | — | — | Lihat detail CPU, RAM dan motherboard. |
 | **HWiNFO** | winget | — | — | Monitor suhu dan sensor hardware secara lengkap. |
@@ -294,12 +294,12 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Maccy** | — | brew cask | — | Riwayat clipboard (copy-paste) yang ringan. |
 | **Hidden Bar** | — | brew cask | — | Sembunyikan ikon menu bar yang terlalu ramai. |
 | **MonitorControl** | — | brew cask | — | Atur brightness/volume monitor eksternal dari keyboard. |
-| ★ **Flatpak + Flathub** | — | — | apk · apt · dnf · pacman · zypper | -/Toko aplikasi universal Linux. Dipasang otomatis kalau ada aplikasi yang butuh. |
-| **fastfetch** | — | — | Flathub · apk · apt · dnf · pacman · zypper | -/Tampilkan info sistem + logo distro di terminal (pengganti neofetch). Wajib buat pamer. |
-| ★ **Timeshift (backup sistem)** | — | — | apt · dnf · pacman | -/Snapshot sistem: kalau update bikin rusak, tinggal restore. WAJIB untuk pemula Linux. |
-| **GParted** | — | — | apk · apt · dnf · pacman · zypper | -/Atur partisi disk. |
-| **CopyQ (riwayat clipboard)** | — | — | apt · dnf · pacman | -/Riwayat copy-paste yang bisa dicari. |
-| **GNOME Tweaks + Extension Manager** | — | — | apt · dnf · pacman · zypper | -/Kustomisasi tampilan GNOME (font, tema, ekstensi). Hanya untuk desktop GNOME. |
+| ★ **Flatpak + Flathub** | — | — | apk · apt · dnf · pacman · zypper | Toko aplikasi universal Linux. Dipasang otomatis kalau ada aplikasi yang butuh. |
+| **fastfetch** | — | — | apk · apt · dnf · pacman · termux · zypper | Tampilkan info sistem + logo distro di terminal (pengganti neofetch). Wajib buat pamer. |
+| ★ **Timeshift (backup sistem)** | — | — | apt · dnf · pacman | Snapshot sistem: kalau update bikin rusak, tinggal restore. WAJIB untuk pemula Linux. |
+| **GParted** | — | — | apk · apt · dnf · pacman · zypper | Atur partisi disk. |
+| **CopyQ (riwayat clipboard)** | — | — | Flathub · apt · dnf · pacman | Riwayat copy-paste yang bisa dicari. |
+| **GNOME Tweaks + Extension Manager** | — | — | Flathub · apt · dnf · pacman · zypper | Kustomisasi tampilan GNOME (font, tema, ekstensi). Hanya untuk desktop GNOME. |
 
 ## Profil
 

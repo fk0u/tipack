@@ -22,7 +22,7 @@ Installer, tune-up & debloat interaktif di terminal untuk **Windows, macOS & Lin
 ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20%7C%20Intel-000000?style=flat-square&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-apt%20%7C%20dnf%20%7C%20pacman%20%7C%20zypper%20%7C%20apk-FCC624?style=flat-square&logo=linux&logoColor=black)
 
-[Mulai cepat](#-mulai-cepat) · [Fitur](#-fitur) · [Dokumentasi](docs/README.md) · [Katalog](docs/katalog.md) · [FAQ](docs/troubleshooting.md) · [Kontribusi](CONTRIBUTING.md)
+[Mulai cepat](#-mulai-cepat) · [Fitur](#-fitur) · [Rilis](https://github.com/fk0u/tipack/releases/latest) · [Dokumentasi](docs/README.md) · [Katalog](docs/katalog.md) · [FAQ](docs/troubleshooting.md) · [Kontribusi](CONTRIBUTING.md)
 
 </div>
 
@@ -171,6 +171,8 @@ Exit code `0` = berhasil, `3` = ada yang gagal. Tambahkan `-NoAnim` / `--no-anim
 | [Keamanan](docs/keamanan.md) | Apa yang dilakukan script, sumber paket, hak akses, cara audit. |
 | [Arsitektur & kontribusi](docs/arsitektur.md) | Struktur repo, format katalog, cara menambah aplikasi, pengujian. |
 | [Website](docs/website.md) | Situs tipack.kousozo.tech: halaman, sistem optimisasi, build katalog, deploy. |
+| [CHANGELOG](CHANGELOG.md) | Riwayat versi. |
+| [Notulensi pengembangan](docs/notulensi.md) | Kronologi, keputusan teknis, masalah & akar masalahnya, hasil uji, tindak lanjut. |
 
 ## 🗂️ Struktur repo
 

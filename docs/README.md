@@ -17,6 +17,11 @@ Selamat datang di dokumentasi **TIPACK · DEVSETUP IF**, installer interaktif de
 8. **[Website](website.md)**: situs tipack.kousozo.tech, sistem optimisasi animasi, build katalog, deploy.
 9. **[CONTRIBUTING.md](../CONTRIBUTING.md)**: alur pull request.
 
+## Riwayat
+
+10. **[CHANGELOG](../CHANGELOG.md)**: perubahan per versi.
+11. **[Notulensi pengembangan v2.0.0](notulensi.md)**: kronologi, keputusan teknis, masalah & akar masalah, hasil uji, risiko dan tindak lanjut.
+
 ## Ringkasan 30 detik
 
 | OS | Perintah |
