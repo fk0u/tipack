@@ -1305,7 +1305,7 @@ function Main-Menu {
 # =====================================================================================
 try {
   Log "DEVSETUP IF dimulai. Admin=$IsAdmin Arch=$Arch PS=$($PSVersionTable.PSVersion) Host=$($Host.Name) VT=$VT Tes=$TestMode"
-  if (-not $TestMode) {
+  if (-not $TestMode -and -not $Unattended -and -not $SelfTest) {
     try { $redir = [Console]::IsInputRedirected } catch { $redir = $false }
     if ($redir) { Write-Host 'Input keyboard tidak tersedia (dijalankan lewat pipe/ISE). Jalankan dari jendela PowerShell biasa atau klik JALANKAN.bat.' -ForegroundColor Red; exit 1 }
   }
