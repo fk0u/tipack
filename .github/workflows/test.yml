@@ -57,9 +57,9 @@ jobs:
           $out.Substring([Math]::Max(0, $out.Length - 1500))
           if ($code -ne 0 -or $out -notmatch 'SELFTEST-TOMBOL-SELESAI') { Write-Error "Navigasi gagal (exit $code)"; exit 1 }
 
-      - name: Install sungguhan lewat winget (-Install 7zip)
+      - name: Install sungguhan lewat winget (-Install sumatra)
         run: |
-          powershell -NoProfile -ExecutionPolicy Bypass -File windows\setup.ps1 -Install 7zip -NoAnim
+          powershell -NoProfile -ExecutionPolicy Bypass -File windows\setup.ps1 -Install sumatra -NoAnim
           "exit=$LASTEXITCODE"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -165,7 +165,7 @@ jobs:
       - name: Uji di termux-docker
         run: |
           docker run --rm -v "$PWD/linux:/data/data/com.termux/files/home/t" termux/termux-docker:x86_64 bash -c '
-            cd ~/t && TERM=xterm-256color bash setup.sh --self-test && bash setup.sh --install git,python --no-anim'
+            cd ~/t && TERM=xterm-256color bash setup.sh --self-test && { bash setup.sh --install git,python --no-anim || { echo "=== LOG ==="; tail -60 $PREFIX/tmp/devsetup-log-*.txt; exit 1; }; }'
 
   # ---------------------------------------------------------------- Katalog & dokumentasi hasil generate
   catalog:
