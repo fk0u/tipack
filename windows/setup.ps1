@@ -6,7 +6,7 @@
   Jalankan:  klik kanan JALANKAN.bat -> Run as administrator
   atau:      powershell -ExecutionPolicy Bypass -File setup.ps1 [-Preset starter] [-NoAnim]
 #>
-param([string]$Preset = "", [switch]$NoAnim)
+param([string]$Preset = "", [string]$Install = "", [switch]$NoAnim, [switch]$SelfTest)
 
 $ErrorActionPreference = 'Continue'
 $ProgressPreference = 'SilentlyContinue'
@@ -15,6 +15,18 @@ $Host.UI.RawUI.WindowTitle = 'DEVSETUP IF - Installer Mahasiswa Informatika'
 $Root = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $LogFile = Join-Path $Root ("devsetup-log-{0:yyyyMMdd-HHmmss}.txt" -f (Get-Date))
 $IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$Arch = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }   # AMD64 / ARM64 / x86
+$ESC = [char]27
+# stdin kosong untuk semua program luar: prompt tersembunyi langsung dapat EOF, tidak menunggu selamanya
+$EmptyIn = Join-Path $env:TEMP 'tipack_empty_stdin.txt'
+try { [IO.File]::WriteAllText($EmptyIn, '') } catch {}
+# Antrean tombol untuk pengujian otomatis: $env:TIPACK_KEYS = "Down,Down,Enter,Esc,q"
+$KeyQueue = New-Object System.Collections.Queue
+if ($env:TIPACK_KEYS) { foreach ($k in ($env:TIPACK_KEYS -split ',')) { if ($k.Trim()) { $KeyQueue.Enqueue($k.Trim()) } } }
+$TestMode = [bool]$env:TIPACK_KEYS -or [bool]$SelfTest
+if ($TestMode) { $NoAnim = $true }
+$Unattended = [bool]$Install -or [bool]$Preset
+$script:InstallFail = 0
 
 # =====================================================================================
 #  KATALOG   key | Kategori | ID (winget / wsl:x / feat:x / info:url) | Nama | Rek(1/0) | Tooltip
@@ -156,7 +168,16 @@ $Catalog = foreach ($line in ($CatalogRaw -split "`r?`n")) {
   $kind = if ($p[2] -like 'wsl:*') { 'wsl' } elseif ($p[2] -like 'feat:*') { 'feat' } elseif ($p[2] -like 'info:*') { 'info' } else { 'winget' }
   [pscustomobject]@{ Key = $p[0]; Cat = $p[1]; Id = $p[2]; Name = $p[3]; Rec = ($p[4] -eq '1'); Tip = $p[5]; Kind = $kind; Installed = $false }
 }
+# Penyesuaian arsitektur
+if ($Arch -eq 'ARM64') {
+  $Catalog = @($Catalog | Where-Object { $_.Key -notin @('virtualbox', 'bluestacks', 'vcredist') })   # tidak ada versi ARM64
+  foreach ($c in $Catalog) {
+    if ($c.Key -eq 'mingw') { $c.Id = 'MartinStorsjo.LLVM-MinGW.UCRT'; $c.Name = 'LLVM-MinGW (gcc/g++ untuk ARM64)'; $c.Tip = 'Compiler C/C++ (perintah gcc, g++, clang) yang berjalan native di Windows ARM64. Pengganti WinLibs MinGW.' }
+  }
+}
+if ($Arch -eq 'x86') { $Catalog = @($Catalog | Where-Object { $_.Key -notin @('docker', 'androidstudio', 'wslcore', 'wsl-ubuntu', 'wsl-debian', 'wsl-kali', 'ollama', 'lmstudio') }) }
 $C = @{}; foreach ($c in $Catalog) { $C[$c.Key] = $c }
+function KeyList([string]$csv) { @($csv -split '[,\s]+' | Where-Object { $_ -and $C.ContainsKey($_) }) }
 $CatOrder = @(); foreach ($c in $Catalog) { if ($CatOrder -notcontains $c.Cat) { $CatOrder += $c.Cat } }
 $Heavy = @('docker', 'androidstudio', 'vs2022', 'unity', 'ollama', 'lmstudio', 'virtualbox', 'bluestacks')
 # Probe tambahan: aplikasi yang mungkin diinstall manual (bukan lewat winget)
@@ -245,7 +266,46 @@ $Sys = @{}
 # =====================================================================================
 #  UTILITAS UI
 # =====================================================================================
-function Log([string]$m) { Add-Content -Path $LogFile -Value ("[{0:HH:mm:ss}] {1}" -f (Get-Date), $m) }
+function Log([string]$m) { try { Add-Content -Path $LogFile -Value ("[{0:HH:mm:ss.fff}] {1}" -f (Get-Date), $m) } catch {} }
+function Get-ConSize {
+  try { $w = [Console]::WindowWidth; $h = [Console]::WindowHeight; if ($w -lt 20 -or $h -lt 8) { throw 'kecil' } } catch { $w = 120; $h = 40 }
+  return @($w, $h)
+}
+function Set-Cursor([bool]$v) { try { [Console]::CursorVisible = $v } catch {} }
+
+# Renderer cepat: aktifkan VT processing supaya satu frame = satu kali tulis (tanpa kedip, ringan di laptop lama)
+$VT = $false
+if (-not $TestMode) {
+  try {
+    if ($Host.UI.SupportsVirtualTerminal) { $VT = $true }
+    else {
+      Add-Type -ErrorAction Stop -TypeDefinition @'
+using System; using System.Runtime.InteropServices;
+public static class TipackCon {
+  [DllImport("kernel32.dll")] static extern IntPtr GetStdHandle(int n);
+  [DllImport("kernel32.dll")] static extern bool GetConsoleMode(IntPtr h, out uint m);
+  [DllImport("kernel32.dll")] static extern bool SetConsoleMode(IntPtr h, uint m);
+  public static bool EnableVT() { IntPtr h = GetStdHandle(-11); uint m; if (!GetConsoleMode(h, out m)) return false; return SetConsoleMode(h, m | 0x0004); }
+}
+'@
+      $VT = [TipackCon]::EnableVT()
+    }
+  } catch { $VT = $false }
+}
+$SGR = @{ Black = 30; DarkBlue = 34; DarkGreen = 32; DarkCyan = 36; DarkRed = 31; DarkMagenta = 35; DarkYellow = 33; Gray = 37; DarkGray = 90; Blue = 94; Green = 92; Cyan = 96; Red = 91; Magenta = 95; Yellow = 93; White = 97 }
+
+function Read-Key {
+  if ($KeyQueue.Count -gt 0) {
+    $n = [string]$KeyQueue.Dequeue()
+    Log "KEY $n"
+    $map = @{ Up = 'UpArrow'; Down = 'DownArrow'; Enter = 'Enter'; Esc = 'Escape'; Space = 'Spacebar'; PgDn = 'PageDown'; PgUp = 'PageUp'; Home = 'Home'; End = 'End'; Back = 'Backspace' }
+    if ($map.ContainsKey($n)) { return New-Object System.ConsoleKeyInfo -ArgumentList ([char]0), ([ConsoleKey]$map[$n]), $false, $false, $false }
+    $ch = [char]$n.ToLower()[0]
+    return New-Object System.ConsoleKeyInfo -ArgumentList $ch, ([ConsoleKey]([string]$n.ToUpper()[0])), $false, $false, $false
+  }
+  if ($TestMode) { throw 'TIPACK_KEYS_HABIS' }
+  return [Console]::ReadKey($true)
+}
 
 function Wrap([string]$Text, [int]$Width) {
   $out = New-Object System.Collections.Generic.List[string]
@@ -262,15 +322,35 @@ function Wrap([string]$Text, [int]$Width) {
 
 # Render satu layar penuh. Setiap baris memakai markup warna: "{Cyan}teks {Gray}teks"
 function Paint([System.Collections.Generic.List[string]]$Rows) {
-  $w = [Console]::WindowWidth - 1; $h = [Console]::WindowHeight
-  [Console]::SetCursorPosition(0, 0)
+  $sz = Get-ConSize; $w = $sz[0] - 1; $h = $sz[1]
+  if ($VT) {
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.Append("$ESC[?7l$ESC[H")
+    $n = 0
+    foreach ($row in $Rows) {
+      if ($n -ge $h - 1) { break }
+      $parts = [regex]::Split($row, '\{(\w+)\}'); $len = 0
+      for ($i = 0; $i -lt $parts.Count; $i++) {
+        if ($i % 2 -eq 1) { if ($SGR.ContainsKey($parts[$i])) { [void]$sb.Append("$ESC[$($SGR[$parts[$i]])m"); continue } else { $parts[$i] = '{' + $parts[$i] + '}' } }
+        $t = $parts[$i]
+        if (-not $t -or $len -ge $w) { continue }
+        if ($len + $t.Length -gt $w) { $t = $t.Substring(0, $w - $len) }
+        [void]$sb.Append($t); $len += $t.Length
+      }
+      [void]$sb.Append("$ESC[0m$ESC[K`n"); $n++
+    }
+    [void]$sb.Append("$ESC[J$ESC[?7h")
+    [Console]::Out.Write($sb.ToString())
+    return
+  }
+  try { [Console]::SetCursorPosition(0, 0) } catch {}
   $n = 0
   foreach ($row in $Rows) {
     if ($n -ge $h - 1) { break }
     $parts = [regex]::Split($row, '\{(\w+)\}')
     $color = 'Gray'; $len = 0
     for ($i = 0; $i -lt $parts.Count; $i++) {
-      if ($i % 2 -eq 1) { $color = $parts[$i]; continue }
+      if ($i % 2 -eq 1) { if ($SGR.ContainsKey($parts[$i])) { $color = $parts[$i]; continue } else { $parts[$i] = '{' + $parts[$i] + '}' } }
       $t = $parts[$i]
       if (-not $t -or $len -ge $w) { continue }
       if ($len + $t.Length -gt $w) { $t = $t.Substring(0, $w - $len) }
@@ -278,7 +358,7 @@ function Paint([System.Collections.Generic.List[string]]$Rows) {
     }
     Write-Host (' ' * [Math]::Max(0, $w - $len)); $n++
   }
-  while ($n -lt $h - 1) { Write-Host (' ' * $w); $n++ }
+  if (-not $TestMode) { while ($n -lt $h - 1) { Write-Host (' ' * $w); $n++ } }
 }
 
 $Banner = @(
@@ -315,9 +395,9 @@ function Select-List {
   $idx = if ($Start -ge 0) { $Start } else { 0 }
   while ($idx -lt $Items.Count - 1 -and $Items[$idx].Sep) { $idx++ }
   $top = 0
-  Clear-Host; [Console]::CursorVisible = $false
+  Clear-Host; Set-Cursor $false
   while ($true) {
-    $h = [Console]::WindowHeight; $w = [Console]::WindowWidth - 1
+    $sz = Get-ConSize; $h = $sz[1]; $w = $sz[0] - 1
     $rows = New-Object System.Collections.Generic.List[string]
     foreach ($hr in $Header) { $rows.Add($hr) }
     $rows.Add("{Magenta}▓▒░ {White}DEVSETUP IF {DarkGray}│ {Cyan}$Title" + $(if ($Cart.Count) { "{DarkGray}   │ {Green}Keranjang: $($Cart.Count) item" } else { '' }))
@@ -359,7 +439,7 @@ function Select-List {
     $rows.Add(" $keys")
     Paint $rows
 
-    $k = [Console]::ReadKey($true)
+    $k = Read-Key
     $ch = ([string]$k.KeyChar).ToLower()
     $move = 0
     switch ($k.Key) {
@@ -392,7 +472,8 @@ function Select-List {
 }
 
 function Ask([string]$Q, [string]$Def = '') {
-  [Console]::CursorVisible = $true
+  if ($TestMode -or $Unattended) { Log "ASK $Q -> $Def (otomatis)"; return $Def }
+  Set-Cursor $true
   Write-Host "  ? " -NoNewline -ForegroundColor Magenta; Write-Host $Q -NoNewline -ForegroundColor White
   if ($Def) { Write-Host " [$Def]" -NoNewline -ForegroundColor DarkGray }
   Write-Host ': ' -NoNewline
@@ -404,29 +485,40 @@ function YesNo([string]$Q, [bool]$Def = $true) {
   $a = Ask "$Q (y/n)" $(if ($Def) { 'y' } else { 'n' })
   return ($a -match '^(y|ya|yes)$')
 }
-function Pause-Key { Write-Host "`n  Tekan tombol apa saja untuk kembali..." -ForegroundColor DarkGray; [void][Console]::ReadKey($true) }
+function Pause-Key { Write-Host "`n  Tekan tombol apa saja untuk kembali..." -ForegroundColor DarkGray; [void](Read-Key) }
 function Line([string]$t, [string]$c = 'Gray') { Write-Host $t -ForegroundColor $c }
 function Bar([int]$Done, [int]$Total, [int]$Width = 34) {
   $f = if ($Total) { [int][Math]::Round($Width * $Done / $Total) } else { 0 }
   return ('█' * $f) + ('░' * ($Width - $f)) + (' {0,3}%' -f $(if ($Total) { [int](100 * $Done / $Total) } else { 0 }))
 }
 
-function Invoke-Spin([string]$File, [string]$ArgStr, [string]$Label) {
-  $o = Join-Path $env:TEMP 'devsetup_out.txt'; $e = Join-Path $env:TEMP 'devsetup_err.txt'
-  $p = Start-Process -FilePath $File -ArgumentList $ArgStr -NoNewWindow -PassThru -RedirectStandardOutput $o -RedirectStandardError $e
+function Invoke-Ext {
+  param([string]$File, [string]$ArgStr, [string]$Label = '', [int]$Timeout = 3600, [switch]$Quiet)
+  $o = Join-Path $env:TEMP 'tipack_out.txt'; $e = Join-Path $env:TEMP 'tipack_err.txt'
+  Remove-Item $o, $e -ErrorAction SilentlyContinue
+  Log ">>> $File $ArgStr  (batas ${Timeout}s)"
+  try { $p = Start-Process -FilePath $File -ArgumentList $ArgStr -NoNewWindow -PassThru -RedirectStandardInput $EmptyIn -RedirectStandardOutput $o -RedirectStandardError $e -ErrorAction Stop }
+  catch { Log "!!! gagal menjalankan: $($_.Exception.Message)"; return [pscustomobject]@{ Code = -1; Secs = 0; TimedOut = $false; Out = '' } }
   $null = $p.Handle
-  $fr = @('⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏')
-  if ($Host.Name -eq 'ConsoleHost' -and -not $env:WT_SESSION) { $fr = @('|', '/', '-', '\') }  # conhost lama tidak punya font braille
-  $sw = [Diagnostics.Stopwatch]::StartNew(); $i = 0
+  $fr = if ($VT -or $env:WT_SESSION) { @('⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏') } else { @('|', '/', '-', '\') }
+  $sw = [Diagnostics.Stopwatch]::StartNew(); $i = 0; $to = $false
   while (-not $p.HasExited) {
-    Write-Host ("`r   {0} {1}  {2:mm\:ss}   " -f $fr[$i % $fr.Count], $Label, $sw.Elapsed) -NoNewline -ForegroundColor Cyan
+    if ($sw.Elapsed.TotalSeconds -gt $Timeout) {
+      Log "!!! TIMEOUT, menghentikan PID $($p.Id) beserta anak prosesnya"
+      try { & taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null } catch {}
+      $to = $true; break
+    }
+    if (-not $Quiet -and -not $TestMode) { Write-Host ("`r   {0} {1}  {2:mm\:ss}   " -f $fr[$i % $fr.Count], $Label, $sw.Elapsed) -NoNewline -ForegroundColor Cyan }
     $i++; Start-Sleep -Milliseconds 100
   }
-  $p.WaitForExit()
-  Log "=== $File $ArgStr (exit $($p.ExitCode))"
-  Get-Content $o, $e -ErrorAction SilentlyContinue | ForEach-Object { Add-Content $LogFile $_ }
-  return [pscustomobject]@{ Code = $p.ExitCode; Secs = [int]$sw.Elapsed.TotalSeconds }
+  if (-not $to) { $p.WaitForExit() }
+  $out = [string](Get-Content $o -Raw -ErrorAction SilentlyContinue) + [string](Get-Content $e -Raw -ErrorAction SilentlyContinue)
+  if ($out) { try { Add-Content $LogFile $out } catch {} }
+  $code = if ($to) { -999 } else { $p.ExitCode }
+  Log ("<<< exit {0} ({1}s){2}" -f $code, [int]$sw.Elapsed.TotalSeconds, $(if ($to) { ' TIMEOUT' } else { '' }))
+  return [pscustomobject]@{ Code = $code; Secs = [int]$sw.Elapsed.TotalSeconds; TimedOut = $to; Out = $out }
 }
+function Invoke-Spin([string]$File, [string]$ArgStr, [string]$Label) { Invoke-Ext -File $File -ArgStr $ArgStr -Label $Label }
 
 function Refresh-Path {
   $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -447,9 +539,40 @@ function Get-SysInfo {
     $d = Get-PSDrive C; $Sys.Disk = '{0:N0} GB kosong dari {1:N0} GB' -f ($d.Free / 1GB), (($d.Used + $d.Free) / 1GB)
     $Sys.DiskFree = [int]($d.Free / 1GB)
   } catch { $Sys.OS = 'Windows'; $Sys.Virt = 'tidak diketahui' }
-  $Sys.Winget = try { (winget --version) 2>$null } catch { $null }
+  $Sys.Winget = Get-WingetVersion
+  $Sys.Arch = $Arch
+  $Sys.PS = "$($PSVersionTable.PSVersion) ($($PSVersionTable.PSEdition))"
+  try {
+    $pd = Get-Partition -DriveLetter C -ErrorAction Stop | Get-Disk | Get-PhysicalDisk -ErrorAction Stop
+    $Sys.DiskType = if ($pd.MediaType -eq 'HDD' -or $pd.SpindleSpeed -gt 0) { 'HDD' } elseif ($pd.MediaType -eq 'SSD') { 'SSD' } else { [string]$pd.MediaType }
+  } catch { $Sys.DiskType = 'tidak diketahui' }
   $Sys.Net = try { [void][Net.Dns]::GetHostAddresses('github.com'); $true } catch { $false }
   $Sys.User = $env:USERNAME
+}
+
+function Get-WingetVersion {
+  $cmd = Get-Command winget -ErrorAction SilentlyContinue
+  if (-not $cmd) {
+    # Windows baru: App Installer sudah ada tapi winget belum terdaftar untuk user ini
+    try { Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe -ErrorAction Stop; Log 'winget didaftarkan ulang' } catch {}
+    $env:Path = $env:Path + ";$env:LOCALAPPDATA\Microsoft\WindowsApps"
+    $cmd = Get-Command winget -ErrorAction SilentlyContinue
+  }
+  if (-not $cmd) { return $null }
+  $r = Invoke-Ext -File 'winget' -ArgStr '--version' -Timeout 30 -Quiet
+  if ($r.Code -eq 0 -and $r.Out -match 'v?\d+\.\d+') { return $r.Out.Trim() }
+  return $null
+}
+function Repair-Winget {
+  Write-Host "`n  Memperbaiki winget lewat modul resmi Microsoft.WinGet.Client (±2-5 menit)..." -ForegroundColor Cyan
+  try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -ErrorAction Stop | Out-Null
+    Install-Module Microsoft.WinGet.Client -Force -Scope CurrentUser -AllowClobber -Repository PSGallery -ErrorAction Stop
+    Import-Module Microsoft.WinGet.Client -ErrorAction Stop
+    if ($IsAdmin) { Repair-WinGetPackageManager -Latest -Force -AllUsers -ErrorAction Stop } else { Repair-WinGetPackageManager -Latest -Force -ErrorAction Stop }
+  } catch { Log "Repair-Winget gagal: $($_.Exception.Message)"; Write-Host "  Gagal: $($_.Exception.Message)" -ForegroundColor Red }
+  $Sys.Winget = Get-WingetVersion
 }
 
 function Scan-Installed([switch]$Quiet) {
@@ -457,21 +580,16 @@ function Scan-Installed([switch]$Quiet) {
   if ($Sys.Winget) {
     $f = Join-Path $env:TEMP 'devsetup_export.json'
     Remove-Item $f -ErrorAction SilentlyContinue
-    if ($Quiet) { winget export -o $f --accept-source-agreements --disable-interactivity *> $null }
-    else { $null = Invoke-Spin 'winget' "export -o `"$f`" --accept-source-agreements --disable-interactivity" 'Memindai aplikasi terpasang (winget)...' }
+    $null = Invoke-Ext -File 'winget' -ArgStr "export -o `"$f`" --accept-source-agreements --disable-interactivity --source winget" -Label 'Memindai aplikasi terpasang (winget)...' -Timeout 240 -Quiet:$Quiet
     if (Test-Path $f) {
-      try { (Get-Content $f -Raw | ConvertFrom-Json).Sources | ForEach-Object { $_.Packages } | ForEach-Object { $ids[$_.PackageIdentifier.ToLower()] = 1 } } catch {}
+      try { (Get-Content $f -Raw | ConvertFrom-Json).Sources | ForEach-Object { $_.Packages } | ForEach-Object { $ids[$_.PackageIdentifier.ToLower()] = 1 } } catch { Log "export JSON gagal dibaca: $_" }
     }
   }
   Refresh-Path
-  $env:WSL_UTF8 = '1'
-  $distros = @()
-  $wslOk = $false
-  if (Test-Path "$env:windir\System32\wsl.exe") {
-    $st = (& wsl.exe --status 2>&1 | Out-String) -replace "`0", ''
-    $wslOk = ($LASTEXITCODE -eq 0) -and ($st -notmatch 'not installed|tidak diinstal|--install')
-    $distros = (& wsl.exe -l -q 2>$null | Out-String) -replace "`0", '' -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ }
-  }
+  # WSL dideteksi dari registry & file; wsl.exe TIDAK dipanggil karena stub-nya bisa menunggu "press any key"
+  $wslOk = (Test-Path "$env:ProgramFiles\WSL\wsl.exe") -or (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LxssManager')
+  $distros = @(Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss' -ErrorAction SilentlyContinue | ForEach-Object { (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).DistributionName } | Where-Object { $_ })
+  Log "scan: winget=$($ids.Count) paket, WSL=$wslOk, distro=$($distros -join ',')"
   foreach ($c in $Catalog) {
     $hit = $false
     switch ($c.Kind) {
@@ -493,7 +611,7 @@ function Scan-Installed([switch]$Quiet) {
 #  LAYAR-LAYAR
 # =====================================================================================
 function Show-Boot {
-  Clear-Host; [Console]::CursorVisible = $false
+  Clear-Host; Set-Cursor $false
   Write-Host ''
   for ($i = 0; $i -lt $Banner.Count; $i++) {
     Write-Host ('  ' + $Banner[$i]) -ForegroundColor $BannerColors[$i]
@@ -523,24 +641,34 @@ function Show-Boot {
   Line "     CPU    : $($Sys.CPU)  ($($Sys.Cores))" DarkCyan
   Line "     RAM    : $($Sys.Ram) GB      Disk C: $($Sys.Disk)" DarkCyan
   Line "     Virt.  : $($Sys.Virt)" DarkCyan
+  Line "     Arsit. : $Arch   PowerShell $($Sys.PS)   Disk: $($Sys.DiskType)" DarkCyan
+  if ($Arch -eq 'ARM64') { Line '     Windows ARM64: aplikasi tanpa versi ARM berjalan lewat emulasi x64 (sedikit lebih lambat).' DarkYellow }
   Write-Host ''
-  if (-not $Sys.Winget) {
-    Line '  winget tidak ditemukan! Install/update "App Installer" dari Microsoft Store:' Red
+  if (-not $Sys.Winget -and -not $TestMode) {
+    Line '  winget tidak ditemukan atau tidak merespons.' Red
+    if (YesNo 'Coba pasang/perbaiki winget otomatis sekarang?' $true) { Repair-Winget }
+  }
+  if (-not $Sys.Winget -and $TestMode) { Line '  [tes] winget tidak ada, lanjut tanpa pemindaian winget' Yellow }
+  elseif (-not $Sys.Winget) {
+    Line '  winget masih tidak tersedia. Install/update "App Installer" dari Microsoft Store:' Red
     Line '  https://apps.microsoft.com/detail/9NBLGGH4NNS1   lalu jalankan ulang script ini.' Yellow
     Start-Process 'ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1' -ErrorAction SilentlyContinue
     Pause-Key; exit 1
   }
   if (-not $Sys.Net) { Line '  Tidak ada internet. Instalasi butuh koneksi, cek WiFi dulu ya.' Yellow }
   if ($Sys.DiskFree -and $Sys.DiskFree -lt 20) { Line "  Disk C tinggal $($Sys.DiskFree) GB. Paket berat seperti Android Studio/VS bisa gagal." Yellow }
-  if (-not $IsAdmin) {
+  if (-not $IsAdmin -and -not $TestMode) {
     Line '  Script tidak berjalan sebagai Administrator: akan banyak popup UAC dan WSL/fitur Windows tidak bisa dipasang.' Yellow
     if (YesNo 'Jalankan ulang sebagai Administrator sekarang?' $true) {
       $a = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""; if ($Preset) { $a += " -Preset $Preset" }
       Start-Process powershell -Verb RunAs -ArgumentList $a; exit
     }
   }
-  [Console]::CursorVisible = $false
-  winget source update --disable-interactivity *> $null
+  Set-Cursor $false
+  if ($Sys.Winget) {
+    $null = Invoke-Ext -File 'winget' -ArgStr 'source update --name winget --disable-interactivity' -Label 'Memperbarui sumber paket winget...' -Timeout 120
+    Write-Host "`r$(' ' * 70)`r" -NoNewline
+  }
   Scan-Installed
   $n = @($Catalog | Where-Object Installed).Count
   Write-Host "`r   √ Pemindaian selesai: $n dari $($Catalog.Count) aplikasi di katalog sudah terpasang.               " -ForegroundColor Green
@@ -557,7 +685,7 @@ function Sync-Cart([string[]]$Keys, [string[]]$Chosen) {
 function Run-Wizard {
   $i = 0
   while ($i -lt $Wizard.Count) {
-    $q = $Wizard[$i]; $keys = $q.L -split ','
+    $q = $Wizard[$i]; $keys = (KeyList $q.L)
     $tip = $q.T -replace '__VIRT__', $Sys.Virt -replace '__RAM__', $Sys.Ram
     $items = @($keys | ForEach-Object { CatItem $_ })
     $prog = "Pertanyaan $($i + 1)/$($Wizard.Count)  " + ('●' * ($i + 1)) + ('○' * ($Wizard.Count - $i - 1))
@@ -579,14 +707,14 @@ function Run-Wizard {
 function Pick-Profile {
   while ($true) {
     $items = foreach ($p in $Profiles) {
-      $ks = $p.L -split ','; $done = @($ks | Where-Object { $C[$_].Installed }).Count
+      $ks = (KeyList $p.L); $done = @($ks | Where-Object { $C[$_].Installed }).Count
       $names = ($ks | ForEach-Object { $C[$_].Name }) -join ', '
       MkItem $p.N "$($p.T)`nIsi: $names" $p.K ("{DarkGray}$($ks.Count) aplikasi  " + $(if ($done) { "{Green}$done sudah ada" } else { '' }))
     }
     $r = Select-List -Title 'Profil Siap Pakai' -Sub 'Pilih profil sesuai minat/peminatan. Isinya masih bisa kamu centang/hapus sebelum dimasukkan keranjang.' -Items $items
     if (-not $r.Ok) { return }
     $p = $Profiles | Where-Object { $_.K -eq $r.Value }
-    $ks = $p.L -split ','
+    $ks = (KeyList $p.L)
     $its = @($ks | ForEach-Object { $x = CatItem $_; if (-not $x.Lock) { $x.Checked = $true }; $x })
     $r2 = Select-List -Title "Profil │ $($p.N)" -Sub 'Semua sudah dicentang. Hapus centang yang tidak perlu, lalu Enter untuk memasukkan ke keranjang.' -Items $its -Multi -EnterText 'masukkan keranjang'
     if ($r2.Ok) { Sync-Cart $ks $r2.Values; if (YesNo 'Langsung ke keranjang & install sekarang?' $true) { Review-Install; return } }
@@ -646,7 +774,7 @@ function Install-Cart {
   $list = @($Cart.Keys | ForEach-Object { $C[$_] })
   # urutan: fitur Windows dulu, lalu winget, lalu info manual
   $list = @($list | Sort-Object { switch ($_.Kind) { 'feat' { 0 } 'wsl' { 1 } 'winget' { 2 } 'info' { 3 } } })
-  Clear-Host; [Console]::CursorVisible = $false
+  Clear-Host; Set-Cursor $false
   Write-Host ''
   for ($i = 0; $i -lt $Banner.Count; $i++) { Write-Host ('  ' + $Banner[$i]) -ForegroundColor $BannerColors[$i] }
   Write-Host "`n  ═══ INSTALASI DIMULAI · $($list.Count) item · log: $LogFile`n" -ForegroundColor Magenta
@@ -715,15 +843,16 @@ function Install-Cart {
   if ($Notes.Count) {
     Line "`n  Perlu download manual:" Yellow
     foreach ($nt in $Notes) { Line "   • $nt" Gray }
-    if (YesNo 'Buka semua link download di browser?' $true) { foreach ($nt in $Notes) { if ($nt -match '(https?://\S+)') { Start-Process $Matches[1] } } }
+    if (-not $TestMode -and -not $Unattended -and (YesNo 'Buka semua link download di browser?' $true)) { foreach ($nt in $Notes) { if ($nt -match '(https?://\S+)') { Start-Process $Matches[1] } } }
     $Notes.Clear()
   }
+  $script:InstallFail = $res.fail
   Line "`n  Tip: tutup lalu buka lagi terminal/VS Code supaya PATH baru terbaca." DarkCyan
   if ($reboot) {
     Line '  Beberapa komponen (WSL/fitur Windows) butuh RESTART.' Yellow
-    if (YesNo 'Restart sekarang? (simpan pekerjaan dulu)' $false) { Restart-Computer -Force }
+    if (-not $Unattended -and (YesNo 'Restart sekarang? (simpan pekerjaan dulu)' $false)) { Restart-Computer -Force }
   }
-  Pause-Key
+  if (-not $Unattended) { Pause-Key }
 }
 
 function Setup-VSCodeExt {
@@ -827,10 +956,289 @@ function Setup-Tweaks {
 
 function Update-All {
   Clear-Host; Line "`n  ═══ UPDATE SEMUA APLIKASI (winget upgrade --all) ═══`n" Magenta
-  [Console]::CursorVisible = $true
+  Set-Cursor $true
   winget upgrade --all --silent --accept-package-agreements --accept-source-agreements --include-unknown
-  if (Get-Command wsl.exe -ErrorAction SilentlyContinue) { Line "`n  Update kernel WSL..." DarkCyan; wsl.exe --update }
+  if ($C.ContainsKey('wslcore') -and $C['wslcore'].Installed) { Line "`n  Update WSL..." DarkCyan; $null = Invoke-Ext -File 'wsl.exe' -ArgStr '--update' -Label 'wsl --update' -Timeout 600 }
   Scan-Installed -Quiet
+  Pause-Key
+}
+
+# =====================================================================================
+#  TUNE-UP, STARTUP & DEBLOAT (untuk laptop lama maupun baru)
+# =====================================================================================
+function Get-Reg([string]$Path, [string]$Name) { try { (Get-ItemProperty -Path $Path -Name $Name -ErrorAction Stop).$Name } catch { $null } }
+function Set-Reg([string]$Path, [string]$Name, $Value, [string]$Type = 'DWord') {
+  if (-not (Test-Path $Path)) { New-Item -Path $Path -Force | Out-Null }
+  New-ItemProperty -Path $Path -Name $Name -Value $Value -PropertyType $Type -Force | Out-Null
+}
+function Get-DirBytes([string[]]$Paths) {
+  $sum = 0
+  foreach ($p in $Paths) { if (Test-Path $p) { try { $sum += (Get-ChildItem $p -Recurse -Force -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum } catch {} } }
+  return [int64]$sum
+}
+function Fmt-Bytes([int64]$b) { if ($b -ge 1GB) { '{0:N1} GB' -f ($b / 1GB) } elseif ($b -ge 1MB) { '{0:N0} MB' -f ($b / 1MB) } else { '{0:N0} KB' -f ($b / 1KB) } }
+function Clear-Dir([string[]]$Paths) {
+  foreach ($p in $Paths) { if (Test-Path $p) { Get-ChildItem $p -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue } }
+}
+function New-RestorePoint([string]$Desc) {
+  if (-not $IsAdmin) { Line '   ! Restore point dilewati (butuh Administrator).' Yellow; return }
+  try {
+    Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction SilentlyContinue
+    Write-Host '   ... Membuat restore point (titik pemulihan sistem)' -NoNewline -ForegroundColor Cyan
+    Checkpoint-Computer -Description $Desc -RestorePointType MODIFY_SETTINGS -ErrorAction Stop -WarningAction SilentlyContinue
+    Write-Host "`r   √ Restore point dibuat: $Desc                          " -ForegroundColor Green
+  } catch { Write-Host "`r   ! Restore point tidak dibuat ($($_.Exception.Message.Split('.')[0])). Windows hanya mengizinkan 1 per 24 jam.     " -ForegroundColor Yellow }
+}
+function Is-Laptop { try { [bool](Get-CimInstance Win32_Battery -ErrorAction Stop) } catch { $false } }
+
+function Tune-Up {
+  Clear-Host; Write-Host "`n   Menghitung ukuran file sampah, tunggu sebentar..." -ForegroundColor DarkGray
+  $tempPaths = @($env:TEMP, "$env:SystemRoot\Temp")
+  $wuPaths = @("$env:SystemRoot\SoftwareDistribution\Download")
+  $thumbPaths = @("$env:LOCALAPPDATA\Microsoft\Windows\Explorer")
+  $szTemp = Get-DirBytes $tempPaths; $szWu = Get-DirBytes $wuPaths
+  $szThumb = [int64](Get-ChildItem "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*.db" -Force -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum
+  $szRecycle = 0; try { $szRecycle = [int64](Get-ChildItem "$env:SystemDrive\`$Recycle.Bin" -Recurse -Force -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum } catch {}
+  $hib = Get-Item "$env:SystemDrive\hiberfil.sys" -Force -ErrorAction SilentlyContinue
+  $laptop = Is-Laptop
+  $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+  $T = @(
+    @{ K = 'temp'; N = "Bersihkan file sementara ($(Fmt-Bytes $szTemp))"; T = 'Menghapus isi folder TEMP user dan Windows\Temp. File yang sedang dipakai otomatis dilewati. Aman.'; A = $false; On = $false; R = $true }
+    @{ K = 'wu'; N = "Hapus cache Windows Update ($(Fmt-Bytes $szWu))"; T = 'File installer update yang sudah terpasang di SoftwareDistribution\Download. Aman; Windows mengunduh ulang kalau perlu.'; A = $true; On = $false; R = $true }
+    @{ K = 'thumb'; N = "Hapus cache thumbnail ($(Fmt-Bytes $szThumb))"; T = 'Cache gambar mini di Explorer. Dibuat ulang otomatis saat membuka folder.'; A = $false; On = $false; R = $false }
+    @{ K = 'recycle'; N = "Kosongkan Recycle Bin ($(Fmt-Bytes $szRecycle))"; T = 'PERMANEN: file di Recycle Bin tidak bisa dikembalikan lagi. Cek dulu isinya kalau ragu.'; A = $false; On = $false; R = $false }
+    @{ K = 'dism'; N = 'Bersihkan komponen Windows lama (DISM)'; T = 'DISM /StartComponentCleanup menghapus versi lama komponen Windows setelah update. Bisa membebaskan beberapa GB. Butuh 5-15 menit.'; A = $true; On = $false; R = $false }
+    @{ K = 'visual'; N = 'Efek visual: utamakan performa'; T = 'Mematikan animasi jendela, bayangan dan fade, tapi teks tetap halus (ClearType). Efek paling terasa di laptop lama. Berlaku setelah sign out.'; A = $false; On = ((Get-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' 'VisualFXSetting') -eq 3 -and (Get-Reg 'HKCU:\Control Panel\Desktop\WindowMetrics' 'MinAnimate') -eq '0'); R = $true }
+    @{ K = 'transp'; N = 'Matikan efek transparansi'; T = 'Transparansi taskbar/Start memakai GPU. Mematikannya meringankan laptop dengan grafis terintegrasi lama.'; A = $false; On = ((Get-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' 'EnableTransparency') -eq 0); R = $true }
+    @{ K = 'bgapps'; N = 'Batasi aplikasi latar belakang (Store apps)'; T = 'Aplikasi Store tidak berjalan di belakang saat tidak dibuka. Hemat RAM dan baterai. Notifikasi aplikasi tersebut bisa terlambat.'; A = $false; On = ((Get-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' 'GlobalUserDisabled') -eq 1); R = $false }
+    @{ K = 'gamedvr'; N = 'Matikan perekaman latar Game DVR'; T = 'Xbox Game Bar merekam gameplay di belakang dan memakan CPU/GPU. Shortcut Win+G tetap bisa dipakai manual.'; A = $false; On = ((Get-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled') -eq 0); R = $true }
+    @{ K = 'power'; N = $(if ($laptop) { 'Power plan: High performance (laptop: boros baterai)' } else { 'Power plan: High performance' }); T = 'CPU tidak diturunkan kecepatannya. Paling terasa di PC/laptop yang dicolok charger. Di laptop, baterai lebih cepat habis.'; A = $false; On = ((powercfg /getactivescheme 2>$null) -match '8c5e7fda'); R = (-not $laptop) }
+    @{ K = 'hiber'; N = $(if ($hib) { "Matikan hibernasi (hapus hiberfil.sys $(Fmt-Bytes $hib.Length))" } else { 'Matikan hibernasi' }); T = 'Membebaskan ruang sebesar RAM. Fast Startup dan mode Hibernate jadi tidak tersedia; Sleep tetap bisa.'; A = $true; On = (-not $hib); R = $false }
+    @{ K = 'trim'; N = "Optimasi drive C: ($(if ($Sys.DiskType -eq 'HDD') { 'defrag HDD' } else { 'TRIM SSD' }))"; T = 'SSD: perintah TRIM supaya tulis tetap cepat. HDD: defragmentasi (bisa lama). Windows biasanya melakukan ini mingguan.'; A = $true; On = $false; R = $false }
+    @{ K = 'dns'; N = 'Flush DNS cache'; T = 'Mengatasi situs yang tidak bisa dibuka setelah ganti jaringan/DNS.'; A = $false; On = $false; R = $false }
+    @{ K = 'sfc'; N = 'Perbaiki file sistem (SFC + DISM RestoreHealth)'; T = 'Untuk Windows yang sering error/crash. Memeriksa dan memperbaiki file sistem yang rusak. Butuh 15-40 menit dan internet.'; A = $true; On = $false; R = $false }
+  )
+  if ($Sys.DiskType -eq 'HDD') {
+    $T += @{ K = 'sysmain'; N = 'Matikan SysMain/Superfetch (khusus HDD)'; T = 'Di HDD lama, SysMain sering membuat disk 100%. Di SSD sebaiknya dibiarkan.'; A = $true; On = ((Get-Service SysMain -ErrorAction SilentlyContinue).StartType -eq 'Disabled'); R = $true }
+  }
+  $items = foreach ($t in $T) {
+    $b = $(if ($t.On) { '{Green}√ sudah  ' } else { '' }) + $(if ($t.R) { '{Yellow}♦ rekomendasi  ' } else { '' }) + $(if ($t.A -and -not $IsAdmin) { '{Red}butuh admin' } else { '' })
+    MkItem $t.N $t.T $t.K $b ($t.R -and -not $t.On -and (-not $t.A -or $IsAdmin)) ([bool]$t.On -and $t.K -notin 'trim', 'dns', 'sfc', 'dism') $t.R
+  }
+  $hint = "RAM $($Sys.Ram) GB, disk $($Sys.DiskType). Rekomendasi sudah dicentang. Untuk aplikasi yang jalan saat startup, pakai menu Kelola Startup."
+  $r = Select-List -Title 'Tune-Up & Optimasi' -Sub $hint -Items $items -Multi -EnterText 'jalankan'
+  if (-not $r.Ok -or -not $r.Values.Count) { return }
+  Clear-Host; Write-Host "`n  ═══ TUNE-UP ═══`n" -ForegroundColor Magenta
+  $before = (Get-PSDrive C).Free
+  foreach ($k in $r.Values) {
+    $t = $T | Where-Object { $_.K -eq $k }
+    if ($t.A -and -not $IsAdmin) { Line "   × $($t.N): butuh Administrator" Red; continue }
+    Log "TUNE $k"
+    try {
+      switch ($k) {
+        'temp' { Clear-Dir $tempPaths }
+        'wu' { Stop-Service wuauserv, bits -Force -ErrorAction SilentlyContinue; Clear-Dir $wuPaths; Start-Service wuauserv -ErrorAction SilentlyContinue }
+        'thumb' { Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*.db" -Force -ErrorAction SilentlyContinue }
+        'recycle' { Clear-RecycleBin -Force -ErrorAction SilentlyContinue }
+        'dism' { $x = Invoke-Ext -File 'dism.exe' -ArgStr '/Online /Cleanup-Image /StartComponentCleanup /NoRestart' -Label 'DISM membersihkan komponen lama' -Timeout 3600; if ($x.Code -ne 0) { throw "DISM exit $($x.Code)" } }
+        'visual' {
+          Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' 'VisualFXSetting' 3
+          Set-Reg 'HKCU:\Control Panel\Desktop' 'UserPreferencesMask' ([byte[]](0x90, 0x12, 0x03, 0x80, 0x10, 0x00, 0x00, 0x00)) 'Binary'
+          Set-Reg 'HKCU:\Control Panel\Desktop\WindowMetrics' 'MinAnimate' '0' 'String'
+          Set-Reg $adv 'TaskbarAnimations' 0; Set-Reg $adv 'ListviewShadow' 0
+          Set-Reg 'HKCU:\Control Panel\Desktop' 'FontSmoothing' '2' 'String'
+        }
+        'transp' { Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' 'EnableTransparency' 0 }
+        'bgapps' { Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' 'GlobalUserDisabled' 1; Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' 'BackgroundAppGlobalToggle' 0 }
+        'gamedvr' { Set-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled' 0; Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR' 'AppCaptureEnabled' 0 }
+        'power' {
+          $null = powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>&1
+          if (-not ((powercfg /getactivescheme) -match '8c5e7fda')) { $dup = powercfg /duplicatescheme 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>&1; if ("$dup" -match '([0-9a-f-]{36})') { $null = powercfg /setactive $Matches[1] } }
+        }
+        'hiber' { $null = powercfg /hibernate off 2>&1 }
+        'trim' { if ($Sys.DiskType -eq 'HDD') { Optimize-Volume -DriveLetter C -Defrag -ErrorAction Stop } else { Optimize-Volume -DriveLetter C -ReTrim -ErrorAction Stop } }
+        'dns' { $null = ipconfig /flushdns }
+        'sfc' {
+          $x = Invoke-Ext -File 'dism.exe' -ArgStr '/Online /Cleanup-Image /RestoreHealth /NoRestart' -Label 'DISM RestoreHealth' -Timeout 5400
+          $y = Invoke-Ext -File 'sfc.exe' -ArgStr '/scannow' -Label 'SFC memeriksa file sistem' -Timeout 5400
+          Log "sfc: dism=$($x.Code) sfc=$($y.Code)"
+        }
+        'sysmain' { Stop-Service SysMain -Force -ErrorAction SilentlyContinue; Set-Service SysMain -StartupType Disabled }
+      }
+      Write-Host "`r   √ $($t.N)$(' ' * 20)" -ForegroundColor Green
+    } catch { Write-Host "`r   × $($t.N): $($_.Exception.Message)" -ForegroundColor Red; Log "TUNE $k gagal: $_" }
+  }
+  $freed = (Get-PSDrive C).Free - $before
+  if ($freed -gt 0) { Line "`n   Ruang kosong bertambah: $(Fmt-Bytes $freed)" Green }
+  if ($r.Values | Where-Object { $_ -in 'visual', 'transp' }) { Line '   Sign out lalu login lagi supaya efek visual berubah sepenuhnya.' Yellow }
+  Pause-Key
+}
+
+function Manage-Startup {
+  $src = @(
+    @{ Reg = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'; Ap = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'; L = 'user'; A = $false }
+    @{ Reg = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Run'; Ap = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'; L = 'semua user'; A = $true }
+    @{ Reg = 'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run'; Ap = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run32'; L = 'semua user (32-bit)'; A = $true }
+  )
+  $list = @()
+  foreach ($s in $src) {
+    $props = Get-ItemProperty $s.Reg -ErrorAction SilentlyContinue
+    if (-not $props) { continue }
+    foreach ($pp in $props.PSObject.Properties) {
+      if ($pp.Name -like 'PS*') { continue }
+      $st = Get-Reg $s.Ap $pp.Name
+      $enabled = -not ($st -is [byte[]] -and ($st[0] -band 1))
+      $list += [pscustomobject]@{ Name = $pp.Name; Cmd = [string]$pp.Value; Src = $s; Enabled = $enabled }
+    }
+  }
+  $folder = [Environment]::GetFolderPath('Startup')
+  foreach ($f in (Get-ChildItem $folder -File -ErrorAction SilentlyContinue)) {
+    $ap = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder'
+    $st = Get-Reg $ap $f.Name
+    $list += [pscustomobject]@{ Name = $f.Name; Cmd = $f.FullName; Src = @{ Ap = $ap; L = 'folder Startup'; A = $false }; Enabled = -not ($st -is [byte[]] -and ($st[0] -band 1)) }
+  }
+  if (-not $list.Count) { Clear-Host; Line "`n  Tidak ada aplikasi startup yang terdaftar." Green; Pause-Key; return }
+  $items = foreach ($x in $list) {
+    $lock = $x.Src.A -and -not $IsAdmin
+    MkItem $x.Name "Perintah: $($x.Cmd)`nSumber: $($x.Src.L). Hapus centang = tidak ikut jalan saat Windows menyala (bisa diaktifkan lagi kapan saja, sama seperti di Task Manager)." $x.Name $(if ($lock) { '{Red}butuh admin' } elseif ($x.Enabled) { '{Green}aktif' } else { '{DarkGray}nonaktif' }) $x.Enabled $false
+  }
+  $r = Select-List -Title 'Kelola Aplikasi Startup' -Sub "$($list.Count) aplikasi startup. Yang dicentang tetap aktif. Makin sedikit aplikasi startup, makin cepat laptop siap dipakai setelah menyala." -Items $items -Multi -EnterText 'simpan'
+  if (-not $r.Ok) { return }
+  Clear-Host; Write-Host ''
+  foreach ($x in $list) {
+    $want = $r.Values -contains $x.Name
+    if ($want -eq $x.Enabled) { continue }
+    if ($x.Src.A -and -not $IsAdmin) { Line "   × $($x.Name): butuh Administrator" Red; continue }
+    try {
+      $val = if ($want) { [byte[]](0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) } else { [byte[]](0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) }
+      Set-Reg $x.Src.Ap $x.Name $val 'Binary'
+      Line "   √ $($x.Name) -> $(if ($want) { 'aktif' } else { 'nonaktif' })" Green
+    } catch { Line "   × $($x.Name): $($_.Exception.Message)" Red }
+  }
+  Pause-Key
+}
+
+$BloatApps = @(
+  'Microsoft.BingNews|Microsoft News|1|Aplikasi berita MSN.'
+  'Microsoft.BingWeather|Cuaca MSN|0|Aplikasi cuaca. Hapus kalau tidak dipakai.'
+  'Microsoft.BingSearch|Bing Search|1|Komponen pencarian Bing.'
+  'Microsoft.GetHelp|Get Help|1|Aplikasi bantuan Microsoft.'
+  'Microsoft.Getstarted|Tips|1|Aplikasi tips Windows.'
+  'Microsoft.MicrosoftSolitaireCollection|Solitaire Collection|1|Game dengan iklan.'
+  'Microsoft.People|People|1|Kontak lama, jarang dipakai.'
+  'Microsoft.MicrosoftOfficeHub|Office Hub (iklan Microsoft 365)|1|Bukan Office-nya, hanya peluncur/iklan. Office tetap bisa dipasang terpisah.'
+  'Clipchamp.Clipchamp|Clipchamp|1|Editor video online. Hapus kalau tidak dipakai.'
+  'Microsoft.WindowsFeedbackHub|Feedback Hub|1|Kirim masukan ke Microsoft.'
+  'Microsoft.549981C3F5F10|Cortana|1|Asisten suara lama, sudah tidak dikembangkan.'
+  'MSTeams|Microsoft Teams (pribadi)|1|Teams versi pribadi/gratis. Teams kampus/kerja dari winget tetap bisa dipasang.'
+  'MicrosoftTeams|Microsoft Teams (pribadi, lama)|1|Teams versi pribadi lama.'
+  'Microsoft.Todos|Microsoft To Do|0|Aplikasi daftar tugas.'
+  'Microsoft.YourPhone|Phone Link|0|Sambungan ke HP Android/iPhone. Biarkan kalau dipakai.'
+  'Microsoft.WindowsMaps|Peta|1|Aplikasi peta offline.'
+  'Microsoft.PowerAutomateDesktop|Power Automate|1|Otomasi untuk kantor.'
+  'Microsoft.OutlookForWindows|Outlook (baru)|0|Klien email baru Windows.'
+  'Microsoft.ZuneVideo|Film & TV|1|Pemutar video lama. VLC jauh lebih lengkap.'
+  'Microsoft.MixedReality.Portal|Mixed Reality Portal|1|Untuk headset VR Windows.'
+  'Microsoft.Microsoft3DViewer|3D Viewer|1|Penampil model 3D.'
+  'Microsoft.MSPaint|Paint 3D|1|Paint klasik tidak ikut terhapus.'
+  'Microsoft.SkypeApp|Skype|1|Skype sudah dihentikan Microsoft (Mei 2025).'
+  'Microsoft.Wallet|Wallet|1|Tidak dipakai di Indonesia.'
+  'Microsoft.Messaging|Messaging|1|Aplikasi lama.'
+  'Microsoft.OneConnect|Mobile Plans|1|Paket data seluler.'
+  'Microsoft.GamingApp|Xbox app|0|Biarkan kalau pakai Game Pass.'
+  'Microsoft.XboxGamingOverlay|Xbox Game Bar|0|Dipakai untuk rekam layar Win+G. Biarkan kalau sering merekam layar.'
+  'Microsoft.Windows.DevHome|Dev Home|0|Dashboard developer (sudah dihentikan Microsoft).'
+  '*SpotifyAB.SpotifyMusic*|Spotify (bawaan pabrik)|0|Hapus kalau tidak dipakai, bisa dipasang ulang kapan saja.'
+  '*Disney*|Disney+ (promo)|1|Aplikasi promo bawaan pabrik.'
+  '*CandyCrush*|Candy Crush (promo)|1|Game promo bawaan pabrik.'
+  '*TikTok*|TikTok (promo)|1|Aplikasi promo bawaan pabrik.'
+  '*Facebook*|Facebook (promo)|1|Aplikasi promo bawaan pabrik.'
+  '*Instagram*|Instagram (promo)|1|Aplikasi promo bawaan pabrik.'
+  '*LinkedInforWindows*|LinkedIn (promo)|1|Aplikasi promo bawaan pabrik.'
+  '*PrimeVideo*|Prime Video (promo)|1|Aplikasi promo bawaan pabrik.'
+  '*Netflix*|Netflix (promo)|0|Biarkan kalau dipakai.'
+  '*McAfee*|McAfee (trial bawaan pabrik)|1|Antivirus trial yang berat. Windows Defender bawaan sudah cukup.'
+  '*Norton*|Norton (trial bawaan pabrik)|1|Antivirus trial yang berat. Windows Defender bawaan sudah cukup.'
+  '*Booking*|Booking.com (promo)|1|Aplikasi promo bawaan pabrik.'
+  '*Duolingo*|Duolingo (promo)|0|Biarkan kalau dipakai.'
+  '*PhotoshopExpress*|Photoshop Express (promo)|1|Aplikasi promo bawaan pabrik.'
+)
+
+function Debloat {
+  Clear-Host; Write-Host "`n   Membaca aplikasi bawaan yang terpasang..." -ForegroundColor DarkGray
+  $installed = @(Get-AppxPackage -ErrorAction SilentlyContinue)
+  $cdm = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+  $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+  $items = New-Object System.Collections.Generic.List[object]
+  $appMap = @{}
+  foreach ($b in $BloatApps) {
+    $f = $b -split '\|', 4
+    $hit = @($installed | Where-Object { $_.Name -like $f[0] })
+    if (-not $hit.Count) { continue }
+    $appMap["app:$($f[0])"] = $f
+    if (-not ($items | Where-Object Sep)) { $items.Add((MkItem 'Aplikasi bawaan yang terpasang' '' $null '' $false $true $false $true)) }
+    $items.Add((MkItem $f[1] "$($f[3])`nPaket: $($hit[0].Name). Bisa dipasang ulang dari Microsoft Store." "app:$($f[0])" $(if ($f[2] -eq '1') { '{Yellow}♦ aman dihapus' } else { '{DarkGray}opsional' }) ($f[2] -eq '1') $false ($f[2] -eq '1')))
+  }
+  $TW = @(
+    @{ K = 'ads'; N = 'Matikan iklan & "saran" di Start, Settings dan lock screen'; T = 'Menghentikan pemasangan aplikasi promo otomatis (Candy Crush dkk) dan rekomendasi iklan.'; On = ((Get-Reg $cdm 'SilentInstalledAppsEnabled') -eq 0); A = $false }
+    @{ K = 'adid'; N = 'Matikan Advertising ID'; T = 'ID unik untuk iklan yang dipersonalisasi antar aplikasi.'; On = ((Get-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' 'Enabled') -eq 0); A = $false }
+    @{ K = 'tailored'; N = 'Matikan "pengalaman yang disesuaikan"'; T = 'Microsoft memakai data diagnostik untuk tips dan iklan.'; On = ((Get-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Privacy' 'TailoredExperiencesWithDiagnosticDataEnabled') -eq 0); A = $false }
+    @{ K = 'bing'; N = 'Matikan hasil web Bing di pencarian Start'; T = 'Pencarian Start hanya mencari file dan aplikasi di laptop, lebih cepat dan tidak mengirim ketikan ke Bing.'; On = ((Get-Reg 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' 'DisableSearchBoxSuggestions') -eq 1); A = $false }
+    @{ K = 'copilot'; N = 'Matikan Copilot'; T = 'Menyembunyikan dan menonaktifkan Copilot bawaan Windows.'; On = ((Get-Reg 'HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot' 'TurnOffWindowsCopilot') -eq 1); A = $false }
+    @{ K = 'recall'; N = 'Matikan Recall / snapshot AI'; T = 'Fitur yang memotret layar secara berkala (PC Copilot+). Mematikannya menjaga privasi dan ruang disk.'; On = ((Get-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' 'DisableAIDataAnalysis') -eq 1); A = $true }
+    @{ K = 'widgets'; N = 'Matikan Widgets / News and Interests'; T = 'Panel berita cuaca di taskbar yang memakan RAM dan internet.'; On = ((Get-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Dsh' 'AllowNewsAndInterests') -eq 0); A = $true }
+    @{ K = 'chat'; N = 'Sembunyikan Chat/Teams dan tombol Task View di taskbar'; T = 'Taskbar lebih bersih.'; On = ((Get-Reg $adv 'TaskbarMn') -eq 0); A = $false }
+    @{ K = 'telemetry'; N = 'Telemetri seminimal mungkin'; T = 'Mengatur data diagnostik ke level minimum dan mematikan layanan DiagTrack. Windows Update tetap berjalan normal.'; On = ((Get-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' 'AllowTelemetry') -eq 1); A = $true }
+    @{ K = 'ctxmenu'; N = 'Menu klik kanan klasik (Windows 11)'; T = 'Langsung tampil menu lengkap tanpa harus klik "Show more options". Favorit developer.'; On = (Test-Path 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32'); A = $false }
+    @{ K = 'onedrive'; N = 'Uninstall OneDrive'; T = 'File yang sudah tersinkron tetap aman di cloud (onedrive.live.com) dan di folder lokal. Hanya aplikasi sinkronisasinya yang dihapus.'; On = (-not (Test-Path "$env:LOCALAPPDATA\Microsoft\OneDrive\OneDrive.exe")); A = $false }
+  )
+  $items.Add((MkItem 'Privasi, iklan & gangguan' '' $null '' $false $true $false $true))
+  foreach ($t in $TW) {
+    $b = $(if ($t.On) { '{Green}√ sudah' } else { '' }) + $(if ($t.A -and -not $IsAdmin) { '  {Red}butuh admin' } else { '' })
+    $items.Add((MkItem $t.N $t.T "tw:$($t.K)" $b ((-not $t.On) -and $t.K -notin 'onedrive' -and (-not $t.A -or $IsAdmin)) ([bool]$t.On) ($t.K -ne 'onedrive')))
+  }
+  $r = Select-List -Title 'Debloat Windows' -Sub 'Hapus aplikasi bawaan yang tidak perlu dan matikan iklan/pelacakan. Restore point dibuat dulu (kalau Administrator). Aplikasi penting (Store, Kalkulator, Foto, Notepad, Terminal, winget) tidak pernah disentuh.' -Items $items.ToArray() -Multi -EnterText 'jalankan'
+  if (-not $r.Ok -or -not $r.Values.Count) { return }
+  Clear-Host; Write-Host "`n  ═══ DEBLOAT ═══`n" -ForegroundColor Magenta
+  New-RestorePoint 'TIPACK sebelum debloat'
+  $deprov = $false
+  if ($IsAdmin -and ($r.Values | Where-Object { $_ -like 'app:*' })) { $deprov = YesNo 'Hapus juga untuk akun user baru (deprovision)?' $false }
+  foreach ($v in $r.Values) {
+    Log "DEBLOAT $v"
+    if ($v -like 'app:*') {
+      $f = $appMap[$v]
+      try {
+        Get-AppxPackage -Name $f[0] -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction Stop
+        if ($deprov) { Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object DisplayName -like $f[0] | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Out-Null }
+        Line "   √ Dihapus: $($f[1])" Green
+      } catch { Line "   × $($f[1]): $($_.Exception.Message.Split([char]10)[0])" Red }
+      continue
+    }
+    $k = $v.Substring(3); $t = $TW | Where-Object { $_.K -eq $k }
+    if ($t.A -and -not $IsAdmin) { Line "   × $($t.N): butuh Administrator" Red; continue }
+    try {
+      switch ($k) {
+        'ads' {
+          foreach ($n in 'ContentDeliveryAllowed', 'SilentInstalledAppsEnabled', 'SystemPaneSuggestionsEnabled', 'SoftLandingEnabled', 'PreInstalledAppsEnabled', 'OemPreInstalledAppsEnabled', 'PreInstalledAppsEverEnabled', 'RotatingLockScreenOverlayEnabled', 'SubscribedContent-338387Enabled', 'SubscribedContent-338388Enabled', 'SubscribedContent-338389Enabled', 'SubscribedContent-338393Enabled', 'SubscribedContent-353694Enabled', 'SubscribedContent-353696Enabled', 'SubscribedContent-310093Enabled') { Set-Reg $cdm $n 0 }
+          Set-Reg $adv 'Start_IrisRecommendations' 0; Set-Reg $adv 'ShowSyncProviderNotifications' 0
+        }
+        'adid' { Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' 'Enabled' 0 }
+        'tailored' { Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Privacy' 'TailoredExperiencesWithDiagnosticDataEnabled' 0 }
+        'bing' { Set-Reg 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' 'DisableSearchBoxSuggestions' 1; Set-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' 'BingSearchEnabled' 0 }
+        'copilot' { Set-Reg 'HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot' 'TurnOffWindowsCopilot' 1; Set-Reg $adv 'ShowCopilotButton' 0 }
+        'recall' { Set-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' 'DisableAIDataAnalysis' 1; Set-Reg 'HKCU:\Software\Policies\Microsoft\Windows\WindowsAI' 'DisableAIDataAnalysis' 1 }
+        'widgets' { Set-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Dsh' 'AllowNewsAndInterests' 0; try { Set-Reg $adv 'TaskbarDa' 0 } catch {} }
+        'chat' { Set-Reg $adv 'TaskbarMn' 0; Set-Reg $adv 'ShowTaskViewButton' 0 }
+        'telemetry' { Set-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' 'AllowTelemetry' 1; Stop-Service DiagTrack -Force -ErrorAction SilentlyContinue; Set-Service DiagTrack -StartupType Disabled -ErrorAction SilentlyContinue }
+        'ctxmenu' { $kp = 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32'; New-Item -Path $kp -Force | Out-Null; Set-ItemProperty -Path $kp -Name '(default)' -Value '' }
+        'onedrive' { $x = Invoke-Ext -File 'winget' -ArgStr 'uninstall --id Microsoft.OneDrive -e --silent --accept-source-agreements --disable-interactivity' -Label 'Menghapus OneDrive' -Timeout 600; if ($x.Code -ne 0) { throw "winget exit $($x.Code)" } }
+      }
+      Line "   √ $($t.N)" Green
+    } catch { Line "   × $($t.N): $($_.Exception.Message)" Red; Log "DEBLOAT $k gagal: $_" }
+  }
+  Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+  Line "`n   Explorer di-restart. Beberapa perubahan baru terasa setelah restart." DarkGray
+  Line '   Membatalkan: Control Panel > Recovery > Open System Restore, pilih "TIPACK sebelum debloat".' DarkGray
   Pause-Key
 }
 
@@ -843,6 +1251,8 @@ function Show-SysInfo {
     MkItem "RAM     : $($Sys.Ram) GB" $(if ($Sys.Ram -lt 8) { 'RAM di bawah 8GB: hindari Docker/Android Studio, pakai editor ringan.' } elseif ($Sys.Ram -lt 16) { 'RAM 8-12GB: cukup untuk kuliah. Android Studio + emulator akan terasa berat.' } else { 'RAM 16GB+: aman untuk Docker, Android Studio dan LLM lokal kecil.' })
     MkItem "Disk C  : $($Sys.Disk)" 'Sisakan minimal 30GB untuk tool dev + proyek.'
     MkItem "Virtual.: $($Sys.Virt)" 'Dibutuhkan WSL2, Docker, Android Emulator dan VirtualBox. Kalau tidak aktif: masuk BIOS (F2/Del/F10 saat boot) lalu aktifkan Intel VT-x / AMD SVM.'
+    MkItem "Arsitek.: $Arch · PowerShell $($Sys.PS)" $(if ($Arch -eq 'ARM64') { 'Windows di prosesor ARM (Snapdragon dll). Aplikasi tanpa versi ARM berjalan lewat emulasi x64. VirtualBox & BlueStacks tidak tersedia.' } elseif ($Arch -eq 'x86') { 'Windows 32-bit: banyak tool modern (Docker, WSL2, Android Studio) tidak tersedia. Pertimbangkan pindah ke Windows 64-bit kalau CPU mendukung.' } else { 'Windows 64-bit (x64).' })
+    MkItem "Disk C  : jenis $($Sys.DiskType)" $(if ($Sys.DiskType -eq 'HDD') { 'HDD lambat untuk Windows modern. Upgrade ke SSD adalah peningkatan paling terasa untuk laptop lama (bisa 3-5x lebih cepat booting). Sementara itu jalankan Tune-Up.' } else { 'SSD: cepat. Jaga ruang kosong minimal 15-20%.' })
     MkItem "Admin   : $(if ($IsAdmin) { 'Ya' } else { 'Tidak' })" 'Jalankan sebagai Administrator agar WSL dan fitur Windows bisa dipasang.'
     MkItem "winget  : $($Sys.Winget)" 'Package manager resmi Windows yang dipakai script ini.'
     MkItem "Katalog : $n/$($Catalog.Count) aplikasi terpasang" 'Lihat menu Cek Status untuk detailnya.'
@@ -854,7 +1264,7 @@ function Main-Menu {
   while ($true) {
     $n = @($Catalog | Where-Object Installed).Count
     $hdr = @()
-    if ([Console]::WindowHeight -ge 40) { for ($i = 0; $i -lt $Banner.Count; $i++) { $hdr += "{$($BannerColors[$i])}  $($Banner[$i])" }; $hdr += "{DarkGray}      I F  ·  $($Sys.User)@$($Sys.Model)  ·  RAM $($Sys.Ram)GB  ·  $n/$($Catalog.Count) app terpasang"; $hdr += '' }
+    if ((Get-ConSize)[1] -ge 40) { for ($i = 0; $i -lt $Banner.Count; $i++) { $hdr += "{$($BannerColors[$i])}  $($Banner[$i])" }; $hdr += "{DarkGray}      I F  ·  $($Sys.User)@$($Sys.Model)  ·  RAM $($Sys.Ram)GB  ·  $n/$($Catalog.Count) app terpasang"; $hdr += '' }
     $items = @(
       MkItem '🧙 Wizard Preferensi' "Jawab $($Wizard.Count) pertanyaan singkat (browser, WinRAR/7-Zip, editor, bahasa, WSL, WSA, dst). Setiap pilihan ada penjelasan dan rekomendasinya. PALING DISARANKAN untuk laptop baru." 'wiz' '{Yellow}♦ mulai di sini'
       MkItem '📦 Profil Siap Pakai' 'Paket sekali klik: Starter Mahasiswa IF, Web, Mobile, Data/AI, Jaringan & Security, DevOps, Game, Desain, Abang IT.' 'prof'
@@ -864,6 +1274,9 @@ function Main-Menu {
       MkItem '🧩 Ekstensi VS Code' 'Pasang ekstensi VS Code penting: C/C++, Code Runner, Python, Java, Live Server, GitLens, Error Lens, dll.' 'ext'
       MkItem '🔑 Setup Git & SSH Key GitHub' 'Atur nama/email Git, buat SSH key, copy ke clipboard, buka halaman GitHub, aktifkan ssh-agent, gh auth login.' 'git'
       MkItem '⚙  Tweak Windows untuk Developer' 'Tampilkan ekstensi file, file tersembunyi, dark mode, Long Paths, Developer Mode, ExecutionPolicy.' 'tweak'
+      MkItem '🚀 Tune-Up & Optimasi' 'Bersihkan file sampah (TEMP, cache Windows Update, Recycle Bin, komponen lama), efek visual ringan, power plan, matikan hibernasi, TRIM/defrag, perbaiki file sistem (SFC/DISM). Cocok untuk laptop lama yang mulai lemot.' 'tune' $(if ($Sys.Ram -le 8 -or $Sys.DiskType -eq 'HDD') { '{Yellow}♦ disarankan untuk laptop ini' } else { '' })
+      MkItem '⚡ Kelola Aplikasi Startup' 'Pilih aplikasi yang boleh ikut jalan saat Windows menyala. Makin sedikit, makin cepat booting. Bisa diaktifkan lagi kapan saja.' 'startup'
+      MkItem '🧹 Debloat Windows' 'Hapus aplikasi bawaan/promo yang tidak perlu (Candy Crush, News, Solitaire, trial antivirus, dll), matikan iklan di Start, Copilot, Recall, Widgets, telemetri, Bing di pencarian. Restore point dibuat dulu.' 'debloat'
       MkItem '⟳  Update Semua Aplikasi' 'winget upgrade --all + wsl --update.' 'upd'
       MkItem '💻 Info Sistem' 'Spesifikasi laptop, RAM, disk, status virtualisasi (untuk WSL/Docker/Emulator).' 'sys'
       MkItem '⏻  Keluar' 'Sampai jumpa! Semangat ngodingnya.' 'quit'
@@ -875,9 +1288,10 @@ function Main-Menu {
       'wiz' { Run-Wizard } 'prof' { Pick-Profile } 'cat' { Browse-Category } 'status' { Show-All }
       'cart' { Review-Install } 'ext' { Setup-VSCodeExt } 'git' { Setup-Git } 'tweak' { Setup-Tweaks }
       'upd' { Update-All } 'sys' { Show-SysInfo }
+      'tune' { Tune-Up } 'startup' { Manage-Startup } 'debloat' { Debloat }
       'quit' {
         if ($Cart.Count -and -not (YesNo "Keranjang masih berisi $($Cart.Count) item. Yakin keluar?" $false)) { continue }
-        Clear-Host; [Console]::CursorVisible = $true
+        Clear-Host; Set-Cursor $true
         Line "`n  Terima kasih sudah pakai DEVSETUP IF. Log: $LogFile`n" Magenta; return
       }
     }
@@ -888,12 +1302,41 @@ function Main-Menu {
 #  MAIN
 # =====================================================================================
 try {
-  Log "DEVSETUP IF dimulai. Admin=$IsAdmin"
+  Log "DEVSETUP IF dimulai. Admin=$IsAdmin Arch=$Arch PS=$($PSVersionTable.PSVersion) Host=$($Host.Name) VT=$VT Tes=$TestMode"
+  if (-not $TestMode) {
+    try { $redir = [Console]::IsInputRedirected } catch { $redir = $false }
+    if ($redir) { Write-Host 'Input keyboard tidak tersedia (dijalankan lewat pipe/ISE). Jalankan dari jendela PowerShell biasa atau klik JALANKAN.bat.' -ForegroundColor Red; exit 1 }
+  }
   Show-Boot
+  if ($SelfTest -and -not $env:TIPACK_KEYS) {
+    $miss = @(); foreach ($q in $Wizard) { foreach ($k in ($q.L -split ',')) { if (-not $C.ContainsKey($k) -and $Arch -eq 'AMD64') { $miss += $k } } }
+    Write-Host "SELFTEST katalog=$($Catalog.Count) terpasang=$(@($Catalog | Where-Object Installed).Count) arch=$Arch winget=$($Sys.Winget) vt=$VT key-hilang=$($miss -join ',')"
+    if ($miss) { exit 2 }; exit 0
+  }
+  if ($Install) {
+    $ks = KeyList $Install
+    $bad = @($Install -split '[,\s]+' | Where-Object { $_ -and -not $C.ContainsKey($_) })
+    if ($bad) { Line "Key tidak dikenal: $($bad -join ', ')" Red }
+    if (-not $ks) { exit 1 }
+    Sync-Cart $ks $ks
+    if ($Cart.Count) { Install-Cart } else { Line 'Semua aplikasi yang diminta sudah terpasang.' Green }
+    exit $(if ($script:InstallFail -gt 0) { 3 } else { 0 })
+  }
   if ($Preset) {
     $p = $Profiles | Where-Object { $_.K -eq $Preset }
     if (-not $p) { Line "Preset '$Preset' tidak dikenal. Pilihan: $(($Profiles | ForEach-Object K) -join ', ')" Red; exit 1 }
-    Sync-Cart ($p.L -split ',') ($p.L -split ',')
+    Sync-Cart (KeyList $p.L) (KeyList $p.L)
     Install-Cart
+    exit $(if ($script:InstallFail -gt 0) { 3 } else { 0 })
   } else { Main-Menu }
-} finally { [Console]::CursorVisible = $true }
+} catch {
+  if ("$_" -eq 'TIPACK_KEYS_HABIS') { Log 'tes selesai: antrean tombol habis'; Write-Host "`nSELFTEST-TOMBOL-SELESAI"; exit 0 }
+  Log "ERROR: $_`n$($_.ScriptStackTrace)"
+  Set-Cursor $true
+  Write-Host "`n  Terjadi error: $_" -ForegroundColor Red
+  Write-Host "  Lokasi: $($_.InvocationInfo.ScriptLineNumber): $($_.InvocationInfo.Line.Trim())" -ForegroundColor DarkGray
+  Write-Host "  Log lengkap: $LogFile" -ForegroundColor Yellow
+  Write-Host '  Kirim file log itu saat melapor di https://github.com/fk0u/tipack/issues' -ForegroundColor DarkGray
+  if (-not $TestMode) { Read-Host '  Tekan Enter untuk keluar' }
+  exit 1
+} finally { Set-Cursor $true; if ($VT) { [Console]::Out.Write("$ESC[?7h$ESC[0m") } }

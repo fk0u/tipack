@@ -9,8 +9,14 @@
 #              ./setup.sh --no-anim
 # =====================================================================================
 
-PRESET=""; NOANIM=0
-while [ $# -gt 0 ]; do case "$1" in --preset) PRESET="$2"; shift ;; --no-anim) NOANIM=1 ;; esac; shift; done
+PRESET=""; NOANIM=0; INSTALL_KEYS=""; SELFTEST=0
+while [ $# -gt 0 ]; do case "$1" in --preset) PRESET="$2"; shift ;; --install) INSTALL_KEYS="$2"; shift ;; --self-test) SELFTEST=1 ;; --no-anim) NOANIM=1 ;; esac; shift; done
+TEST_MODE=0; KEYQ=(); KEYI=0
+if [ -n "$TIPACK_KEYS" ]; then IFS=',' read -r -a KEYQ <<< "$TIPACK_KEYS"; TEST_MODE=1; fi
+[ $SELFTEST = 1 ] && TEST_MODE=1
+[ $TEST_MODE = 1 ] && NOANIM=1
+UNATTENDED=0; { [ -n "$INSTALL_KEYS" ] || [ -n "$PRESET" ]; } && UNATTENDED=1
+INSTALL_FAIL=0
 
 [ "$(uname)" = Darwin ] || { echo "Script ini khusus macOS. Untuk Windows pakai windows/setup.ps1"; exit 1; }
 export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
@@ -239,13 +245,16 @@ trap cleanup EXIT
 trap 'cleanup; echo; exit 130' INT
 hide_cur() { printf '%s' "$E[?25l"; }
 show_cur() { printf '%s' "$E[?25h"; }
-pause_key() { printf '\n  %sTekan tombol apa saja untuk kembali...%s' "$DIM" "$R0"; read -rsn1; }
+pause_key() { printf '\n  %sTekan tombol apa saja untuk kembali...%s' "$DIM" "$R0"; read_key; }
 ask() { # ask "pertanyaan" "default" -> REPLY_VAL
+  if [ "$TEST_MODE" = 1 ] || [ "$UNATTENDED" = 1 ]; then REPLY_VAL="$2"; log "ASK $1 -> $2"; return; fi
   show_cur; printf '  %s?%s %s%s%s' "$MAG" "$R0" "$WHT" "$1" "$R0"; [ -n "$2" ] && printf ' %s[%s]%s' "$DIM" "$2" "$R0"; printf ': '
   IFS= read -r REPLY_VAL; [ -z "$REPLY_VAL" ] && REPLY_VAL="$2"
 }
 yesno() { ask "$1 (y/n)" "${2:-y}"; case "$REPLY_VAL" in y|Y|ya|yes) return 0 ;; *) return 1 ;; esac; }
 repeat() { local s="" n=$2; while [ $n -gt 0 ]; do s="$s$1"; n=$((n-1)); done; printf '%s' "$s"; }
+human() { local b=${1:-0}; if [ "$b" -ge 1073741824 ]; then awk -v b="$b" 'BEGIN{printf "%.1f GB", b/1073741824}'; elif [ "$b" -ge 1048576 ]; then echo "$((b/1048576)) MB"; else echo "$((b/1024)) KB"; fi; }
+dir_bytes() { local t=0 p k; for p in "$@"; do [ -e "$p" ] || continue; k=$(du -sk "$p" 2>/dev/null | awk '{print $1}'); t=$((t + ${k:-0}*1024)); done; echo $t; }
 bar() { local d=$1 t=$2 w=${3:-34} f=0 p=0; [ "$t" -gt 0 ] && { f=$((w*d/t)); p=$((100*d/t)); }; printf '%s%s %3d%%' "$(repeat '█' $f)" "$(repeat '░' $((w-f)))" $p; }
 in_list() { case " $2 " in *" $1 "*) return 0 ;; esac; return 1; }
 cart_count() { local n=0 i; for ((i=0;i<NCAT;i++)); do [ "${CART[$i]}" = 1 ] && n=$((n+1)); done; echo $n; }
@@ -275,6 +284,12 @@ cat_opt() { # tambahkan item katalog berdasarkan key
 # ---------- input keyboard ----------
 read_key() {
   local k r
+  if [ "$TEST_MODE" = 1 ]; then
+    if [ $KEYI -ge ${#KEYQ[@]} ]; then printf '\nSELFTEST-TOMBOL-SELESAI\n'; exit 0; fi
+    k=${KEYQ[$KEYI]}; KEYI=$((KEYI+1)); log "KEY $k"
+    case "$k" in Up) KEY=UP ;; Down) KEY=DOWN ;; Enter) KEY=ENTER ;; Esc) KEY=ESC ;; Space) KEY=SPACE ;; PgDn) KEY=PGDN ;; PgUp) KEY=PGUP ;; Home) KEY=HOME ;; End) KEY=END ;; *) KEY=$(printf '%s' "$k" | tr 'A-Z' 'a-z') ;; esac
+    return
+  fi
   IFS= read -rsn1 k
   if [ "$k" = "$E" ]; then
     IFS= read -rsn1 -t 1 r || { KEY=ESC; return; }
@@ -298,7 +313,7 @@ select_list() {
   while [ $idx -lt $((n-1)) ] && [ "${O_SEP[$idx]}" = 1 ]; do idx=$((idx+1)); done
   printf '%s' "$E[2J$E[?7l"; hide_cur
   while true; do
-    rows=$(tput lines); cols=$(tput cols); OUT="$E[H"; LN=0
+    rows=$(tput lines 2>/dev/null || echo 30); cols=$(tput cols 2>/dev/null || echo 100); [ "${rows:-0}" -lt 10 ] && rows=30; [ "${cols:-0}" -lt 40 ] && cols=100; OUT="$E[H"; LN=0
     ln() { OUT="$OUT$1$E[K"$'\n'; LN=$((LN+1)); }
     for line in "${HDR[@]}"; do ln "$line"; done
     cc=$(cart_count)
@@ -611,7 +626,7 @@ install_cart() {
   total=$(echo $order | wc -w | tr -d ' ')
   printf '%s' "$E[2J$E[H"; show_banner
   printf '\n  %s═══ INSTALASI DIMULAI · %s item · log: %s%s\n\n' "$MAG" "$total" "$LOG" "$R0"
-  if echo "$order" | grep -q .; then
+  if echo "$order" | grep -q . && ! sudo -n true 2>/dev/null; then
     printf '  %sBeberapa aplikasi (cask) butuh password Mac. Masukkan sekali di sini:%s\n' "$DIM" "$R0"; show_cur
     sudo -v && { ( while true; do sudo -n true; sleep 50; kill -0 $$ 2>/dev/null || exit; done ) 2>/dev/null & SUDO_PID=$!; }
     hide_cur; echo
@@ -648,10 +663,11 @@ install_cart() {
   if [ -n "$notes" ]; then
     printf '\n  %sPerlu download/instal manual:%s\n' "$YEL" "$R0"
     echo "$notes" | while IFS='|' read -r nm url; do [ -n "$nm" ] && printf '   • %s: %s\n' "$nm" "$url"; done
-    if yesno "Buka semua link di browser?" y; then echo "$notes" | while IFS='|' read -r nm url; do [ -n "$url" ] && open "$url"; done; fi
+    if [ "$UNATTENDED$TEST_MODE" = 00 ] && yesno "Buka semua link di browser?" y; then echo "$notes" | while IFS='|' read -r nm url; do [ -n "$url" ] && open "$url"; done; fi
   fi
+  INSTALL_FAIL=$fail
   printf '\n  %sTip: buka tab Terminal baru (atau jalankan: source ~/.zshrc) supaya PATH baru terbaca.%s\n' "$CYN" "$R0"
-  pause_key
+  [ "$UNATTENDED" = 1 ] || pause_key
 }
 
 setup_vscode_ext() {
@@ -751,6 +767,114 @@ update_all() {
   scan_installed; pause_key
 }
 
+# =====================================================================================
+#  TUNE-UP & DEBLOAT macOS
+# =====================================================================================
+tune_up() {
+  printf '%s\n   %sMenghitung ukuran cache, tunggu sebentar...%s' "$E[2J$E[H" "$DIM" "$R0"
+  local s_cache s_logs s_brew s_dev s_trash s_xcode
+  s_cache=$(dir_bytes ~/Library/Caches); s_logs=$(dir_bytes ~/Library/Logs)
+  s_brew=$(dir_bytes "$(brew --cache 2>/dev/null)")
+  s_dev=$(dir_bytes ~/.npm/_cacache ~/Library/Caches/pip ~/.gradle/caches ~/Library/Caches/Yarn ~/.cache/pip)
+  s_xcode=$(dir_bytes ~/Library/Developer/Xcode/DerivedData ~/Library/Developer/Xcode/iOS\ DeviceSupport ~/Library/Developer/CoreSimulator/Caches)
+  s_trash=$(dir_bytes ~/.Trash)
+  local snaps; snaps=$(tmutil listlocalsnapshots / 2>/dev/null | grep -c com.apple)
+  local old=0; [ "$SYS_RAM" -le 8 ] && old=1
+  local TU=(
+    "cache|Bersihkan cache aplikasi user ($(human "$s_cache"))|Isi ~/Library/Caches. Aplikasi membuat ulang cache-nya; pertama kali dibuka mungkin sedikit lebih lambat.|1"
+    "logs|Hapus log lama ($(human "$s_logs"))|Isi ~/Library/Logs. Aman.|1"
+    "brew|Bersihkan Homebrew ($(human "$s_brew"))|brew cleanup --prune=all + brew autoremove: hapus installer lama dan dependensi yatim.|1"
+    "dev|Bersihkan cache developer ($(human "$s_dev"))|npm, pip, Yarn dan Gradle cache. Paket diunduh ulang saat dibutuhkan.|0"
+    "xcode|Bersihkan Xcode DerivedData & cache simulator ($(human "$s_xcode"))|Sering puluhan GB di Mac developer iOS. Build pertama setelahnya lebih lama.|0"
+    "trash|Kosongkan Trash ($(human "$s_trash"))|PERMANEN. Cek isi Trash dulu kalau ragu.|0"
+    "tmsnap|Hapus snapshot lokal Time Machine ($snaps snapshot)|Snapshot lokal bisa memakan banyak GB yang tidak terlihat di Finder. Backup di disk eksternal tidak tersentuh.|$( [ "$snaps" -gt 0 ] && echo 1 || echo 0)"
+    "anim|Percepat animasi (Dock, jendela, Mission Control)|Animasi lebih singkat atau mati, sehingga Mac lama terasa jauh lebih responsif.|$old"
+    "motion|Kurangi gerakan & transparansi|Mengurangi beban GPU. Di macOS terbaru mungkin perlu izin; kalau gagal, atur di System Settings > Accessibility > Display.|$old"
+    "purge|Bebaskan RAM (purge)|Mengosongkan cache memori yang tidak aktif. Efeknya sementara; berguna sebelum membuka aplikasi berat.|0"
+    "dns|Flush DNS cache|Untuk situs yang tidak bisa dibuka setelah ganti jaringan/DNS.|0"
+    "spot|Bangun ulang index Spotlight|Untuk pencarian Spotlight yang lambat atau tidak menemukan file. Mac akan sibuk mengindeks 10-60 menit.|0"
+  )
+  local t k n d r
+  opt_reset
+  for t in "${TU[@]}"; do IFS='|' read -r k n d r <<< "$t"; opt_add "$n" "$d" "$k" "$( [ "$r" = 1 ] && printf '%s★ rekomendasi' "$YEL")" "$r" 0 "$r"; done
+  opt_add "Login items (aplikasi saat Mac menyala)" "Membuka System Settings > General > Login Items. Matikan aplikasi yang tidak perlu ikut jalan saat Mac menyala supaya booting lebih cepat." "login" "" 0 0 0
+  opt_add "Cari file besar (> 500 MB) di folder home" "Hanya menampilkan daftar, tidak menghapus apa pun." "big" "" 0 0 0
+  select_list "Tune-Up & Optimasi" "RAM $SYS_RAM GB, disk kosong $SYS_DISKFREE GB. Rekomendasi sudah dicentang." multi 0 "jalankan"
+  [ "$RES_OK" != 1 ] && return
+  printf '%s\n  %s═══ TUNE-UP ═══%s\n\n' "$E[2J$E[H" "$MAG" "$R0"; show_cur
+  local before; before=$(df -k / | awk 'NR==2{print $4}')
+  case " $RES_VALUES " in *" tmsnap "*|*" purge "*|*" dns "*|*" spot "*) sudo -v ;; esac
+  for k in $RES_VALUES; do
+    log "TUNE $k"
+    case $k in
+      cache) rm -rf ~/Library/Caches/* 2>/dev/null ;;
+      logs) rm -rf ~/Library/Logs/* 2>/dev/null ;;
+      brew) brew cleanup --prune=all >>"$LOG" 2>&1; brew autoremove >>"$LOG" 2>&1 ;;
+      dev) command -v npm >/dev/null && npm cache clean --force >>"$LOG" 2>&1; command -v pip3 >/dev/null && pip3 cache purge >>"$LOG" 2>&1; rm -rf ~/.gradle/caches ~/Library/Caches/Yarn 2>/dev/null ;;
+      xcode) rm -rf ~/Library/Developer/Xcode/DerivedData/* ~/Library/Developer/Xcode/iOS\ DeviceSupport/* ~/Library/Developer/CoreSimulator/Caches/* 2>/dev/null; command -v xcrun >/dev/null && xcrun simctl delete unavailable >>"$LOG" 2>&1 ;;
+      trash) osascript -e 'tell application "Finder" to empty trash' >>"$LOG" 2>&1 || rm -rf ~/.Trash/* 2>/dev/null ;;
+      tmsnap) sudo tmutil thinlocalsnapshots / 999999999999 4 >>"$LOG" 2>&1 ;;
+      anim) defaults write com.apple.dock autohide-time-modifier -float 0.15; defaults write com.apple.dock autohide-delay -float 0
+            defaults write com.apple.dock expose-animation-duration -float 0.1; defaults write com.apple.dock launchanim -bool false
+            defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false; defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
+            defaults write com.apple.finder DisableAllAnimations -bool true; killall Dock Finder 2>/dev/null ;;
+      motion) defaults write com.apple.universalaccess reduceMotion -bool true 2>>"$LOG"; defaults write com.apple.universalaccess reduceTransparency -bool true 2>>"$LOG" ;;
+      purge) sudo purge ;;
+      dns) sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder 2>/dev/null ;;
+      spot) sudo mdutil -E / >>"$LOG" 2>&1 ;;
+      login) open "x-apple.systempreferences:com.apple.LoginItems-Settings.extension" 2>/dev/null ;;
+      big) printf '  %sFile terbesar di %s:%s\n' "$CYN" "$HOME" "$R0"; find ~ -xdev -type f -size +500M -not -path '*/Library/Mobile Documents/*' 2>/dev/null | head -200 | while IFS= read -r f; do du -h "$f" 2>/dev/null; done | sort -rh | head -15 | sed 's/^/     /' ;;
+    esac
+    printf '   %s✓ %s%s\n' "$GRN" "$k" "$R0"
+  done
+  local after; after=$(df -k / | awk 'NR==2{print $4}')
+  [ "$after" -gt "$before" ] && printf '\n   %sRuang kosong bertambah: %s%s\n' "$GRN" "$(human $(( (after-before)*1024 )))" "$R0"
+  pause_key
+}
+
+debloat() {
+  local APPS=(
+    "GarageBand|GarageBand|Studio musik bawaan. Bersama loop audionya bisa memakan 2-10 GB."
+    "iMovie|iMovie|Editor video bawaan (±3 GB)."
+    "Keynote|Keynote|Presentasi Apple. Hapus kalau memakai PowerPoint/Google Slides."
+    "Numbers|Numbers|Spreadsheet Apple. Hapus kalau memakai Excel/Google Sheets."
+    "Pages|Pages|Pengolah kata Apple. Hapus kalau memakai Word/Google Docs."
+  )
+  local a f nm d sz
+  opt_reset
+  opt_add "Aplikasi Apple opsional" "" "" "" 0 1 0 1
+  for a in "${APPS[@]}"; do
+    IFS='|' read -r f nm d <<< "$a"
+    [ -d "/Applications/$f.app" ] || continue
+    sz=$(dir_bytes "/Applications/$f.app")
+    [ "$f" = GarageBand ] && sz=$(( sz + $(dir_bytes "/Library/Application Support/GarageBand" "/Library/Audio/Apple Loops") ))
+    opt_add "$nm ($(human "$sz"))" "$d Dipindahkan ke Trash (masih bisa dikembalikan) dan bisa dipasang ulang gratis dari App Store." "app:$f" "${DIM}opsional" 0 0 0
+  done
+  opt_add "Privasi & gangguan" "" "" "" 0 1 0 1
+  local siri ads; siri=$(defaults read com.apple.assistant.support "Assistant Enabled" 2>/dev/null); ads=$(defaults read com.apple.AdLib allowApplePersonalizedAdvertising 2>/dev/null)
+  opt_add "Matikan iklan yang dipersonalisasi Apple" "Apple tidak memakai data kamu untuk iklan di App Store, News dan Stocks." "tw:ads" "$( [ "$ads" = 0 ] && printf '%s✓ sudah' "$GRN")" $( [ "$ads" = 0 ] && echo 0 || echo 1) $( [ "$ads" = 0 ] && echo 1 || echo 0) 1
+  opt_add "Matikan Siri" "Siri dan proses latarnya tidak berjalan. Hemat RAM di Mac lama." "tw:siri" "$( [ "$siri" = 0 ] && printf '%s✓ sudah' "$GRN")" 0 $( [ "$siri" = 0 ] && echo 1 || echo 0) 0
+  opt_add "Matikan kirim data analitik & crash ke Apple" "Membuka System Settings > Privacy & Security > Analytics & Improvements (pengaturan ini dilindungi sistem)." "tw:analytics" "" 0 0 0
+  opt_add "Sembunyikan aplikasi terbaru di Dock" "Dock hanya berisi aplikasi yang kamu pin." "tw:recents" "" 1 0 1
+  select_list "Debloat macOS" "Hapus aplikasi Apple opsional yang besar dan matikan gangguan. Aplikasi sistem yang dilindungi macOS (SIP) tidak bisa dan tidak akan dihapus." multi 0 "jalankan"
+  [ "$RES_OK" != 1 ] && return
+  printf '%s\n  %s═══ DEBLOAT ═══%s\n\n' "$E[2J$E[H" "$MAG" "$R0"; show_cur
+  case "$RES_VALUES" in *app:*) sudo -v ;; esac
+  local v
+  for v in $RES_VALUES; do
+    log "DEBLOAT $v"
+    case $v in
+      app:*) f=${v#app:}; sudo mv "/Applications/$f.app" ~/.Trash/ 2>>"$LOG" && printf '   %s✓ %s dipindah ke Trash%s\n' "$GRN" "$f" "$R0" || printf '   %s✗ %s gagal%s\n' "$RED" "$f" "$R0"
+             if [ "$f" = GarageBand ]; then sudo rm -rf "/Library/Application Support/GarageBand" "/Library/Audio/Apple Loops/Apple" 2>/dev/null; fi ;;
+      tw:ads) defaults write com.apple.AdLib allowApplePersonalizedAdvertising -bool false; printf '   %s✓ iklan personal mati%s\n' "$GRN" "$R0" ;;
+      tw:siri) defaults write com.apple.assistant.support "Assistant Enabled" -bool false; defaults write com.apple.Siri StatusMenuVisible -bool false; launchctl disable "gui/$(id -u)/com.apple.Siri.agent" 2>/dev/null; printf '   %s✓ Siri mati%s\n' "$GRN" "$R0" ;;
+      tw:analytics) open "x-apple.systempreferences:com.apple.preference.security?Privacy_Analytics" 2>/dev/null; printf '   %s→ System Settings dibuka%s\n' "$CYN" "$R0" ;;
+      tw:recents) defaults write com.apple.dock show-recents -bool false; killall Dock 2>/dev/null; printf '   %s✓ recent apps disembunyikan%s\n' "$GRN" "$R0" ;;
+    esac
+  done
+  pause_key
+}
+
 show_sysinfo() {
   local rt
   if [ "$SYS_RAM" -lt 8 ]; then rt="RAM di bawah 8GB: hindari Docker Desktop/Android Studio, pakai OrbStack dan editor ringan."
@@ -785,6 +909,8 @@ main_menu() {
     opt_add "🧩 Ekstensi VS Code" "Pasang ekstensi VS Code penting: C/C++, Code Runner, Python, Java, Live Server, GitLens, Error Lens, dll." ext
     opt_add "🔑 Setup Git & SSH Key GitHub" "Atur nama/email Git, buat SSH key, simpan di Keychain, copy ke clipboard, buka GitHub, gh auth login." git
     opt_add "⚙️  Tweak macOS untuk Developer" "Tampilkan ekstensi dan file tersembunyi, path bar, folder screenshot, key repeat cepat, tanpa .DS_Store di flashdisk." tweak
+    opt_add "🚀 Tune-Up & Optimasi" "Bersihkan cache, log, Homebrew, cache developer & Xcode, snapshot Time Machine, percepat animasi, bebaskan RAM. Cocok untuk Mac lama yang mulai lemot." tune "$( [ "$SYS_RAM" -le 8 ] && printf '%s★ disarankan untuk Mac ini' "$YEL")"
+    opt_add "🧹 Debloat macOS" "Hapus GarageBand/iMovie/Keynote/Numbers/Pages (bisa belasan GB), matikan iklan personal, Siri dan recent apps di Dock." debloat
     opt_add "🔄 Update Semua Aplikasi" "brew update + upgrade + upgrade --cask --greedy + cleanup." upd
     opt_add "💻 Info Sistem" "Spesifikasi Mac, chip, RAM, disk dan versi Homebrew." sys
     opt_add "🚪 Keluar" "Sampai jumpa! Semangat ngodingnya." quit
@@ -794,7 +920,7 @@ main_menu() {
     case $v in
       wiz) run_wizard ;; prof) pick_profile ;; cat) browse_category ;; status) show_all ;;
       cart) review_install ;; ext) setup_vscode_ext ;; git) setup_git ;; tweak) setup_tweaks ;;
-      upd) update_all ;; sys) show_sysinfo ;;
+      upd) update_all ;; sys) show_sysinfo ;; tune) tune_up ;; debloat) debloat ;;
       quit)
         if [ "$(cart_count)" -gt 0 ]; then printf '%s' "$E[2J$E[H"; echo; yesno "Keranjang masih berisi $(cart_count) item. Yakin keluar?" n || continue; fi
         printf '%s' "$E[2J$E[H"; printf '\n  %sTerima kasih sudah pakai DEVSETUP IF. Log: %s%s\n\n' "$MAG" "$LOG" "$R0"; return ;;
@@ -805,12 +931,24 @@ main_menu() {
 # =====================================================================================
 #  MAIN
 # =====================================================================================
-log "DEVSETUP IF macOS dimulai"
+log "DEVSETUP IF macOS dimulai ($(uname -m), bash $BASH_VERSION, tes=$TEST_MODE)"
 boot
+if [ $SELFTEST = 1 ] && [ ${#KEYQ[@]} = 0 ]; then
+  echo "SELFTEST katalog=$NCAT terpasang=$(inst_count) arch=$(uname -m) os=$(sw_vers -productVersion)"; exit 0
+fi
+if [ -n "$INSTALL_KEYS" ]; then
+  want=$(echo "$INSTALL_KEYS" | tr ',' ' '); bad=""
+  for k in $want; do case "$k" in *[!a-z0-9]*) bad="$bad $k"; continue ;; esac; [ -z "$(ix "$k")" ] && bad="$bad $k"; done
+  [ -n "$bad" ] && echo "Key tidak dikenal:$bad"
+  sync_cart "$want" "$want"
+  if [ "$(cart_count)" -gt 0 ]; then install_cart; else echo "Semua aplikasi yang diminta sudah terpasang."; fi
+  [ "$INSTALL_FAIL" -gt 0 ] && exit 3; exit 0
+fi
 if [ -n "$PRESET" ]; then
   found=""; for p in "${PROFILES[@]}"; do [ "${p%%|*}" = "$PRESET" ] && found=${p##*|}; done
   [ -z "$found" ] && { echo "Preset '$PRESET' tidak dikenal."; exit 1; }
   sync_cart "$found" "$found"; install_cart
+  [ "$INSTALL_FAIL" -gt 0 ] && exit 3
 else
   main_menu
 fi

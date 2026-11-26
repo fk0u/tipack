@@ -1,0 +1,178 @@
+name: Uji semua platform
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------- Windows (x64 & ARM64, PowerShell 5.1 & 7)
+  windows:
+    name: Windows ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-2025, arch: x64 }
+          - { os: windows-11-arm, arch: arm64 }
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cek syntax (parser PowerShell 5.1)
+        run: |
+          $err = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile("$pwd\windows\setup.ps1", [ref]$null, [ref]$err)
+          [void][System.Management.Automation.Language.Parser]::ParseFile("$pwd\web\install.ps1", [ref]$null, [ref]$err)
+          if ($err) { $err | ForEach-Object { "::error file=windows/setup.ps1,line=$($_.Extent.StartLineNumber)::$($_.Message)" }; exit 1 }
+          'syntax OK'
+
+      - name: Self-test (PowerShell 5.1)
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File windows\setup.ps1 -SelfTest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Self-test (PowerShell 7)
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File windows/setup.ps1 -SelfTest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Navigasi semua menu (antrean tombol)
+        env:
+          # Info · Tune-Up · Startup · Debloat · Tweak · Status · Kategori · Profil · Wizard · Ekstensi VS Code
+          TIPACK_KEYS: "Up,Up,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Enter,Down,Space,Esc,Down,Down,Enter,Enter,Space,Enter,Esc,Down,Enter,Enter,Esc,Esc,Enter,Enter,Esc,Esc,Down,Down,Down,Down,Down,Enter,Esc"
+        run: |
+          $out = powershell -NoProfile -ExecutionPolicy Bypass -File windows\setup.ps1 2>&1 | Out-String
+          $code = $LASTEXITCODE
+          $out.Substring([Math]::Max(0, $out.Length - 1500))
+          if ($code -ne 0 -or $out -notmatch 'SELFTEST-TOMBOL-SELESAI') { Write-Error "Navigasi gagal (exit $code)"; exit 1 }
+
+      - name: Install sungguhan lewat winget (-Install 7zip)
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File windows\setup.ps1 -Install 7zip -NoAnim
+          "exit=$LASTEXITCODE"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Validasi semua ID winget di katalog
+        continue-on-error: true
+        run: |
+          $raw = (Get-Content windows\setup.ps1 -Raw -Encoding UTF8) -split "\`$CatalogRaw = @'" | Select-Object -Index 1
+          $raw = ($raw -split "'@")[0]
+          $ids = $raw -split "`n" | ForEach-Object { ($_ -split '\|')[2] } | Where-Object { $_ -and $_ -notmatch '^(wsl|feat|info):' }
+          $bad = @()
+          foreach ($id in $ids) {
+            $r = winget show --id $id -e --accept-source-agreements --disable-interactivity 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) { $bad += $id; "::warning::winget ID tidak ditemukan: $id" }
+          }
+          "Dicek: $($ids.Count) ID, tidak ditemukan: $($bad.Count) -> $($bad -join ', ')"
+          if ($bad) { exit 1 }
+
+      - name: Simpan log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-windows-${{ matrix.arch }}
+          path: windows/devsetup-log-*.txt
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- macOS (Apple Silicon & Intel)
+  macos:
+    name: macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-15, arch: arm64 }
+          - { os: macos-15-intel, arch: x64 }
+    env:
+      TERM: xterm-256color
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cek syntax dengan bash 3.2 bawaan macOS
+        run: /bin/bash -n macos/setup.sh && /bin/bash -n web/install.sh
+      - name: Self-test
+        run: /bin/bash macos/setup.sh --self-test
+      - name: Navigasi semua menu (antrean tombol)
+        env:
+          TIPACK_KEYS: "Up,Up,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Enter,Down,Space,Esc,Down,Down,Enter,Enter,Space,Enter,Esc,Down,Enter,Enter,Esc,Esc,Enter,Enter,Esc,Esc"
+        run: /bin/bash macos/setup.sh | tail -c 600 | grep -q SELFTEST-TOMBOL-SELESAI
+      - name: Install sungguhan lewat Homebrew (--install lazygit)
+        run: /bin/bash macos/setup.sh --install lazygit --no-anim
+      - name: Simpan log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-macos-${{ matrix.arch }}
+          path: macos/devsetup-log-*.txt
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- Linux (6 distro, x64 & ARM64) + Termux
+  linux:
+    name: Linux ${{ matrix.image }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "ubuntu:24.04", arch: x64, runner: ubuntu-24.04 }
+          - { image: "debian:12", arch: x64, runner: ubuntu-24.04 }
+          - { image: "fedora:latest", arch: x64, runner: ubuntu-24.04 }
+          - { image: "archlinux:latest", arch: x64, runner: ubuntu-24.04 }
+          - { image: "opensuse/tumbleweed", arch: x64, runner: ubuntu-24.04 }
+          - { image: "alpine:latest", arch: x64, runner: ubuntu-24.04 }
+          - { image: "ubuntu:24.04", arch: arm64, runner: ubuntu-24.04-arm }
+          - { image: "fedora:latest", arch: arm64, runner: ubuntu-24.04-arm }
+          - { image: "debian:12", arch: arm64, runner: ubuntu-24.04-arm }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rakit ulang & bandingkan
+        run: |
+          bash linux/src/build.sh
+          git diff --exit-code linux/setup.sh || { echo "::error::linux/setup.sh tidak sinkron: jalankan bash linux/src/build.sh"; exit 1; }
+      - name: Uji di container ${{ matrix.image }}
+        run: |
+          cp linux/src/test-distro.sh linux/
+          docker run --rm -e TERM=xterm-256color -v "$PWD/linux:/t" "${{ matrix.image }}" sh -c '
+            set -e
+            command -v bash >/dev/null || apk add -q bash ncurses
+            bash /t/test-distro.sh
+            echo "== self-test";  bash /t/setup.sh --self-test
+            echo "== navigasi";   TIPACK_KEYS="Up,Up,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Down,Down,Down,Down,Down,Down,Enter,Esc,Down,Down,Down,Enter,Down,Space,Esc,Down,Down,Enter,Enter,Space,Enter,Esc,Down,Enter,Enter,Esc,Esc,Enter,Enter,Esc,Esc" bash /t/setup.sh | tail -c 400 | grep -q SELFTEST-TOMBOL-SELESAI
+            echo "== install";    bash /t/setup.sh --install git,python,build,nmap --no-anim
+          ' | tee result.txt
+          if grep -q "PAKET-TIDAK-ADA: [a-z]" result.txt; then echo "::warning::$(grep PAKET-TIDAK-ADA result.txt)"; fi
+
+  termux:
+    name: Termux (Android x64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Uji di termux-docker
+        run: |
+          docker run --rm -v "$PWD/linux:/data/data/com.termux/files/home/t" termux/termux-docker:x86_64 bash -c '
+            cd ~/t && TERM=xterm-256color bash setup.sh --self-test && bash setup.sh --install git,python --no-anim'
+
+  # ---------------------------------------------------------------- Katalog & dokumentasi hasil generate
+  catalog:
+    name: Katalog sinkron
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 web/build-catalog.py
+          git diff --exit-code web/catalog.json docs/katalog.md || { echo "::error::Jalankan python3 web/build-catalog.py lalu commit hasilnya"; exit 1; }
