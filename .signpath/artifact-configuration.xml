@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Konfigurasi artifact SignPath untuk installer Windows TIPACK.
+     Salin isi file ini ke SignPath: Project > Artifact configurations > New (atau edit "default").
+     Artifact yang dikirim CI berupa zip berisi *.msi (WiX) dan *-setup.exe (NSIS) hasil build Tauri. -->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <msi-file path="*.msi" max-matches="unbounded">
+      <authenticode-sign/>
+    </msi-file>
+    <pe-file path="*.exe" max-matches="unbounded">
+      <authenticode-sign/>
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

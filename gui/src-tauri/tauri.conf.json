@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "TIPACK",
+  "version": "2.1.0",
+  "identifier": "tech.kousozo.tipack",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "TIPACK",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 900,
+        "minHeight": 600,
+        "center": true,
+        "backgroundColor": "#08070d"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "KouMac (fk0u)",
+    "copyright": "© 2026 KouMac (fk0u), MIT",
+    "category": "Utility",
+    "shortDescription": "Installer, Doctor, tune-up & debloat",
+    "longDescription": "TIPACK memasang 245 aplikasi lewat package manager resmi (winget, Homebrew, apt/dnf/pacman/zypper, Flathub), memperbaiki masalah otomatis (Doctor), dan membuat laporan masalah yang sudah disensor.",
+    "homepage": "https://tipack.kousozo.tech",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "../../windows/setup.ps1": "engine/setup.ps1",
+      "../../macos/setup.sh": "engine/macos.sh",
+      "../../linux/setup.sh": "engine/linux.sh",
+      "askpass/askpass-macos.sh": "engine/askpass-macos.sh",
+      "askpass/askpass-linux.sh": "engine/askpass-linux.sh"
+    },
+    "windows": {
+      "wix": {
+        "language": "en-US"
+      },
+      "nsis": {
+        "installMode": "perMachine"
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "bash",
+          "curl"
+        ]
+      },
+      "rpm": {
+        "depends": [
+          "bash",
+          "curl"
+        ]
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    }
+  }
+}

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIPACK</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<aside class="side">
+  <div class="brand"><img src="logo.svg" alt="" width="34" height="34"><div><b>TIPACK</b><small id="ver">v2.1</small></div></div>
+  <nav id="nav">
+    <button data-view="apps" class="on"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Pasang aplikasi</button>
+    <button data-view="profiles"><svg viewBox="0 0 24 24"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg>Profil</button>
+    <button data-view="config"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6"/></svg>Konfigurasi</button>
+    <button data-view="doctor"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Doctor</button>
+    <button data-view="more"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>Tune-Up & Debloat</button>
+    <button data-view="report"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>Laporkan masalah</button>
+  </nav>
+  <div class="sys" id="sys"><span class="dot"></span><span>Memindai sistem…</span></div>
+</aside>
+
+<main>
+  <!-- PASANG -->
+  <section class="view on" id="v-apps">
+    <header class="top">
+      <div><h1>Pasang aplikasi</h1><p id="appsSub">Pilih aplikasi, lalu tekan Pasang. Yang sudah terpasang ditandai ✓ dan dilewati.</p></div>
+      <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" placeholder="Cari aplikasi…" autocomplete="off" spellcheck="false"></label>
+    </header>
+    <div class="cats" id="cats"></div>
+    <div class="grid-wrap" id="grid"></div>
+  </section>
+
+  <!-- PROFIL -->
+  <section class="view" id="v-profiles">
+    <header class="top"><div><h1>Profil siap pakai</h1><p>Pilih profil untuk mencentang isinya di daftar aplikasi. Isinya masih bisa diubah.</p></div></header>
+    <div class="profs" id="profs"></div>
+  </section>
+
+  <!-- KONFIGURASI -->
+  <section class="view" id="v-config">
+    <header class="top"><div><h1>Konfigurasi <code>tipack.json</code></h1><p>Simpan pilihanmu ke file, atau buka file dari dosen/asisten lab untuk menyamakan isi semua laptop.</p></div></header>
+    <div class="panel">
+      <div class="row"><button class="btn" id="cfgOpen">Buka tipack.json…</button><button class="btn" id="cfgSave">Simpan pilihan sekarang…</button></div>
+      <p class="muted" id="cfgInfo">Belum ada file yang dibuka.</p>
+      <pre class="code" id="cfgPreview"></pre>
+    </div>
+  </section>
+
+  <!-- DOCTOR -->
+  <section class="view" id="v-doctor">
+    <header class="top"><div><h1>Doctor</h1><p>Periksa masalah yang sering membuat instalasi gagal, lalu perbaiki otomatis dengan izinmu.</p></div><button class="btn pri" id="docRun">Periksa sekarang</button></header>
+    <div id="docList" class="cards"><p class="muted">Tekan "Periksa sekarang".</p></div>
+    <div class="row" id="docAct" hidden><button class="btn pri" id="docFix">Perbaiki yang dicentang</button></div>
+  </section>
+
+  <!-- TUNE-UP & DEBLOAT -->
+  <section class="view" id="v-more">
+    <header class="top"><div><h1>Tune-Up & Debloat</h1><p>Bersihkan file sampah, kelola startup, efek visual ringan, zram/earlyoom, dan buang aplikasi bawaan. Fitur ini menampilkan detail per item (ukuran, status, butuh admin), jadi dijalankan di mode terminal TIPACK.</p></div></header>
+    <div class="panel">
+      <p>Buka terminal lalu jalankan:</p>
+      <div class="cmd"><code id="tuneCmd"></code><button class="btn sm" id="tuneCopy">Salin</button></div>
+      <p class="muted">Pilih menu <b>Tune-Up & Optimasi</b>, <b>Kelola Startup</b> (Windows) atau <b>Debloat</b>. Di Windows, restore point dibuat otomatis sebelum debloat.</p>
+    </div>
+  </section>
+
+  <!-- LAPORAN -->
+  <section class="view" id="v-report">
+    <header class="top"><div><h1>Laporkan masalah</h1><p>TIPACK membuat laporan dari log terakhir. Nama user, nama komputer, email, IP publik dan token disensor dulu, lalu form GitHub Issue dibuka dengan info sistem sudah terisi.</p></div><button class="btn pri" id="repRun">Buat laporan</button></header>
+    <div class="panel" id="repOut"><p class="muted">Belum ada laporan.</p></div>
+  </section>
+
+  <!-- BAKI & PROGRESS -->
+  <footer class="tray" id="tray">
+    <div class="count"><b id="selN">0</b><span>dipilih</span></div>
+    <div class="chips" id="chips"></div>
+    <button class="btn" id="clear">Kosongkan</button>
+    <button class="btn pri" id="install">Pasang</button>
+  </footer>
+</main>
+
+<div class="modal" id="run" hidden>
+  <div class="dialog">
+    <header><h2 id="runTitle">Memasang aplikasi</h2><button class="btn sm" id="runStop">Hentikan</button></header>
+    <div class="bar"><i id="runBar"></i></div>
+    <p class="muted" id="runNote">Menyiapkan…</p>
+    <div class="items" id="runItems"></div>
+    <details><summary>Log</summary><pre id="runLog"></pre></details>
+    <footer><span id="runSum"></span><button class="btn pri" id="runClose" hidden>Selesai</button></footer>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

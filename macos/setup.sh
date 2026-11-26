@@ -52,7 +52,7 @@ ghostty|Terminal & Shell|cask|ghostty|Ghostty|0|Ghostty|Terminal super cepat ber
 ohmyzsh|Terminal & Shell|custom|ohmyzsh|Oh My Zsh + autosuggest + syntax highlight|1|dir:~/.oh-my-zsh|Framework zsh dengan tema dan plugin, plus saran perintah otomatis dan pewarnaan perintah.
 starship|Terminal & Shell|formula|starship|Starship prompt|0|cmd:starship|Prompt cantik yang menampilkan branch git dan versi bahasa. Butuh Nerd Font.
 nerdfont|Terminal & Shell|cask|font-jetbrains-mono-nerd-font|JetBrains Mono Nerd Font|0||Font coding dengan ligature dan ikon untuk terminal modern.
-clipack|Terminal & Shell|formula|wget tree htop btop jq tldr ripgrep bat eza fzf zoxide|CLI Power Pack (wget, htop, jq, tldr, dll)|1|cmd:tldr|Paket 11 tool terminal wajib: wget, tree, htop, btop, jq, tldr (contoh perintah), ripgrep, bat, eza, fzf, zoxide.
+clipack|Terminal & Shell|formula|wget tree htop btop jq tlrc ripgrep bat eza fzf zoxide|CLI Power Pack (wget, htop, jq, tldr, dll)|1|cmd:tldr|Paket 11 tool terminal wajib: wget, tree, htop, btop, jq, tldr (contoh perintah), ripgrep, bat, eza, fzf, zoxide.
 vscode|Editor Kode|cask|visual-studio-code|Visual Studio Code|1|Visual Studio Code|Editor paling populer: ringan dan ekstensinya melimpah. Standar mahasiswa IF.
 cursor|Editor Kode|cask|cursor|Cursor|0|Cursor|Fork VS Code dengan AI terintegrasi. Ada tier gratis.
 antigravity|Editor Kode|info|https://antigravity.google|Google Antigravity|0|Antigravity|IDE agentic dari Google (berbasis VS Code). Download manual dari situs resminya.
@@ -105,7 +105,7 @@ kubectl|DevOps & Cloud|formula|kubernetes-cli|kubectl|0|cmd:kubectl|CLI untuk Ku
 terraform|DevOps & Cloud|formula|hashicorp/tap/terraform|Terraform|0|cmd:terraform|Infrastructure as Code.
 awscli|DevOps & Cloud|formula|awscli|AWS CLI|0|cmd:aws|CLI Amazon Web Services.
 gcloud|DevOps & Cloud|cask|google-cloud-sdk|Google Cloud SDK|0|cmd:gcloud|CLI Google Cloud.
-azcli|DevOps & Cloud|formula|azure-cli|Azure CLI|0|cmd:az|CLI Azure. Mahasiswa dapat kredit gratis lewat Azure for Students.
+azcli|DevOps & Cloud|info|https://learn.microsoft.com/cli/azure/install-azure-cli-macos|Azure CLI|0|cmd:az|CLI Azure. Mahasiswa dapat kredit gratis lewat Azure for Students.
 ngrok|DevOps & Cloud|cask|ngrok|ngrok|0|cmd:ngrok|Membuat localhost bisa diakses publik untuk demo.
 ollama|AI & Data|cask|ollama|Ollama|0|Ollama|Jalankan LLM lokal. Apple Silicon + RAM 16GB sangat nyaman.
 lmstudio|AI & Data|cask|lm-studio|LM Studio|0|LM Studio|GUI untuk download dan chat dengan LLM lokal (dukungan MLX di Apple Silicon).
@@ -160,7 +160,7 @@ spotify|Media & Hiburan|cask|spotify|Spotify|1|Spotify|Streaming musik dan podca
 audacity|Media & Hiburan|cask|audacity|Audacity|0|Audacity|Rekam dan edit audio gratis: podcast, voice over, tugas presentasi.
 handbrake|Media & Hiburan|cask|handbrake-app|HandBrake|0|HandBrake|Kompres dan konversi video (misal video tugas terlalu besar untuk diunggah).
 capcut|Media & Hiburan|cask|capcut|CapCut|0|CapCut|Editor video populer untuk konten TikTok/Reels/YouTube Shorts.
-davinci|Media & Hiburan|cask|davinci-resolve|DaVinci Resolve|0|DaVinci Resolve|Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup.
+davinci|Media & Hiburan|info|https://www.blackmagicdesign.com/products/davinciresolve|DaVinci Resolve|0|DaVinci Resolve|Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup.
 kdenlive|Media & Hiburan|cask|kdenlive|Kdenlive|0|kdenlive|Editor video open source yang ringan, alternatif gratis untuk editing serius.
 krita|Desain & Multimedia|cask|krita|Krita|0|krita|Aplikasi menggambar digital gratis, favorit ilustrator dan pengguna pen tablet.
 affinity|Desain & Multimedia|info|https://www.affinity.studio|Affinity (gratis)|0|Affinity|Desain foto, vektor dan layout setara Adobe, sekarang gratis setelah diakuisisi Canva.
@@ -764,7 +764,7 @@ install_cart() {
   printf '\n  %s═══ INSTALASI DIMULAI · %s item · log: %s%s\n\n' "$MAG" "$total" "$LOG" "$R0"
   if echo "$order" | grep -q . && ! sudo -n true 2>/dev/null; then
     printf '  %sBeberapa aplikasi (cask) butuh password Mac. Masukkan sekali di sini:%s\n' "$DIM" "$R0"; show_cur
-    sudo -v && { ( while true; do sudo -n true; sleep 50; kill -0 $$ 2>/dev/null || exit; done ) 2>/dev/null & SUDO_PID=$!; }
+    sudo ${SUDO_ASKPASS:+-A} -v && { ( while true; do sudo -n true; sleep 50; kill -0 $$ 2>/dev/null || exit; done ) 2>/dev/null & SUDO_PID=$!; }
     hide_cur; echo
   fi
   for i in $order; do
@@ -1035,7 +1035,7 @@ apply_fix() {
     brew) ensure_brew ;;
     brewdoc) brew update >>"$LOG" 2>&1 && brew cleanup >>"$LOG" 2>&1 ;;
     path) local bp; bp=$(brew --prefix); echo "eval \"\$($bp/bin/brew shellenv)\"" >> ~/.zprofile ;;
-    rosetta) sudo softwareupdate --install-rosetta --agree-to-license >>"$LOG" 2>&1 ;;
+    rosetta) sudo ${SUDO_ASKPASS:+-A} softwareupdate --install-rosetta --agree-to-license >>"$LOG" 2>&1 ;;
     disk) tune_up ;;
     retry) local fk; fk=$(failed_keys); sync_cart "$fk" "$fk"; [ "$(cart_count)" -gt 0 ] && install_cart; [ "$INSTALL_FAIL" = 0 ] ;;
     *) return 1 ;;

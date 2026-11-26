@@ -39,6 +39,8 @@ WHT="$E[97m"; GRY="$E[37m"; DIM="$E[90m"; ORG="$E[38;5;208m"; PNK="$E[38;5;213m"
 
 if [ "$(id -u)" = 0 ]; then SUDO=""; IS_ROOT=1; else SUDO="sudo"; IS_ROOT=0; fi
 IS_TERMUX=0; { [ -n "$TERMUX_VERSION" ] || [ -d /data/data/com.termux/files/usr ]; } && { IS_TERMUX=1; SUDO=""; }
+# dari aplikasi GUI: sudo memakai dialog password grafis (askpass)
+[ -n "$SUDO_ASKPASS" ] && [ "$SUDO" = sudo ] && SUDO="sudo -A"
 
 # =====================================================================================
 #  KATALOG
@@ -1029,7 +1031,7 @@ install_cart() {
   printf '\n  %s═══ INSTALASI DIMULAI · %s item · %s · log: %s%s\n\n' "$MAG" "$total" "$PM" "$LOG" "$R0"
   if [ "$IS_ROOT" = 0 ] && [ -n "$SUDO" ] && ! sudo -n true 2>/dev/null; then
     printf '  %sMasukkan password sudo sekali di sini (untuk %s):%s\n' "$DIM" "$PM" "$R0"; show_cur
-    sudo -v || { printf '  %sButuh akses sudo untuk memasang paket.%s\n' "$RED" "$R0"; pause_key; return; }
+    $SUDO -v || { printf '  %sButuh akses sudo untuk memasang paket.%s\n' "$RED" "$R0"; [ "$UNATTENDED" = 1 ] || pause_key; return; }
     ( while true; do sudo -n true; sleep 50; kill -0 $$ 2>/dev/null || exit; done ) 2>/dev/null & SUDO_PID=$!
     hide_cur; echo
   fi

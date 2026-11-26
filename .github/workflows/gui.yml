@@ -1,0 +1,107 @@
+name: Build aplikasi GUI
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Tag rilis tujuan upload (kosongkan untuk build saja)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gui-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: windows-x64,     os: windows-2025,     target: x86_64-pc-windows-msvc }
+          - { name: windows-arm64,   os: windows-11-arm,   target: aarch64-pc-windows-msvc }
+          - { name: macos-universal, os: macos-15,         target: universal-apple-darwin, rust_targets: "aarch64-apple-darwin,x86_64-apple-darwin" }
+          - { name: linux-x64,       os: ubuntu-22.04,     target: x86_64-unknown-linux-gnu }
+          - { name: linux-arm64,     os: ubuntu-22.04-arm, target: aarch64-unknown-linux-gnu }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: "${{ matrix.rust_targets || matrix.target }}" }
+      - name: Dependensi Linux (WebKitGTK)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf rpm xdg-utils
+      - uses: Swatinem/rust-cache@v2
+        with: { workspaces: gui/src-tauri -> target }
+      - name: Build
+        working-directory: gui
+        shell: bash
+        run: |
+          npm ci --no-audit --no-fund
+          npm run prepare-ui
+          npx tauri build --target ${{ matrix.target }}
+      - name: Kumpulkan installer
+        shell: bash
+        run: |
+          mkdir -p dist
+          B=gui/src-tauri/target/${{ matrix.target }}/release/bundle
+          for f in $B/msi/*.msi $B/nsis/*-setup.exe $B/dmg/*.dmg $B/deb/*.deb $B/rpm/*.rpm $B/appimage/*.AppImage; do [ -f "$f" ] && cp "$f" dist/; done
+          ls -la dist
+      - name: Upload (belum ditandatangani)
+        id: up
+        uses: actions/upload-artifact@v4
+        with:
+          name: tipack-gui-${{ matrix.name }}
+          path: dist/*
+          if-no-files-found: error
+
+      # ---- Tanda tangan digital Windows lewat SignPath (aktif kalau variabel repo SIGNPATH_ORGANIZATION_ID diisi)
+      - name: Tanda tangani lewat SignPath
+        if: runner.os == 'Windows' && vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIG || 'default' }}
+          github-artifact-id: ${{ steps.up.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+      - name: Upload (sudah ditandatangani)
+        if: runner.os == 'Windows' && vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: tipack-gui-${{ matrix.name }}-signed
+          path: signed/*
+
+  release:
+    name: Lampirkan ke rilis
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release != ''
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: art }
+      - name: Pilih versi bertanda tangan kalau ada
+        run: |
+          mkdir -p up
+          for d in art/*; do case "$d" in *-signed) continue ;; esac
+            if [ -d "$d-signed" ]; then cp "$d-signed"/* up/; else cp "$d"/* up/; fi; done
+          cd up && for f in *; do n=$(echo "$f" | sed -E 's/^TIPACK_/tipack-gui_/'); [ "$f" != "$n" ] && mv "$f" "$n"; done
+          sha256sum * > SHA256SUMS-gui.txt && ls -la
+      - name: Upload ke rilis
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release || github.ref_name }}
+        run: gh release upload "$TAG" up/* --clobber --repo "${{ github.repository }}"

@@ -4,6 +4,28 @@ Semua perubahan penting di TIPACK dicatat di sini. Format mengikuti [Keep a Chan
 
 Riwayat lengkap beserta keputusan dan akar masalah setiap perbaikan ada di [docs/notulensi.md](docs/notulensi.md).
 
+## [2.1.0] - 2026-11-26
+
+### Ditambahkan
+- **Aplikasi GUI** (Tauri 2): pasang aplikasi dengan progres langsung, profil, konfigurasi `tipack.json`, Doctor dan laporan masalah.
+  - Installer `.msi`/`.exe` (x64 & ARM64), `.dmg` universal, serta `.deb`/`.rpm`/AppImage (x64 & ARM64), dibangun otomatis di GitHub Actions.
+  - Penandatanganan Windows lewat **SignPath** (aktif setelah variabel repo diisi).
+- **Katalog umum ala Ninite 2026**: 245 aplikasi unik (Windows 186, macOS 153, Linux 142).
+  - Kategori baru: Media & Hiburan, Keamanan & Privasi, Cloud, Gaming, Download, Runtime.
+  - Aplikasi baru antara lain Zen Browser, WhatsApp, Spotify, CapCut, DaVinci Resolve, WPS Office, Bitwarden, Proton VPN, Cloudflare WARP, Steam, Epic, Heroic, ChatGPT, qBittorrent, IDM dan WizTree.
+  - Profil baru `umum`, `gamer` dan `kreator`.
+- Dukungan **Microsoft Store** (`msstore:`) di mesin Windows.
+- **Doctor** (auto-fix) dan **Laporkan masalah** (log disensor → form GitHub Issue) di ketiga OS.
+- `--config` / `-Config` (`tipack.json`, file atau URL), `--json` (event untuk GUI), `--scan-json`, `--doctor`, `--doctor-fix`, `--report`.
+- **Website baru**: logo TIPACK, ikon brand asli (Simple Icons, CC0), pemilih aplikasi ala Ninite (perintah satu baris, link bagikan, `tipack.json`), bento fitur, matriks platform, FAQ.
+- Bootstrap Windows menerima `TIPACK_APPS` / `TIPACK_CONFIG`.
+- Template issue GitHub (laporan masalah, usul aplikasi).
+- CI: validasi semua ID Homebrew dan Flathub, ditambah winget.
+
+### Diperbaiki
+- ID Homebrew: `tldr` → `tlrc`; Azure CLI dan DaVinci Resolve di macOS menjadi unduhan manual.
+- Key wizard Windows yang menunjuk aplikasi khusus macOS/Linux.
+
 ## [2.0.0] - 2026-11-26
 
 Rilis publik pertama.
@@ -68,4 +90,5 @@ Rilis publik pertama.
 - Katalog web membaca kolom Linux bergeser setelah kolom Termux ditambahkan (99 → 105 aplikasi).
 - Mode lite situs terlalu agresif (aktif di perangkat 16 GB RAM / 4 core). Kini keputusan memakai probe FPS.
 
+[2.1.0]: https://github.com/fk0u/tipack/releases/tag/v2.1.0
 [2.0.0]: https://github.com/fk0u/tipack/releases/tag/v2.0.0

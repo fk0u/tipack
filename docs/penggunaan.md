@@ -16,6 +16,8 @@ Panduan ini membahas setiap layar TIPACK secara berurutan. Tampilan di Windows, 
 - [Tune-Up & optimasi](#13-tune-up--optimasi)
 - [Kelola startup (Windows)](#14-kelola-startup-windows)
 - [Debloat](#15-debloat)
+- [Doctor](#16-doctor)
+- [Laporkan masalah](#17-laporkan-masalah)
 - [Info sistem](#12-info-sistem)
 - [Membaca tampilan daftar](#membaca-tampilan-daftar)
 
@@ -288,6 +290,30 @@ Daftar aplikasi dari `HKCU\...\Run`, `HKLM\...\Run` (termasuk 32-bit) dan folder
 - **Lepas Snap (Ubuntu):** semua snap dan snapd dihapus, snap dikunci supaya tidak terpasang lagi, lalu Firefox versi Flatpak ditawarkan sebagai pengganti. Ini perubahan besar dan tidak dicentang otomatis.
 - **Telemetri Ubuntu:** `popularity-contest`, `ubuntu-report`, `apport`, `whoopsie`.
 - **Layanan tak terpakai:** CUPS, Bluetooth, ModemManager, Avahi, PackageKit. Bisa dihidupkan lagi dengan `sudo systemctl enable --now <nama>`.
+
+## 16. Doctor
+
+Memeriksa hal-hal yang paling sering membuat instalasi gagal. Setiap temuan punya tingkat keparahan (**tinggi** / **sedang** / **rendah**) dan perbaikannya. Yang dicentang diperbaiki otomatis; temuan yang hanya bisa diperbaiki manual (misalnya virtualisasi BIOS) ditampilkan sebagai panduan.
+
+| Windows | macOS | Linux |
+|---|---|---|
+| winget tidak ada/rusak → `Repair-WinGetPackageManager` | Xcode CLT hilang → `xcode-select --install` | `dpkg` terputus → `dpkg --configure -a` |
+| Sumber winget rusak → `winget source reset --force` | Homebrew hilang / peringatan `brew doctor` | Dependensi apt rusak → `apt-get -f install` |
+| Restart tertunda | PATH Homebrew belum diset → tambah `shellenv` | apt/dpkg dikunci proses lain → tunggu |
+| ExecutionPolicy memblokir script | Rosetta 2 belum ada (Apple Silicon) | Lock pacman tertinggal → hapus `db.lck` |
+| Long Paths mati | Disk penuh → Tune-Up | Keyring Arch kedaluwarsa → update `archlinux-keyring` |
+| Virtualisasi BIOS mati (panduan) | Tidak ada internet | Flatpak rusak → `flatpak repair --user` |
+| Jam sistem meleset → `w32tm /resync` | | Batas inotify rendah, sudo tidak ada, disk penuh |
+| Hash installer tidak cocok → update sumber | | |
+
+Untuk semua OS: **aplikasi yang gagal di instalasi terakhir** dibaca dari log, lalu bisa dicoba ulang dengan satu klik.
+
+## 17. Laporkan masalah
+
+1. Mengambil 400 baris terakhir dari log sesi ini dan sesi sebelumnya, ditambah info sistem dan temuan Doctor.
+2. **Menyensor** nama user, path home, nama komputer, email, IP publik dan token (`ghp_…`, `sk-…`, dll).
+3. Menyimpan `devsetup-laporan-*.txt` dan menyalinnya ke clipboard.
+4. Membuka form **GitHub Issue** dengan OS, versi dan 40 baris log terakhir sudah terisi. Seret file laporan ke kolom komentar untuk log lengkap.
 
 ## Membaca tampilan daftar
 

@@ -180,7 +180,7 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Terraform** | winget | brew | — | Infrastructure as Code. |
 | **AWS CLI** | winget | brew | — | CLI Amazon Web Services. Mahasiswa bisa ikut AWS Academy. |
 | **Google Cloud SDK** | winget | brew cask | — | CLI Google Cloud. |
-| **Azure CLI** | winget | brew | — | CLI Microsoft Azure. Mahasiswa dapat kredit gratis lewat Azure for Students. |
+| **Azure CLI** | winget | manual | — | CLI Microsoft Azure. Mahasiswa dapat kredit gratis lewat Azure for Students. |
 | **ngrok** | winget | brew cask | AUR | Membuat localhost bisa diakses publik. Berguna untuk demo ke dosen atau tes webhook. |
 | ★ **OrbStack** | — | brew cask | — | Docker + Linux VM untuk Mac. Jauh lebih ringan dan cepat dari Docker Desktop. Juga bisa jadi pengganti WSL di Mac. |
 | **Podman** | — | — | apk · apt · dnf · pacman · zypper | Alternatif Docker tanpa daemon dan tanpa root. Bawaan Fedora. |
@@ -337,7 +337,7 @@ Versi interaktif dengan pencarian: https://tipack.kousozo.tech/katalog
 | **Audacity** | winget | brew cask | Flathub · apt · dnf · pacman · zypper | Rekam dan edit audio gratis: podcast, voice over, tugas presentasi. |
 | **HandBrake** | winget | brew cask | Flathub · apt · pacman | Kompres dan konversi video (misal video tugas terlalu besar untuk diunggah). |
 | **CapCut** | winget | brew cask | — | Editor video populer untuk konten TikTok/Reels/YouTube Shorts. |
-| **DaVinci Resolve** | manual | brew cask | manual | Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup. |
+| **DaVinci Resolve** | manual | manual | manual | Editor video profesional gratis kelas Hollywood. Butuh GPU yang cukup. |
 | **Kdenlive** | winget | brew cask | Flathub · apt · dnf · pacman · zypper | Editor video open source yang ringan, alternatif gratis untuk editing serius. |
 | **K-Lite Codec Pack** | winget | — | — | Codec video lengkap supaya semua format bisa diputar di pemutar bawaan Windows. |
 

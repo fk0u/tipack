@@ -6,8 +6,8 @@
 <title>Katalog Aplikasi — TIPACK</title>
 <meta name="description" content="Semua aplikasi yang bisa dipasang TIPACK: cari, filter per kategori, OS, profil, dan lihat perintah install-nya.">
 <meta name="theme-color" content="#08070d">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f0abfc'/><stop offset='.5' stop-color='%23a855f7'/><stop offset='1' stop-color='%233b82f6'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='%2308070d'/><path d='M8 10l6 6-6 6' stroke='url(%23g)' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/><rect x='16' y='20' width='9' height='3' rx='1.5' fill='url(%23g)'/></svg>">
-<script src="perf.js?v=2"></script>
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml"><link rel="alternate icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f0abfc'/><stop offset='.5' stop-color='%23a855f7'/><stop offset='1' stop-color='%233b82f6'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='%2308070d'/><path d='M8 10l6 6-6 6' stroke='url(%23g)' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/><rect x='16' y='20' width='9' height='3' rx='1.5' fill='url(%23g)'/></svg>">
+<script src="perf.js?v=3"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -143,7 +143,7 @@ footer a:hover{color:#fff}
 <body>
 <div class="bgfx" aria-hidden="true"></div>
 <nav class="top"><div class="wrap">
-  <a href="./" class="logo"><span class="mark">&gt;_</span>TIPACK</a>
+  <a href="./" class="logo"><img src="brand/logo.svg" alt="" width="30" height="30">TIPACK</a>
   <div class="nav-links"><a href="./#fitur">Fitur</a><a href="./#profil">Profil</a><a href="katalog.html" class="on">Katalog</a><a href="./#install">Install</a></div>
   <a href="./#install" class="btn">Install Sekarang</a>
 </div></nav>
@@ -186,7 +186,8 @@ const ICON = {
 const OSNAME = { win: 'Windows', mac: 'macOS', linux: 'Linux' };
 const CATCOL = ['#d946ef,#7c3aed', '#f97316,#dc2626', '#0ea5e9,#2563eb', '#2563eb,#7c3aed', '#7c3aed,#db2777', '#16a34a,#0d9488', '#ea580c,#a16207', '#dc2626,#9333ea', '#0284c7,#0d9488', '#c026d3,#4f46e5', '#22c55e,#0891b2', '#ef4444,#7f1d1d', '#ca8a04,#57534e', '#ec4899,#8b5cf6', '#6366f1,#06b6d4', '#14b8a6,#3b82f6', '#64748b,#334155'];
 
-let DATA, OSES = [], catColor = {}, profName = {};
+let DATA, OSES = [], catColor = {}, profName = {}, ICONS = {};
+const glyphHTML = a => ICONS[a.key] ? `<span class="glyph" style="background:#ffffff0d;border:1px solid var(--line2)"><img src="icons/${ICONS[a.key].slug}.svg" alt="" width="26" height="26" loading="lazy"></span>` : `<span class="glyph" style="background:linear-gradient(140deg,${catColor[a.cat]})">${esc(glyphOf(a.name))}</span>`;
 const st = { q: '', os: 'all', cat: '', rec: false, prof: '', sort: 'cat' };
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -221,7 +222,7 @@ function badgeRow(a) {
   return h;
 }
 const cardHTML = a => `<button class="card" data-k="${a.key}">
-  <div class="card-top"><span class="glyph" style="background:linear-gradient(140deg,${catColor[a.cat]})">${esc(glyphOf(a.name))}</span>
+  <div class="card-top">${glyphHTML(a)}
   <div><h3>${hl(a.name, st.q)}</h3><div class="cat">${esc(a.cat)}</div></div></div>
   <p>${hl(a.tip, st.q)}</p><div class="badges">${badgeRow(a)}</div></button>`;
 
@@ -267,7 +268,7 @@ function osBlock(a, o) {
 function openApp(key, push = true) {
   const a = DATA.apps.find(x => x.key === key); if (!a) return;
   $('#dialog').innerHTML = `<button class="x" aria-label="Tutup">✕</button>
-    <div class="d-head"><span class="glyph" style="background:linear-gradient(140deg,${catColor[a.cat]})">${esc(glyphOf(a.name))}</span>
+    <div class="d-head">${glyphHTML(a)}
     <div><div class="cat" style="font:500 11px var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.1em">${esc(a.cat)}</div><h2 id="dTitle">${esc(a.name)}</h2></div></div>
     <div class="badges" style="margin-top:14px">${badgeRow(a)}</div>
     <p class="tip">${esc(a.tip)}</p>
@@ -302,7 +303,8 @@ addEventListener('keydown', e => {
 });
 
 /* load */
-fetch('catalog.json').then(r => r.json()).then(d => {
+Promise.all([fetch('catalog.json').then(r => r.json()), fetch('icons/icons.json').then(r => r.json()).catch(() => ({}))]).then(([d, ic]) => {
+  ICONS = ic;
   DATA = d;
   OSES = ['win', 'mac', 'linux'].filter(o => d.apps.some(a => a[o]));
   d.categories.forEach((c, i) => catColor[c] = CATCOL[i % CATCOL.length]);

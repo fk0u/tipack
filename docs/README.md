@@ -10,11 +10,13 @@ Selamat datang di dokumentasi **TIPACK · DEVSETUP IF**, installer interaktif de
 4. **[Katalog aplikasi](katalog.md)**: daftar semua aplikasi dan isi setiap profil.
 5. **[Troubleshooting & FAQ](troubleshooting.md)**: kalau ada yang tidak berjalan.
 6. **[Keamanan](keamanan.md)**: apa saja yang dilakukan script di laptopmu.
+7. **[Aplikasi GUI](gui.md)**: unduh dan pakai versi desktop.
 
 ## Untuk kontributor
 
 7. **[Arsitektur & cara menambah aplikasi](arsitektur.md)**: struktur kode, format katalog ketiga OS, pengujian.
-8. **[Website](website.md)**: situs tipack.kousozo.tech, sistem optimisasi animasi, build katalog, deploy.
+8. **[SignPath](signpath.md)**: tanda tangan digital installer Windows.
+9. **[Website](website.md)**: situs tipack.kousozo.tech, sistem optimisasi animasi, build katalog, deploy.
 9. **[CONTRIBUTING.md](../CONTRIBUTING.md)**: alur pull request.
 
 ## Riwayat

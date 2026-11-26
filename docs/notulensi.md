@@ -129,3 +129,43 @@ bash linux/src/build.sh                                           # rakit linux/
 python3 web/build-catalog.py                                      # regenerasi katalog web & docs
 TIPACK_KEYS="Up,Up,Enter,Esc" bash macos/setup.sh                 # uji TUI otomatis
 ```
+
+---
+
+# Addendum: v2.1.0 (26 November 2026)
+
+## Kebutuhan baru
+1. Konfigurasi dalam bentuk **GUI** (`.msi`/`.pkg`), dengan log yang bisa dikirim ke Issues dan **auto-fix**.
+2. Website yang lebih "expert" dengan **logo dan ikon asli**.
+3. Selain tools IT, sediakan **software sehari-hari** seperti Ninite, mengikuti tren 2026.
+4. Pemilik sudah membuat akun **SignPath**.
+
+## Keputusan
+| Keputusan | Alasan |
+|---|---|
+| GUI dibangun dengan **Tauri 2**, sebagai pembungkus mesin script yang ada | Installer beberapa MB (Electron 100 MB+); mesin yang sudah teruji di 15 platform tidak ditulis ulang |
+| Protokol `--json` → baris `@@TIPACK {json}` | GUI cukup membaca stdout; satu protokol untuk tiga OS |
+| Laporan lewat **form issue terisi** (URL), bukan token di aplikasi | Token di aplikasi bisa dicuri dan disalahgunakan untuk spam |
+| Doctor berbasis **aturan**, bukan AI | Hasil bisa ditebak, aman, dan bisa diuji |
+| Ikon dari **Simple Icons (CC0)**, disimpan di situs | Lisensi jelas, cepat, tanpa CDN pihak ketiga. Logo Microsoft/Adobe tidak tersedia di sana (ditarik atas permintaan pemilik merek), jadi memakai monogram |
+| SignPath lewat variabel repo, langkahnya dilewati kalau belum diisi | Workflow tidak gagal sebelum SignPath dikonfigurasi |
+| Tune-Up & Debloat di GUI diarahkan ke terminal | Fitur ini menampilkan detail per item yang sudah matang di TUI; GUI versi pertama fokus ke instalasi, Doctor dan laporan |
+
+## Temuan & perbaikan selama pengerjaan
+| Temuan | Akar masalah | Perbaikan |
+|---|---|---|
+| Self-test Windows gagal setelah katalog baru | Pertanyaan wizard baru memuat key khusus macOS/Linux (IINA, Lutris) | Key dibuang dari wizard Windows; pengecekan ketat dipertahankan untuk menangkap salah ketik |
+| 4 ID Homebrew tidak ditemukan | `tldr` diganti `tlrc`, `azure-cli` & `davinci-resolve` tidak ada lagi | Diperbaiki atau dijadikan unduhan manual |
+| 4 ID winget tidak ditemukan di ARM64 | Kemungkinan tidak ada installer ARM64 | Dipantau lewat validasi x64 di CI |
+| Katalog web mencatat Linux 99, seharusnya 105 (rilis 2.0.0) | Parser belum menyesuaikan kolom Termux | Parser diperbarui |
+
+## Uji yang dilakukan
+- Lokal (macOS): `--scan-json`, `--doctor --json` (menemukan peringatan `brew doctor` sungguhan), `--config` (tanpa memasang apa pun karena aplikasinya sudah ada), `--report --json` (sensor nama user, hostname & path `/Users/` terverifikasi 0 kemunculan).
+- Website: pemilih (Windows/Linux, profil, perintah, URL), tampilan desktop 1440 px dan HP 375 px tanpa overflow.
+- GUI: build `.app`/`.dmg` macOS lokal; build semua OS di workflow `gui.yml`.
+
+## Tindak lanjut
+- [ ] Isi variabel SignPath (Organization ID, project slug, policy) dan secret `SIGNPATH_API_TOKEN`, lalu uji `test-signing`.
+- [ ] Ajukan proyek ke SignPath Foundation untuk sertifikat `release-signing`.
+- [ ] Pertimbangkan Apple Developer ID untuk notarisasi macOS.
+- [ ] GUI versi berikutnya: halaman Tune-Up & Debloat native.

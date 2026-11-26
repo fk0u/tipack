@@ -115,10 +115,29 @@ bash macos/setup.sh      # atau: bash linux/setup.sh
 |---|---|---|
 | `-Preset <nama>` | `--preset <nama>` | Langsung memasang satu profil tanpa menu. Nama: `starter cpp java web mobile data net devops game design tech`. |
 | `-Install a,b,c` | `--install a,b,c` | Pasang aplikasi tertentu (key dari [katalog](katalog.md)) tanpa menu. Exit code `3` kalau ada yang gagal. |
+| `-Config file/URL` | `--config file/URL` | Pasang sesuai `tipack.json` (field `apps` dan/atau `profiles`). |
+| `-Doctor` | `--doctor` | Buka Doctor langsung. Dengan `-Json` / `--json`, temuan dicetak sebagai event JSON. |
+| `-DoctorFix id1,id2` | `--doctor-fix id1,id2` | Terapkan perbaikan tertentu tanpa menu. Exit code `4` kalau ada yang gagal. |
+| `-Report` | `--report` | Buat laporan masalah yang disensor dan buka form issue. |
+| `-ScanJson` | `--scan-json` | Cetak aplikasi terpasang & tersedia sebagai JSON (dipakai GUI). |
+| `-Json` | `--json` | Cetak event progres `@@TIPACK {...}` per baris (dipakai GUI). |
 | `-SelfTest` | `--self-test` | Cek sistem & katalog lalu keluar, tanpa memasang apa pun. |
 | `-NoAnim` | `--no-anim` | Matikan animasi banner dan efek ketik (lebih cepat, cocok untuk terminal lambat/SSH). |
 
-Parameter juga bisa diteruskan lewat bootstrap:
+Bootstrap Windows menerima variabel lingkungan (yang dibuat oleh pemilih di website):
+
+```powershell
+$env:TIPACK_APPS="chrome,vlc,7zip"; irm https://tipack.kousozo.tech/install.ps1 | iex
+$env:TIPACK_CONFIG="https://contoh.ac.id/lab-rpl.json"; irm https://tipack.kousozo.tech/install.ps1 | iex
+```
+
+Format `tipack.json`:
+
+```json
+{ "tipack": 1, "name": "Lab RPL 2026", "apps": ["vscode", "git", "python"], "profiles": ["starter"] }
+```
+
+Parameter juga bisa diteruskan lewat bootstrap macOS/Linux:
 
 ```bash
 curl -fsSL https://tipack.kousozo.tech/install.sh | bash -s -- --preset starter

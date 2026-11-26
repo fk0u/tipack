@@ -9,12 +9,16 @@ Situs statis tanpa build step dan tanpa framework. Isinya HTML, CSS dan JavaScri
 | `index.html` | `/` | Landing page: hero dengan perintah install (Windows/macOS/Linux, OS terdeteksi otomatis), fitur, profil, isi katalog, cara install, catatan penting |
 | `katalog.html` | `/katalog` | Katalog semua aplikasi: pencarian (`/` untuk fokus), filter OS/kategori/profil/rekomendasi, urutan per kategori atau A-Z, detail dengan perintah install per OS dan distro |
 | `catalog.json` | `/catalog.json` | Data katalog (dibuat otomatis) |
+| `icons/*.svg`, `icons/icons.json` | `/icons/` | Logo brand asli dari [Simple Icons](https://simpleicons.org) (CC0), dibuat oleh `tools/build-icons.py`. Aplikasi tanpa logo memakai monogram. |
+| `brand/` | `/brand/` | Logo TIPACK (`logo.svg`, PNG 512/1024, favicon, apple-touch-icon) dan gambar preview `og.png` |
 | `perf.js` | `/perf.js` | Sistem optimisasi animasi |
 | `install.sh` | `/install.sh` | Bootstrap macOS & Linux |
 | `install.ps1` | `/install.ps1` | Bootstrap Windows |
 | `build-catalog.py` | — | Generator `catalog.json` & `docs/katalog.md` (tidak di-deploy) |
 
 Script installer di-deploy ke `/windows/`, `/macos/` dan `/linux/`.
+
+**Pemilih ala Ninite** (`/#pilih`): tab OS, kategori, pencarian, grid logo dan baki pilihan dengan tombol *Buat perintah*, *Salin link* dan *tipack.json*. Pilihan tersimpan di URL (`/?os=win&apps=chrome,vlc`).
 
 Filter di katalog tersimpan di URL (contoh: `/katalog?os=linux&cat=IDE&rec=1`), dan `#key` langsung membuka detail aplikasi (contoh: `/katalog#vscode`), jadi tautan bisa dibagikan.
 

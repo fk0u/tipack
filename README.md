@@ -9,13 +9,15 @@
 ╚═════╝ ╚══════╝  ╚═══╝  ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
 ```
 
+<img src="web/brand/logo.svg" width="96" alt="Logo TIPACK">
+
 # TIPACK · DEVSETUP IF
 
-**Setup laptop anak Teknik Informatika dengan satu perintah, dan bikin laptop lama ringan lagi.**
-Installer, tune-up & debloat interaktif di terminal untuk **Windows, macOS & Linux** (x64 dan ARM64, termasuk Termux di Android): wizard preferensi, 188 aplikasi dengan penjelasan dan rekomendasi, dan yang sudah terpasang otomatis dilewati.
+**Alternatif Ninite yang modern: pilih aplikasi, salin satu perintah, selesai. Plus Doctor auto-fix, Tune-Up laptop lama dan Debloat.**
+Installer, tune-up & debloat interaktif di terminal untuk **Windows, macOS & Linux** (x64 dan ARM64, termasuk Termux di Android): wizard preferensi, **245 aplikasi** (tools IT dan software sehari-hari: browser, chat, media, office, keamanan, cloud, gaming, AI) dengan penjelasan dan rekomendasi, dan yang sudah terpasang otomatis dilewati. Tersedia juga sebagai **aplikasi GUI** (`.msi`, `.dmg`, `.deb`, `.rpm`, AppImage).
 
 [![Website](https://img.shields.io/badge/web-tipack.kousozo.tech-d946ef?style=flat-square)](https://tipack.kousozo.tech)
-[![Katalog](https://img.shields.io/badge/katalog-188_aplikasi-a855f7?style=flat-square)](https://tipack.kousozo.tech/katalog)
+[![Katalog](https://img.shields.io/badge/katalog-245_aplikasi-a855f7?style=flat-square)](https://tipack.kousozo.tech/katalog)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
 [![Uji semua platform](https://img.shields.io/github/actions/workflow/status/fk0u/tipack/test.yml?branch=main&style=flat-square&label=uji%20semua%20platform)](https://github.com/fk0u/tipack/actions/workflows/test.yml)
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white)
@@ -36,6 +38,23 @@ Setiap awal semester selalu ada yang sama: Python tidak masuk PATH, `g++` tidak 
 - **Tidak dobel.** Sebelum install, setiap aplikasi dicek dulu. Yang sudah ada ditandai ✓ dan dilewati.
 - **Sumber resmi.** Semua lewat package manager resmi (winget, Homebrew, apt, dnf, pacman, zypper, apk, Flathub) atau installer resmi vendornya.
 - **Bisa diaudit.** Semua kode ada di repo ini. Baca dulu sebelum menjalankan.
+
+## 🛒 Pilih aplikasi ala Ninite
+
+Buka **https://tipack.kousozo.tech/#pilih**, centang aplikasinya (lengkap dengan logo asli), lalu salin satu perintah. Contoh yang dihasilkan:
+
+```powershell
+$env:TIPACK_APPS="chrome,vscode,discord,spotify,vlc"; irm https://tipack.kousozo.tech/install.ps1 | iex
+```
+```bash
+curl -fsSL https://tipack.kousozo.tech/install.sh | bash -s -- --install chrome,vscode,discord,spotify,vlc
+```
+
+Pilihan bisa dibagikan sebagai link atau diunduh sebagai `tipack.json` untuk satu lab atau kelas.
+
+## 🖱️ Aplikasi GUI
+
+Unduh dari [rilis terbaru](https://github.com/fk0u/tipack/releases/latest). Menunya: pasang aplikasi, profil, konfigurasi `tipack.json`, Doctor dan laporan masalah, dengan progres tiap aplikasi tampil langsung. Detail di [docs/gui.md](docs/gui.md).
 
 ## 🚀 Mulai cepat
 
@@ -81,6 +100,9 @@ Mau membaca script-nya dulu? Lihat [Instalasi manual](docs/instalasi.md#instalas
 | 🚀 | **Tune-Up & optimasi** | Bersihkan file sampah & cache (TEMP, Windows Update, Homebrew, Xcode, cache paket Linux), efek visual ringan, power plan, matikan hibernasi, TRIM/defrag, SFC/DISM, **zram** & **earlyoom** di Linux, snapshot Time Machine di macOS. Ukuran ditampilkan sebelum dihapus. |
 | ⚡ | **Kelola startup** (Windows) | Nonaktifkan aplikasi yang ikut jalan saat booting, dengan cara yang sama seperti Task Manager. Bisa diaktifkan lagi kapan saja. |
 | 🧹 | **Debloat** | Windows: hapus aplikasi bawaan/promo, matikan iklan Start, Copilot, Recall, Widgets, telemetri, Bing (restore point otomatis). macOS: GarageBand/iMovie/iWork. Linux: lepas Snap, telemetri Ubuntu, layanan tak terpakai. |
+| 🩺 | **Doctor (auto-fix)** | Diagnosa winget/sumber paket rusak, apt/dpkg terkunci atau terputus, lock pacman, keyring Arch, Homebrew & PATH, Rosetta, ExecutionPolicy, Long Paths, jam sistem, disk penuh, dan aplikasi yang gagal kemarin. Lalu perbaiki dengan izinmu. |
+| 🐞 | **Laporkan masalah** | Log disensor (nama user, hostname, email, IP publik, token), disalin ke clipboard, lalu form GitHub Issue terbuka dengan info sistem terisi. |
+| 📄 | **`tipack.json`** | `-Config` / `--config` (file atau URL) untuk menyamakan isi banyak laptop. |
 | ⟳ | **Update semua** | `winget upgrade --all`, `brew upgrade`, atau upgrade paket distro + Flatpak. |
 
 ### Dukungan OS
@@ -170,6 +192,8 @@ Exit code `0` = berhasil, `3` = ada yang gagal. Tambahkan `-NoAnim` / `--no-anim
 | [Troubleshooting & FAQ](docs/troubleshooting.md) | Masalah umum per OS dan solusinya. |
 | [Keamanan](docs/keamanan.md) | Apa yang dilakukan script, sumber paket, hak akses, cara audit. |
 | [Arsitektur & kontribusi](docs/arsitektur.md) | Struktur repo, format katalog, cara menambah aplikasi, pengujian. |
+| [Aplikasi GUI](docs/gui.md) | Unduh, fitur, cara kerja, build sendiri. |
+| [SignPath](docs/signpath.md) | Tanda tangan digital installer Windows. |
 | [Website](docs/website.md) | Situs tipack.kousozo.tech: halaman, sistem optimisasi, build katalog, deploy. |
 | [CHANGELOG](CHANGELOG.md) | Riwayat versi. |
 | [Notulensi pengembangan](docs/notulensi.md) | Kronologi, keputusan teknis, masalah & akar masalahnya, hasil uji, tindak lanjut. |
