@@ -273,6 +273,7 @@ function Get-ConSize {
   return @($w, $h)
 }
 function Set-Cursor([bool]$v) { try { [Console]::CursorVisible = $v } catch {} }
+function Clear-Scr { if ($VT) { [Console]::Out.Write("$ESC[2J$ESC[3J$ESC[H") } else { try { Clear-Host } catch { try { [Console]::Clear() } catch {} } } }
 
 # Renderer cepat: aktifkan VT processing supaya satu frame = satu kali tulis (tanpa kedip, ringan di laptop lama)
 $VT = $false
@@ -396,7 +397,7 @@ function Select-List {
   $idx = if ($Start -ge 0) { $Start } else { 0 }
   while ($idx -lt $Items.Count - 1 -and $Items[$idx].Sep) { $idx++ }
   $top = 0
-  Clear-Host; Set-Cursor $false
+  Clear-Scr; Set-Cursor $false
   while ($true) {
     $sz = Get-ConSize; $h = $sz[1]; $w = $sz[0] - 1
     $rows = New-Object System.Collections.Generic.List[string]
@@ -612,7 +613,7 @@ function Scan-Installed([switch]$Quiet) {
 #  LAYAR-LAYAR
 # =====================================================================================
 function Show-Boot {
-  Clear-Host; Set-Cursor $false
+  Clear-Scr; Set-Cursor $false
   Write-Host ''
   for ($i = 0; $i -lt $Banner.Count; $i++) {
     Write-Host ('  ' + $Banner[$i]) -ForegroundColor $BannerColors[$i]
@@ -757,7 +758,7 @@ function Show-All {
 }
 
 function Review-Install {
-  if (-not $Cart.Count) { Clear-Host; Line "`n  Keranjang masih kosong. Pilih aplikasi lewat Wizard, Profil, atau Kategori dulu." Yellow; Pause-Key; return }
+  if (-not $Cart.Count) { Clear-Scr; Line "`n  Keranjang masih kosong. Pilih aplikasi lewat Wizard, Profil, atau Kategori dulu." Yellow; Pause-Key; return }
   $keys = @($Cart.Keys)
   $items = @($keys | ForEach-Object { $x = CatItem $_; $x.Checked = $true; $x })
   $heavy = @($keys | Where-Object { $HeavyKeys -contains $_ })
@@ -775,7 +776,7 @@ function Install-Cart {
   $list = @($Cart.Keys | ForEach-Object { $Apps[$_] })
   # urutan: fitur Windows dulu, lalu winget, lalu info manual
   $list = @($list | Sort-Object { switch ($_.Kind) { 'feat' { 0 } 'wsl' { 1 } 'winget' { 2 } 'info' { 3 } } })
-  Clear-Host; Set-Cursor $false
+  Clear-Scr; Set-Cursor $false
   Write-Host ''
   for ($i = 0; $i -lt $Banner.Count; $i++) { Write-Host ('  ' + $Banner[$i]) -ForegroundColor $BannerColors[$i] }
   Write-Host "`n  ═══ INSTALASI DIMULAI · $($list.Count) item · log: $LogFile`n" -ForegroundColor Magenta
@@ -860,8 +861,8 @@ function Setup-VSCodeExt {
   Refresh-Path
   $code = (Get-Command code -ErrorAction SilentlyContinue).Source
   if (-not $code) { foreach ($p in @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\bin\code.cmd", "$env:ProgramFiles\Microsoft VS Code\bin\code.cmd")) { if (Test-Path $p) { $code = $p } } }
-  if (-not $code) { Clear-Host; Line "`n  VS Code belum terpasang. Install dulu lewat menu lain." Red; Pause-Key; return }
-  Clear-Host; Write-Host "`n   Membaca ekstensi yang sudah terpasang..." -ForegroundColor DarkGray
+  if (-not $code) { Clear-Scr; Line "`n  VS Code belum terpasang. Install dulu lewat menu lain." Red; Pause-Key; return }
+  Clear-Scr; Write-Host "`n   Membaca ekstensi yang sudah terpasang..." -ForegroundColor DarkGray
   $have = @(& $code --list-extensions 2>$null | ForEach-Object { $_.ToLower() })
   $items = foreach ($e in $VSExt) {
     $p = $e -split '\|', 4; $ins = $have -contains $p[0].ToLower()
@@ -871,7 +872,7 @@ function Setup-VSCodeExt {
   foreach ($it in $items) { if ($it.Rec -and -not $it.Lock) { $it.Checked = $true } }
   $r = Select-List -Title 'Ekstensi VS Code' -Sub 'Yang rekomendasi sudah dicentang. Enter untuk memasang.' -Items $items -Multi -EnterText 'pasang'
   if (-not $r.Ok -or -not $r.Values.Count) { return }
-  Clear-Host; Write-Host ''
+  Clear-Scr; Write-Host ''
   $i = 0
   foreach ($e in $r.Values) {
     $i++; $x = Invoke-Spin $code "--install-extension $e --force" "[$i/$($r.Values.Count)] $e"
@@ -881,7 +882,7 @@ function Setup-VSCodeExt {
 }
 
 function Setup-Git {
-  Clear-Host; Refresh-Path
+  Clear-Scr; Refresh-Path
   if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Line "`n  Git belum terpasang." Red; Pause-Key; return }
   Line "`n  ═══ SETUP GIT & SSH KEY ═══`n" Magenta
   $curN = git config --global user.name; $curE = git config --global user.email
@@ -936,7 +937,7 @@ function Setup-Tweaks {
   }
   $r = Select-List -Title 'Tweak Windows untuk Developer' -Sub 'Pengaturan yang bikin Windows lebih ramah programmer. Yang belum aktif sudah dicentang.' -Items $items -Multi -EnterText 'terapkan'
   if (-not $r.Ok) { return }
-  Clear-Host; Write-Host ''
+  Clear-Scr; Write-Host ''
   foreach ($k in $r.Values) {
     try {
       switch ($k) {
@@ -956,7 +957,7 @@ function Setup-Tweaks {
 }
 
 function Update-All {
-  Clear-Host; Line "`n  ═══ UPDATE SEMUA APLIKASI (winget upgrade --all) ═══`n" Magenta
+  Clear-Scr; Line "`n  ═══ UPDATE SEMUA APLIKASI (winget upgrade --all) ═══`n" Magenta
   Set-Cursor $true
   winget upgrade --all --silent --accept-package-agreements --accept-source-agreements --include-unknown
   if ($Apps.ContainsKey('wslcore') -and $Apps['wslcore'].Installed) { Line "`n  Update WSL..." DarkCyan; $null = Invoke-Ext -File 'wsl.exe' -ArgStr '--update' -Label 'wsl --update' -Timeout 600 }
@@ -993,7 +994,7 @@ function New-RestorePoint([string]$Desc) {
 function Is-Laptop { try { [bool](Get-CimInstance Win32_Battery -ErrorAction Stop) } catch { $false } }
 
 function Tune-Up {
-  Clear-Host; Write-Host "`n   Menghitung ukuran file sampah, tunggu sebentar..." -ForegroundColor DarkGray
+  Clear-Scr; Write-Host "`n   Menghitung ukuran file sampah, tunggu sebentar..." -ForegroundColor DarkGray
   $tempPaths = @($env:TEMP, "$env:SystemRoot\Temp")
   $wuPaths = @("$env:SystemRoot\SoftwareDistribution\Download")
   $thumbPaths = @("$env:LOCALAPPDATA\Microsoft\Windows\Explorer")
@@ -1029,7 +1030,7 @@ function Tune-Up {
   $hint = "RAM $($Sys.Ram) GB, disk $($Sys.DiskType). Rekomendasi sudah dicentang. Untuk aplikasi yang jalan saat startup, pakai menu Kelola Startup."
   $r = Select-List -Title 'Tune-Up & Optimasi' -Sub $hint -Items $items -Multi -EnterText 'jalankan'
   if (-not $r.Ok -or -not $r.Values.Count) { return }
-  Clear-Host; Write-Host "`n  ═══ TUNE-UP ═══`n" -ForegroundColor Magenta
+  Clear-Scr; Write-Host "`n  ═══ TUNE-UP ═══`n" -ForegroundColor Magenta
   $before = (Get-PSDrive C).Free
   foreach ($k in $r.Values) {
     $t = $TuneList | Where-Object { $_.K -eq $k }
@@ -1098,14 +1099,14 @@ function Manage-Startup {
     $st = Get-Reg $ap $f.Name
     $list += [pscustomobject]@{ Name = $f.Name; Cmd = $f.FullName; Src = @{ Ap = $ap; L = 'folder Startup'; A = $false }; Enabled = -not ($st -is [byte[]] -and ($st[0] -band 1)) }
   }
-  if (-not $list.Count) { Clear-Host; Line "`n  Tidak ada aplikasi startup yang terdaftar." Green; Pause-Key; return }
+  if (-not $list.Count) { Clear-Scr; Line "`n  Tidak ada aplikasi startup yang terdaftar." Green; Pause-Key; return }
   $items = foreach ($x in $list) {
     $lock = $x.Src.A -and -not $IsAdmin
     MkItem $x.Name "Perintah: $($x.Cmd)`nSumber: $($x.Src.L). Hapus centang = tidak ikut jalan saat Windows menyala (bisa diaktifkan lagi kapan saja, sama seperti di Task Manager)." $x.Name $(if ($lock) { '{Red}butuh admin' } elseif ($x.Enabled) { '{Green}aktif' } else { '{DarkGray}nonaktif' }) $x.Enabled $false
   }
   $r = Select-List -Title 'Kelola Aplikasi Startup' -Sub "$($list.Count) aplikasi startup. Yang dicentang tetap aktif. Makin sedikit aplikasi startup, makin cepat laptop siap dipakai setelah menyala." -Items $items -Multi -EnterText 'simpan'
   if (-not $r.Ok) { return }
-  Clear-Host; Write-Host ''
+  Clear-Scr; Write-Host ''
   foreach ($x in $list) {
     $want = $r.Values -contains $x.Name
     if ($want -eq $x.Enabled) { continue }
@@ -1166,7 +1167,7 @@ $BloatApps = @(
 )
 
 function Debloat {
-  Clear-Host; Write-Host "`n   Membaca aplikasi bawaan yang terpasang..." -ForegroundColor DarkGray
+  Clear-Scr; Write-Host "`n   Membaca aplikasi bawaan yang terpasang..." -ForegroundColor DarkGray
   $installed = @(Get-AppxPackage -ErrorAction SilentlyContinue)
   $cdm = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
   $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
@@ -1200,7 +1201,7 @@ function Debloat {
   }
   $r = Select-List -Title 'Debloat Windows' -Sub 'Hapus aplikasi bawaan yang tidak perlu dan matikan iklan/pelacakan. Restore point dibuat dulu (kalau Administrator). Aplikasi penting (Store, Kalkulator, Foto, Notepad, Terminal, winget) tidak pernah disentuh.' -Items $items.ToArray() -Multi -EnterText 'jalankan'
   if (-not $r.Ok -or -not $r.Values.Count) { return }
-  Clear-Host; Write-Host "`n  ═══ DEBLOAT ═══`n" -ForegroundColor Magenta
+  Clear-Scr; Write-Host "`n  ═══ DEBLOAT ═══`n" -ForegroundColor Magenta
   New-RestorePoint 'TIPACK sebelum debloat'
   $deprov = $false
   if ($IsAdmin -and ($r.Values | Where-Object { $_ -like 'app:*' })) { $deprov = YesNo 'Hapus juga untuk akun user baru (deprovision)?' $false }
@@ -1292,7 +1293,7 @@ function Main-Menu {
       'tune' { Tune-Up } 'startup' { Manage-Startup } 'debloat' { Debloat }
       'quit' {
         if ($Cart.Count -and -not (YesNo "Keranjang masih berisi $($Cart.Count) item. Yakin keluar?" $false)) { continue }
-        Clear-Host; Set-Cursor $true
+        Clear-Scr; Set-Cursor $true
         Line "`n  Terima kasih sudah pakai DEVSETUP IF. Log: $LogFile`n" Magenta; return
       }
     }
