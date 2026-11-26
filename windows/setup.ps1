@@ -292,10 +292,10 @@ $Wizard = @(
   @{ Q = 'Komunikasi?'; M = $true; L = 'discord,zoom,telegram,slack,teams'; T = 'Sesuaikan dengan platform yang dipakai kelas dan dosen.' }
   @{ Q = 'Kuliah & produktivitas?'; M = $true; L = 'notion,obsidian,zotero,office,libreoffice,sumatra,acrobat,gdrive'; T = 'Microsoft 365 biasanya gratis dari email kampus. Zotero menyelamatkan saat skripsi.' }
   @{ Q = 'Utilitas sistem?'; M = $true; L = 'powertoys,vcredist,localsend,everything,revo,cpuz,hwinfo,crystaldisk,rufus,ventoy,anydesk,rustdesk'; T = 'PowerToys + Everything + LocalSend = trio wajib. Sisanya untuk abang IT.' }
-  @{ Q = 'Media & hiburan?'; M = $true; L = 'spotify,vlc,iina,audacity,handbrake,capcut,davinci,kdenlive,klite'; T = 'Spotify untuk musik, CapCut/DaVinci/Kdenlive untuk video, Audacity untuk audio, HandBrake untuk kompres video.' }
+  @{ Q = 'Media & hiburan?'; M = $true; L = 'spotify,vlc,audacity,handbrake,capcut,davinci,kdenlive,klite'; T = 'Spotify untuk musik, CapCut/DaVinci/Kdenlive untuk video, Audacity untuk audio, HandBrake untuk kompres video.' }
   @{ Q = 'Keamanan & privasi?'; M = $true; L = 'bitwarden,keepassxc,protonvpn,warp,malwarebytes,veracrypt'; T = 'Password manager (Bitwarden) sangat disarankan untuk semua orang. Proton VPN gratis untuk WiFi publik.' }
   @{ Q = 'Cloud & sinkronisasi?'; M = $true; L = 'gdrive,onedrive,dropbox,mega,syncthing'; T = 'Google Drive/OneDrive biasanya dapat kuota besar dari email kampus.' }
-  @{ Q = 'Gaming?'; M = $true; L = 'steam,epic,heroic,gog,eaapp,ubisoft,playnite,afterburner,lutris,prism'; T = 'Steam paling umum. Di Linux, Heroic dan Lutris membantu menjalankan game Windows.' }
+  @{ Q = 'Gaming?'; M = $true; L = 'steam,epic,heroic,gog,eaapp,ubisoft,playnite,afterburner,prism'; T = 'Steam paling umum. Di Linux, Heroic dan Lutris membantu menjalankan game Windows.' }
   @{ Q = 'Download & transfer?'; M = $true; L = 'qbittorrent,idm,fdm,jdownloader,localsend'; T = 'Free Download Manager gratis, IDM berbayar tapi populer. LocalSend untuk kirim file HP-laptop.' }
 )
 

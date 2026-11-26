@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="TIPACK">
+  <defs>
+    <linearGradient id="tp-g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0abfc"/><stop offset=".38" stop-color="#d946ef"/><stop offset=".68" stop-color="#a855f7"/><stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="tp-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1426"/><stop offset="1" stop-color="#0a0811"/></linearGradient>
+  </defs>
+  <rect x="6" y="6" width="244" height="244" rx="60" fill="url(#tp-bg)"/>
+  <rect x="6.75" y="6.75" width="242.5" height="242.5" rx="59.25" fill="none" stroke="url(#tp-g)" stroke-opacity=".35" stroke-width="1.5"/>
+  <!-- kubus paket isometrik -->
+  <path d="M128 46 L202 88 L202 170 L128 212 L54 170 L54 88 Z" fill="none" stroke="url(#tp-g)" stroke-width="13" stroke-linejoin="round"/>
+  <path d="M54 88 L128 130 L202 88 M128 130 L128 212" fill="none" stroke="url(#tp-g)" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- prompt terminal di sisi depan -->
+  <path d="M74 132 L96 147 L74 162" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 172 L176 155" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/>
+</svg>
