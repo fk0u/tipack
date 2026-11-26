@@ -9,13 +9,15 @@
 #              ./setup.sh --no-anim
 # =====================================================================================
 
-PRESET=""; NOANIM=0; INSTALL_KEYS=""; SELFTEST=0
-while [ $# -gt 0 ]; do case "$1" in --preset) PRESET="$2"; shift ;; --install) INSTALL_KEYS="$2"; shift ;; --self-test) SELFTEST=1 ;; --no-anim) NOANIM=1 ;; esac; shift; done
+VERSION="2.1.0"; OS_NAME="macOS"
+PRESET=""; NOANIM=0; INSTALL_KEYS=""; SELFTEST=0; CONFIG=""; JSON=0; SCANJSON=0; DOCTOR=0; DOCTOR_FIX=""; REPORT=0
+while [ $# -gt 0 ]; do case "$1" in --preset) PRESET="$2"; shift ;; --install) INSTALL_KEYS="$2"; shift ;; --config) CONFIG="$2"; shift ;; --json) JSON=1 ;; --scan-json) SCANJSON=1; JSON=1 ;; --doctor) DOCTOR=1 ;; --doctor-fix) DOCTOR_FIX="$2"; shift ;; --report) REPORT=1 ;; --self-test) SELFTEST=1 ;; --no-anim) NOANIM=1 ;; esac; shift; done
+[ $JSON = 1 ] && NOANIM=1
 TEST_MODE=0; KEYQ=(); KEYI=0
 if [ -n "$TIPACK_KEYS" ]; then IFS=',' read -r -a KEYQ <<< "$TIPACK_KEYS"; TEST_MODE=1; fi
 [ $SELFTEST = 1 ] && TEST_MODE=1
 [ $TEST_MODE = 1 ] && NOANIM=1
-UNATTENDED=0; { [ -n "$INSTALL_KEYS" ] || [ -n "$PRESET" ]; } && UNATTENDED=1
+UNATTENDED=0; { [ -n "$INSTALL_KEYS" ] || [ -n "$PRESET" ] || [ -n "$CONFIG" ] || [ $JSON = 1 ] || [ -n "$DOCTOR_FIX" ] || [ $REPORT = 1 ]; } && UNATTENDED=1
 INSTALL_FAIL=0
 
 [ "$(uname)" = Darwin ] || { echo "Script ini khusus macOS. Untuk Windows pakai windows/setup.ps1"; exit 1; }
@@ -648,6 +650,89 @@ review_install() {
   [ "$(cart_count)" -gt 0 ] && install_cart
 }
 
+# =====================================================================================
+#  JSON EVENTS, KONFIGURASI, DOCTOR & LAPORAN (bersama macOS/Linux)
+# =====================================================================================
+je() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | tr '\n\r\t' '   '; }
+emit() { [ "$JSON" = 1 ] || return 0; printf '@@TIPACK %s\n' "$1"; }
+keys_json() { local o="" k; for k in "$@"; do o="$o${o:+,}\"$k\""; done; printf '[%s]' "$o"; }
+strip_ansi() { sed -e $'s/\e\\[[0-9;?]*[a-zA-Z]//g' | LC_ALL=C tr -cd '\11\12\40-\176'; }
+urlenc() { local s="$1" i c o=""; for ((i=0;i<${#s};i++)); do c=${s:$i:1}; case "$c" in [a-zA-Z0-9.~_-]) o="$o$c" ;; *) o="$o$(printf '%%%02X' "'$c")" ;; esac; done; printf '%s' "$o"; }
+clip() { if command -v pbcopy >/dev/null 2>&1; then pbcopy; elif [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null; then wl-copy; elif command -v xclip >/dev/null; then xclip -selection clipboard; elif command -v clip.exe >/dev/null; then clip.exe; else cat >/dev/null; return 1; fi; }
+open_url() { [ "$TEST_MODE$JSON" = 00 ] || return 0; if command -v open >/dev/null 2>&1 && [ "$(uname)" = Darwin ]; then open "$1"; elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$1" >/dev/null 2>&1 & elif command -v termux-open-url >/dev/null; then termux-open-url "$1"; fi; }
+
+read_config() { # $1 = file atau URL -> CFG_NAME, CFG_KEYS
+  local txt flat apps profs pk p
+  case "$1" in http://*|https://*) txt=$(curl -fsSL "$1" 2>/dev/null || wget -qO- "$1" 2>/dev/null) ;; *) txt=$(cat "$1" 2>/dev/null) ;; esac
+  [ -z "$txt" ] && { echo "Konfigurasi tidak bisa dibaca: $1"; emit '{"t":"error","msg":"config tidak bisa dibaca"}'; exit 1; }
+  flat=$(printf '%s' "$txt" | tr -d '\n\r')
+  CFG_NAME=$(printf '%s' "$flat" | sed -n 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+  apps=$(printf '%s' "$flat" | sed -n 's/.*"apps"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' ' ')
+  profs=$(printf '%s' "$flat" | sed -n 's/.*"profiles"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' ' ')
+  CFG_KEYS="$apps"
+  for pk in $profs; do for p in "${PROFILES[@]}"; do [ "${p%%|*}" = "$pk" ] && CFG_KEYS="$CFG_KEYS ${p##*|}"; done; done
+  log "config '$CFG_NAME': $CFG_KEYS"
+}
+
+redact() {
+  local h u; h=$(hostname 2>/dev/null | cut -d. -f1); u=${USER:-$(id -un)}
+  sed -e "s#$HOME#~#g" | { if [ ${#u} -ge 3 ]; then sed "s#$u#<user>#g"; else cat; fi; } | { if [ ${#h} -ge 3 ]; then sed "s#$h#<host>#g"; else cat; fi; } |
+    sed -E -e 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<email>/g' -e 's/(gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9-]{20,}|xox[abp]-[A-Za-z0-9-]+)/<token>/g'
+}
+
+last_logs() { ls -t "$ROOT"/devsetup-log-*.txt "${TMPDIR:-/tmp}"/devsetup-log-*.txt 2>/dev/null | grep -v "^$LOG$" | head -1; echo "$LOG"; }
+failed_keys() { # aplikasi yang gagal di log terakhir dan masih belum terpasang
+  local f k i; f=$(last_logs | head -1); [ -f "$f" ] || return 0
+  for k in $(grep -E '^\[[0-9:]+\] [a-z0-9]+: .*(-> fail|: fail)' "$f" 2>/dev/null | sed -E 's/^\[[0-9:]+\] ([a-z0-9]+):.*/\1/' | sort -u); do
+    i=$(ix "$k"); [ -n "$i" ] && [ "${INST[$i]}" != 1 ] && printf '%s ' "$k"
+  done
+}
+
+doctor_menu() {
+  printf '%s\n   %sMemeriksa kesehatan sistem...%s' "$E[2J$E[H" "$DIM" "$R0"
+  local F=() line id sev title detail fix
+  while IFS= read -r line; do [ -n "$line" ] && F+=("$line"); done <<< "$(get_findings)"
+  if [ ${#F[@]} = 0 ]; then printf '%s\n   %s✓ Doctor: tidak ada masalah yang terdeteksi. Siap dipakai.%s\n' "$E[2J$E[H" "$GRN" "$R0"; pause_key; return; fi
+  opt_reset
+  for line in "${F[@]}"; do IFS='|' read -r id sev title detail fix <<< "$line"
+    local c=$DIM; [ "$sev" = tinggi ] && c=$RED; [ "$sev" = sedang ] && c=$YEL
+    local chk=1; [ "$sev" = rendah ] && chk=0; case "$fix" in Manual:*) chk=0 ;; esac
+    opt_add "$title" "$detail\nPerbaikan: $fix" "$id" "${c}● $sev" "$chk" 0 1; done
+  select_list "Doctor │ ${#F[@]} temuan" "Masalah yang terdeteksi beserta perbaikannya. Yang dicentang akan diperbaiki otomatis; semua perintah tercatat di log." multi 0 "perbaiki"
+  [ "$RES_OK" != 1 ] && return
+  printf '%s\n  %s═══ DOCTOR: MEMPERBAIKI ═══%s\n\n' "$E[2J$E[H" "$MAG" "$R0"; show_cur
+  for id in $RES_VALUES; do log "DOCTOR-FIX $id"
+    if apply_fix "$id"; then printf '   %s✓ %s%s\n' "$GRN" "$id" "$R0"; else printf '   %s✗ %s: belum bisa diperbaiki otomatis%s\n' "$RED" "$id" "$R0"; fi; done
+  printf '\n   %sKalau masih bermasalah, pilih menu Laporkan Masalah.%s\n' "$DIM" "$R0"
+  pause_key
+}
+
+report_issue() {
+  local out tail40 url f
+  out="$ROOT/devsetup-laporan-$(date +%Y%m%d-%H%M%S).txt"
+  ( : > "$out" ) 2>/dev/null || out="${TMPDIR:-/tmp}/$(basename "$out")"
+  {
+    echo "TIPACK $VERSION · $OS_NAME"
+    echo "OS: $SYS_OS"; echo "Arsitektur: $(uname -m) · ${PM_LABEL:-Homebrew $(brew --version 2>/dev/null | head -1)}"
+    echo "RAM ${SYS_RAM} GB · disk kosong ${SYS_DISKFREE} GB"
+    echo "Doctor: $(get_findings | cut -d'|' -f3 | tr '\n' ';')"
+    echo; echo '----- LOG (disensor) -----'
+    for f in $(last_logs); do [ -f "$f" ] && { echo "== $(basename "$f")"; tail -400 "$f"; }; done
+  } 2>/dev/null | strip_ansi | redact > "$out"
+  clip < "$out" && local copied=1
+  tail40=$(for f in $(last_logs); do [ -f "$f" ] && tail -40 "$f"; done | strip_ansi | redact | tail -40 | cut -c1-200)
+  [ ${#tail40} -gt 3000 ] && tail40=${tail40: -3000}
+  url="https://github.com/fk0u/tipack/issues/new?template=bug_report.yml&title=$(urlenc "[$OS_NAME] ")&os=$(urlenc "$SYS_OS ($(uname -m))")&versi=$VERSION&log=$(urlenc "$tail40")"
+  emit "{\"t\":\"report\",\"file\":\"$(je "$out")\",\"url\":\"$(je "$url")\"}"
+  [ "$JSON" = 1 ] && return
+  printf '%s\n  %s═══ LAPORKAN MASALAH ═══%s\n\n' "$E[2J$E[H" "$MAG" "$R0"
+  printf '  Laporan disimpan (path home, nama user, hostname, email & token sudah disensor):\n   %s%s%s\n' "$WHT" "$out" "$R0"
+  [ "$copied" = 1 ] && printf '  %sIsi lengkapnya juga sudah DICOPY ke clipboard.%s\n' "$GRN" "$R0"
+  printf '\n  Form issue GitHub akan terbuka dengan info sistem & 40 baris log terakhir terisi.\n  Tulis apa yang kamu lakukan, lalu seret file laporan di atas ke kotak komentar.\n'
+  yesno "Buka form issue GitHub sekarang?" y && open_url "$url"
+  pause_key
+}
+
 install_ohmyzsh() {
   if [ ! -d ~/.oh-my-zsh ]; then
     RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || return 1
@@ -685,6 +770,7 @@ install_cart() {
   for i in $order; do
     n=$((n+1)); status=fail; msg=""
     printf '  %s%s  [%s/%s] %s%s%s\n' "$MAG" "$(bar $((n-1)) $total)" $n $total "$DIM" "${K_CAT[$i]}" "$R0"
+    emit "{\"t\":\"start\",\"key\":\"${K_KEY[$i]}\",\"name\":\"$(je "${K_NAME[$i]}")\",\"n\":$n,\"total\":$total}"
     case "${K_TYPE[$i]}" in
       formula) spin "Menginstall ${K_NAME[$i]}" brew install ${K_ID[$i]} ;;
       cask) spin "Menginstall ${K_NAME[$i]}" brew install --cask "${K_ID[$i]}" ;;
@@ -698,6 +784,7 @@ install_cart() {
       fail) printf '\r   %s✗ %s  GAGAL: %s%s%s\n' "$RED" "${K_NAME[$i]}" "$msg" "$R0" "$E[K"; fail=$((fail+1)); failed="$failed${failed:+, }${K_NAME[$i]}" ;;
     esac
     log "${K_KEY[$i]}: $status $msg"
+    emit "{\"t\":\"done\",\"key\":\"${K_KEY[$i]}\",\"status\":\"$status\",\"secs\":${SPIN_SECS:-0},\"msg\":\"$(je "$msg")\"}"
   done
   post_install
   [ -n "$SUDO_PID" ] && { kill $SUDO_PID 2>/dev/null; SUDO_PID=""; }
@@ -717,6 +804,7 @@ install_cart() {
     if [ "$UNATTENDED$TEST_MODE" = 00 ] && yesno "Buka semua link di browser?" y; then echo "$notes" | while IFS='|' read -r nm url; do [ -n "$url" ] && open "$url"; done; fi
   fi
   INSTALL_FAIL=$fail
+  emit "{\"t\":\"summary\",\"ok\":$ok,\"fail\":$fail,\"info\":$info,\"log\":\"$(je "$LOG")\"}"
   printf '\n  %sTip: buka tab Terminal baru (atau jalankan: source ~/.zshrc) supaya PATH baru terbaca.%s\n' "$CYN" "$R0"
   [ "$UNATTENDED" = 1 ] || pause_key
 }
@@ -926,6 +1014,34 @@ debloat() {
   pause_key
 }
 
+get_findings() { # id|keparahan|judul|detail|perbaikan
+  xcode-select -p >/dev/null 2>&1 || echo "clt|tinggi|Xcode Command Line Tools belum ada|Dibutuhkan git, compiler dan Homebrew.|xcode-select --install"
+  if ! command -v brew >/dev/null 2>&1; then echo "brew|tinggi|Homebrew belum terpasang|Semua instalasi memakai Homebrew.|Pasang Homebrew dari brew.sh"
+  else
+    local bd; bd=$(brew doctor 2>&1 | grep -m1 '^Warning:' | sed 's/^Warning: //' | cut -c1-140)
+    [ -n "$bd" ] && echo "brewdoc|sedang|Homebrew punya peringatan|$bd|brew update && brew cleanup (lalu cek brew doctor)"
+    local bp; bp=$(brew --prefix)
+    grep -qs "shellenv" ~/.zprofile ~/.zshrc ~/.bash_profile 2>/dev/null || echo "path|sedang|PATH Homebrew belum diset di shell|Perintah dari brew (git, python3, node) bisa tidak dikenali di terminal baru.|Tambahkan eval \$($bp/bin/brew shellenv) ke ~/.zprofile"
+  fi
+  [ "$(uname -m)" = arm64 ] && ! /usr/bin/pgrep -q oahd 2>/dev/null && echo "rosetta|rendah|Rosetta 2 belum terpasang|Beberapa aplikasi Intel-only butuh Rosetta untuk berjalan di Apple Silicon. Memasangnya berarti menyetujui lisensi Rosetta dari Apple.|softwareupdate --install-rosetta --agree-to-license"
+  [ "${SYS_DISKFREE:-99}" -lt 10 ] && echo "disk|tinggi|Disk tinggal ${SYS_DISKFREE} GB|Instalasi besar dan update macOS bisa gagal.|Buka Tune-Up untuk membersihkan cache"
+  [ "$SYS_NET" = 0 ] && echo "net|tinggi|Tidak ada koneksi internet|Tidak bisa mengunduh apa pun.|Manual: cek WiFi/kabel, matikan VPN/proxy yang bermasalah"
+  local fk; fk=$(failed_keys); [ -n "$fk" ] && echo "retry|sedang|Aplikasi gagal di instalasi terakhir|$fk|Coba pasang ulang: $fk"
+  return 0
+}
+apply_fix() {
+  case $1 in
+    clt) xcode-select --install 2>/dev/null; return 0 ;;
+    brew) ensure_brew ;;
+    brewdoc) brew update >>"$LOG" 2>&1 && brew cleanup >>"$LOG" 2>&1 ;;
+    path) local bp; bp=$(brew --prefix); echo "eval \"\$($bp/bin/brew shellenv)\"" >> ~/.zprofile ;;
+    rosetta) sudo softwareupdate --install-rosetta --agree-to-license >>"$LOG" 2>&1 ;;
+    disk) tune_up ;;
+    retry) local fk; fk=$(failed_keys); sync_cart "$fk" "$fk"; [ "$(cart_count)" -gt 0 ] && install_cart; [ "$INSTALL_FAIL" = 0 ] ;;
+    *) return 1 ;;
+  esac
+}
+
 show_sysinfo() {
   local rt
   if [ "$SYS_RAM" -lt 8 ]; then rt="RAM di bawah 8GB: hindari Docker Desktop/Android Studio, pakai OrbStack dan editor ringan."
@@ -962,6 +1078,8 @@ main_menu() {
     opt_add "⚙️  Tweak macOS untuk Developer" "Tampilkan ekstensi dan file tersembunyi, path bar, folder screenshot, key repeat cepat, tanpa .DS_Store di flashdisk." tweak
     opt_add "🚀 Tune-Up & Optimasi" "Bersihkan cache, log, Homebrew, cache developer & Xcode, snapshot Time Machine, percepat animasi, bebaskan RAM. Cocok untuk Mac lama yang mulai lemot." tune "$( [ "$SYS_RAM" -le 8 ] && printf '%s★ disarankan untuk Mac ini' "$YEL")"
     opt_add "🧹 Debloat macOS" "Hapus GarageBand/iMovie/Keynote/Numbers/Pages (bisa belasan GB), matikan iklan personal, Siri dan recent apps di Dock." debloat
+    opt_add "🩺 Doctor (cek & perbaiki otomatis)" "Periksa Xcode CLT, Homebrew (brew doctor), PATH, Rosetta, disk, internet, dan aplikasi yang gagal di instalasi terakhir. Lalu perbaiki otomatis dengan izinmu." doctor
+    opt_add "🐞 Laporkan Masalah" "Buat laporan (log disensor dari nama user, hostname, email dan token), copy ke clipboard, lalu buka form GitHub Issue yang sudah terisi." report
     opt_add "🔄 Update Semua Aplikasi" "brew update + upgrade + upgrade --cask --greedy + cleanup." upd
     opt_add "💻 Info Sistem" "Spesifikasi Mac, chip, RAM, disk dan versi Homebrew." sys
     opt_add "🚪 Keluar" "Sampai jumpa! Semangat ngodingnya." quit
@@ -971,7 +1089,7 @@ main_menu() {
     case $v in
       wiz) run_wizard ;; prof) pick_profile ;; cat) browse_category ;; status) show_all ;;
       cart) review_install ;; ext) setup_vscode_ext ;; git) setup_git ;; tweak) setup_tweaks ;;
-      upd) update_all ;; sys) show_sysinfo ;; tune) tune_up ;; debloat) debloat ;;
+      upd) update_all ;; sys) show_sysinfo ;; tune) tune_up ;; debloat) debloat ;; doctor) doctor_menu ;; report) report_issue ;;
       quit)
         if [ "$(cart_count)" -gt 0 ]; then printf '%s' "$E[2J$E[H"; echo; yesno "Keranjang masih berisi $(cart_count) item. Yakin keluar?" n || continue; fi
         printf '%s' "$E[2J$E[H"; printf '\n  %sTerima kasih sudah pakai DEVSETUP IF. Log: %s%s\n\n' "$MAG" "$LOG" "$R0"; return ;;
@@ -984,9 +1102,21 @@ main_menu() {
 # =====================================================================================
 log "DEVSETUP IF macOS dimulai ($(uname -m), bash $BASH_VERSION, tes=$TEST_MODE)"
 boot
+emit "{\"t\":\"sys\",\"os\":\"$(je "$SYS_OS")\",\"arch\":\"$(uname -m)\",\"ram\":$SYS_RAM,\"version\":\"$VERSION\",\"log\":\"$(je "$LOG")\"}"
 if [ $SELFTEST = 1 ] && [ ${#KEYQ[@]} = 0 ]; then
   echo "SELFTEST katalog=$NCAT terpasang=$(inst_count) arch=$(uname -m) os=$(sw_vers -productVersion)"; exit 0
 fi
+if [ $SCANJSON = 1 ]; then
+  inst=(); for ((i=0;i<NCAT;i++)); do [ "${INST[$i]}" = 1 ] && inst+=("${K_KEY[$i]}"); done
+  emit "{\"t\":\"scan\",\"installed\":$(keys_json "${inst[@]}"),\"available\":$(keys_json "${K_KEY[@]}")}"; exit 0
+fi
+if [ $DOCTOR = 1 ] && [ $JSON = 1 ]; then
+  get_findings | while IFS='|' read -r id sev title detail fix; do emit "{\"t\":\"doctor\",\"id\":\"$id\",\"sev\":\"$sev\",\"title\":\"$(je "$title")\",\"detail\":\"$(je "$detail")\",\"fix\":\"$(je "$fix")\"}"; done; emit '{"t":"end"}'; exit 0
+fi
+[ $DOCTOR = 1 ] && { doctor_menu; exit 0; }
+if [ -n "$DOCTOR_FIX" ]; then allok=0; for id in $(echo "$DOCTOR_FIX" | tr ',' ' '); do if apply_fix "$id"; then r=true; else r=false; allok=4; fi; emit "{\"t\":\"fixed\",\"id\":\"$id\",\"ok\":$r}"; done; exit $allok; fi
+[ $REPORT = 1 ] && { report_issue; exit 0; }
+if [ -n "$CONFIG" ]; then read_config "$CONFIG"; echo "Konfigurasi: ${CFG_NAME:-tanpa nama} ($(echo $CFG_KEYS | wc -w | tr -d ' ') aplikasi)"; INSTALL_KEYS=$(echo $CFG_KEYS | tr ' ' ','); fi
 if [ -n "$INSTALL_KEYS" ]; then
   want=$(echo "$INSTALL_KEYS" | tr ',' ' '); bad=""
   for k in $want; do case "$k" in *[!a-z0-9]*) bad="$bad $k"; continue ;; esac; [ -z "$(ix "$k")" ] && bad="$bad $k"; done

@@ -15,13 +15,15 @@
 #  CATATAN: file ini dirakit oleh linux/src/build.sh dari linux-parts.sh + mesin TUI macos/setup.sh.
 # =====================================================================================
 
-PRESET=""; NOANIM=0; INSTALL_KEYS=""; SELFTEST=0
-while [ $# -gt 0 ]; do case "$1" in --preset) PRESET="$2"; shift ;; --install) INSTALL_KEYS="$2"; shift ;; --self-test) SELFTEST=1 ;; --no-anim) NOANIM=1 ;; esac; shift; done
+VERSION="2.1.0"; OS_NAME="Linux"
+PRESET=""; NOANIM=0; INSTALL_KEYS=""; SELFTEST=0; CONFIG=""; JSON=0; SCANJSON=0; DOCTOR=0; DOCTOR_FIX=""; REPORT=0
+while [ $# -gt 0 ]; do case "$1" in --preset) PRESET="$2"; shift ;; --install) INSTALL_KEYS="$2"; shift ;; --config) CONFIG="$2"; shift ;; --json) JSON=1 ;; --scan-json) SCANJSON=1; JSON=1 ;; --doctor) DOCTOR=1 ;; --doctor-fix) DOCTOR_FIX="$2"; shift ;; --report) REPORT=1 ;; --self-test) SELFTEST=1 ;; --no-anim) NOANIM=1 ;; esac; shift; done
+[ $JSON = 1 ] && NOANIM=1
 TEST_MODE=0; KEYQ=(); KEYI=0
 if [ -n "$TIPACK_KEYS" ]; then IFS=',' read -r -a KEYQ <<< "$TIPACK_KEYS"; TEST_MODE=1; fi
 [ $SELFTEST = 1 ] && TEST_MODE=1
 [ $TEST_MODE = 1 ] && NOANIM=1
-UNATTENDED=0; { [ -n "$INSTALL_KEYS" ] || [ -n "$PRESET" ]; } && UNATTENDED=1
+UNATTENDED=0; { [ -n "$INSTALL_KEYS" ] || [ -n "$PRESET" ] || [ -n "$CONFIG" ] || [ $JSON = 1 ] || [ -n "$DOCTOR_FIX" ] || [ $REPORT = 1 ]; } && UNATTENDED=1
 INSTALL_FAIL=0
 
 [ "$(uname -s)" = Linux ] || { echo "Script ini khusus Linux. macOS: macos/setup.sh, Windows: windows/setup.ps1"; exit 1; }
@@ -641,6 +643,89 @@ review_install() {
   sync_cart "$keys" "$RES_VALUES"
   [ "$(cart_count)" -gt 0 ] && install_cart
 }
+
+# =====================================================================================
+#  JSON EVENTS, KONFIGURASI, DOCTOR & LAPORAN (bersama macOS/Linux)
+# =====================================================================================
+je() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | tr '\n\r\t' '   '; }
+emit() { [ "$JSON" = 1 ] || return 0; printf '@@TIPACK %s\n' "$1"; }
+keys_json() { local o="" k; for k in "$@"; do o="$o${o:+,}\"$k\""; done; printf '[%s]' "$o"; }
+strip_ansi() { sed -e $'s/\e\\[[0-9;?]*[a-zA-Z]//g' | LC_ALL=C tr -cd '\11\12\40-\176'; }
+urlenc() { local s="$1" i c o=""; for ((i=0;i<${#s};i++)); do c=${s:$i:1}; case "$c" in [a-zA-Z0-9.~_-]) o="$o$c" ;; *) o="$o$(printf '%%%02X' "'$c")" ;; esac; done; printf '%s' "$o"; }
+clip() { if command -v pbcopy >/dev/null 2>&1; then pbcopy; elif [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null; then wl-copy; elif command -v xclip >/dev/null; then xclip -selection clipboard; elif command -v clip.exe >/dev/null; then clip.exe; else cat >/dev/null; return 1; fi; }
+open_url() { [ "$TEST_MODE$JSON" = 00 ] || return 0; if command -v open >/dev/null 2>&1 && [ "$(uname)" = Darwin ]; then open "$1"; elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$1" >/dev/null 2>&1 & elif command -v termux-open-url >/dev/null; then termux-open-url "$1"; fi; }
+
+read_config() { # $1 = file atau URL -> CFG_NAME, CFG_KEYS
+  local txt flat apps profs pk p
+  case "$1" in http://*|https://*) txt=$(curl -fsSL "$1" 2>/dev/null || wget -qO- "$1" 2>/dev/null) ;; *) txt=$(cat "$1" 2>/dev/null) ;; esac
+  [ -z "$txt" ] && { echo "Konfigurasi tidak bisa dibaca: $1"; emit '{"t":"error","msg":"config tidak bisa dibaca"}'; exit 1; }
+  flat=$(printf '%s' "$txt" | tr -d '\n\r')
+  CFG_NAME=$(printf '%s' "$flat" | sed -n 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+  apps=$(printf '%s' "$flat" | sed -n 's/.*"apps"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' ' ')
+  profs=$(printf '%s' "$flat" | sed -n 's/.*"profiles"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' ' ')
+  CFG_KEYS="$apps"
+  for pk in $profs; do for p in "${PROFILES[@]}"; do [ "${p%%|*}" = "$pk" ] && CFG_KEYS="$CFG_KEYS ${p##*|}"; done; done
+  log "config '$CFG_NAME': $CFG_KEYS"
+}
+
+redact() {
+  local h u; h=$(hostname 2>/dev/null | cut -d. -f1); u=${USER:-$(id -un)}
+  sed -e "s#$HOME#~#g" | { if [ ${#u} -ge 3 ]; then sed "s#$u#<user>#g"; else cat; fi; } | { if [ ${#h} -ge 3 ]; then sed "s#$h#<host>#g"; else cat; fi; } |
+    sed -E -e 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<email>/g' -e 's/(gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9-]{20,}|xox[abp]-[A-Za-z0-9-]+)/<token>/g'
+}
+
+last_logs() { ls -t "$ROOT"/devsetup-log-*.txt "${TMPDIR:-/tmp}"/devsetup-log-*.txt 2>/dev/null | grep -v "^$LOG$" | head -1; echo "$LOG"; }
+failed_keys() { # aplikasi yang gagal di log terakhir dan masih belum terpasang
+  local f k i; f=$(last_logs | head -1); [ -f "$f" ] || return 0
+  for k in $(grep -E '^\[[0-9:]+\] [a-z0-9]+: .*(-> fail|: fail)' "$f" 2>/dev/null | sed -E 's/^\[[0-9:]+\] ([a-z0-9]+):.*/\1/' | sort -u); do
+    i=$(ix "$k"); [ -n "$i" ] && [ "${INST[$i]}" != 1 ] && printf '%s ' "$k"
+  done
+}
+
+doctor_menu() {
+  printf '%s\n   %sMemeriksa kesehatan sistem...%s' "$E[2J$E[H" "$DIM" "$R0"
+  local F=() line id sev title detail fix
+  while IFS= read -r line; do [ -n "$line" ] && F+=("$line"); done <<< "$(get_findings)"
+  if [ ${#F[@]} = 0 ]; then printf '%s\n   %s✓ Doctor: tidak ada masalah yang terdeteksi. Siap dipakai.%s\n' "$E[2J$E[H" "$GRN" "$R0"; pause_key; return; fi
+  opt_reset
+  for line in "${F[@]}"; do IFS='|' read -r id sev title detail fix <<< "$line"
+    local c=$DIM; [ "$sev" = tinggi ] && c=$RED; [ "$sev" = sedang ] && c=$YEL
+    local chk=1; [ "$sev" = rendah ] && chk=0; case "$fix" in Manual:*) chk=0 ;; esac
+    opt_add "$title" "$detail\nPerbaikan: $fix" "$id" "${c}● $sev" "$chk" 0 1; done
+  select_list "Doctor │ ${#F[@]} temuan" "Masalah yang terdeteksi beserta perbaikannya. Yang dicentang akan diperbaiki otomatis; semua perintah tercatat di log." multi 0 "perbaiki"
+  [ "$RES_OK" != 1 ] && return
+  printf '%s\n  %s═══ DOCTOR: MEMPERBAIKI ═══%s\n\n' "$E[2J$E[H" "$MAG" "$R0"; show_cur
+  for id in $RES_VALUES; do log "DOCTOR-FIX $id"
+    if apply_fix "$id"; then printf '   %s✓ %s%s\n' "$GRN" "$id" "$R0"; else printf '   %s✗ %s: belum bisa diperbaiki otomatis%s\n' "$RED" "$id" "$R0"; fi; done
+  printf '\n   %sKalau masih bermasalah, pilih menu Laporkan Masalah.%s\n' "$DIM" "$R0"
+  pause_key
+}
+
+report_issue() {
+  local out tail40 url f
+  out="$ROOT/devsetup-laporan-$(date +%Y%m%d-%H%M%S).txt"
+  ( : > "$out" ) 2>/dev/null || out="${TMPDIR:-/tmp}/$(basename "$out")"
+  {
+    echo "TIPACK $VERSION · $OS_NAME"
+    echo "OS: $SYS_OS"; echo "Arsitektur: $(uname -m) · ${PM_LABEL:-Homebrew $(brew --version 2>/dev/null | head -1)}"
+    echo "RAM ${SYS_RAM} GB · disk kosong ${SYS_DISKFREE} GB"
+    echo "Doctor: $(get_findings | cut -d'|' -f3 | tr '\n' ';')"
+    echo; echo '----- LOG (disensor) -----'
+    for f in $(last_logs); do [ -f "$f" ] && { echo "== $(basename "$f")"; tail -400 "$f"; }; done
+  } 2>/dev/null | strip_ansi | redact > "$out"
+  clip < "$out" && local copied=1
+  tail40=$(for f in $(last_logs); do [ -f "$f" ] && tail -40 "$f"; done | strip_ansi | redact | tail -40 | cut -c1-200)
+  [ ${#tail40} -gt 3000 ] && tail40=${tail40: -3000}
+  url="https://github.com/fk0u/tipack/issues/new?template=bug_report.yml&title=$(urlenc "[$OS_NAME] ")&os=$(urlenc "$SYS_OS ($(uname -m))")&versi=$VERSION&log=$(urlenc "$tail40")"
+  emit "{\"t\":\"report\",\"file\":\"$(je "$out")\",\"url\":\"$(je "$url")\"}"
+  [ "$JSON" = 1 ] && return
+  printf '%s\n  %s═══ LAPORKAN MASALAH ═══%s\n\n' "$E[2J$E[H" "$MAG" "$R0"
+  printf '  Laporan disimpan (path home, nama user, hostname, email & token sudah disensor):\n   %s%s%s\n' "$WHT" "$out" "$R0"
+  [ "$copied" = 1 ] && printf '  %sIsi lengkapnya juga sudah DICOPY ke clipboard.%s\n' "$GRN" "$R0"
+  printf '\n  Form issue GitHub akan terbuka dengan info sistem & 40 baris log terakhir terisi.\n  Tulis apa yang kamu lakukan, lalu seret file laporan di atas ke kotak komentar.\n'
+  yesno "Buka form issue GitHub sekarang?" y && open_url "$url"
+  pause_key
+}
 # ======================= AKHIR MESIN TUI =======================
 
 # =====================================================================================
@@ -958,6 +1043,7 @@ install_cart() {
   for i in $order; do
     n=$((n+1)); status=fail; msg=""
     printf '  %s%s  [%s/%s] %s%s · %s%s\n' "$MAG" "$(bar $((n-1)) $total)" $n $total "$DIM" "${K_CAT[$i]}" "${K_TYPE[$i]}" "$R0"
+    emit "{\"t\":\"start\",\"key\":\"${K_KEY[$i]}\",\"name\":\"$(je "${K_NAME[$i]}")\",\"n\":$n,\"total\":$total}"
     if [ "${K_TYPE[$i]}" = info ]; then status=info; notes="$notes${K_NAME[$i]}|${K_ID[$i]}"$'\n'
     else
       spin "Menginstall ${K_NAME[$i]}" install_one "$i"
@@ -969,6 +1055,7 @@ install_cart() {
       fail) printf '\r   %s✗ %s  GAGAL: %s%s%s\n' "$RED" "${K_NAME[$i]}" "$msg" "$R0" "$E[K"; fail=$((fail+1)); failed="$failed${failed:+, }${K_NAME[$i]}" ;;
     esac
     log "${K_KEY[$i]}: ${K_TYPE[$i]} ${K_ID[$i]} -> $status $msg"
+    emit "{\"t\":\"done\",\"key\":\"${K_KEY[$i]}\",\"status\":\"$status\",\"secs\":${SPIN_SECS:-0},\"msg\":\"$(je "$msg")\"}"
   done
   spin "Merapikan konfigurasi..." post_install; printf '\r%s' "$E[K"
   [ -n "$SUDO_PID" ] && { kill $SUDO_PID 2>/dev/null; SUDO_PID=""; }
@@ -991,6 +1078,7 @@ install_cart() {
   printf '\n  %sTip: buka terminal baru (atau: source ~/.bashrc) supaya PATH baru terbaca.%s\n' "$CYN" "$R0"
   [ "$NEED_RELOGIN" = 1 ] && printf '  %sLogout lalu login lagi supaya grup docker / shell zsh aktif.%s\n' "$YEL" "$R0"
   INSTALL_FAIL=$fail
+  emit "{\"t\":\"summary\",\"ok\":$ok,\"fail\":$fail,\"info\":$info,\"log\":\"$(je "$LOG")\"}"
   [ "$UNATTENDED" = 1 ] || pause_key
 }
 
@@ -1213,6 +1301,40 @@ debloat() {
   pause_key
 }
 
+get_findings() { # id|keparahan|judul|detail|perbaikan
+  local fl; fl=$(last_logs | head -1)
+  if [ $PM = apt ]; then
+    [ -n "$(dpkg --audit 2>/dev/null)" ] && echo "dpkg|tinggi|Instalasi paket sebelumnya terputus|dpkg melaporkan paket setengah terpasang; apt akan menolak memasang paket baru.|sudo dpkg --configure -a"
+    apt-get check >/dev/null 2>&1 || echo "aptfix|tinggi|Dependensi paket rusak|apt-get check gagal: ada paket dengan dependensi yang tidak terpenuhi.|sudo apt-get -f install -y"
+    pgrep -x 'apt|apt-get|dpkg|unattended-upgr' >/dev/null 2>&1 && echo "aptlock|sedang|apt sedang dipakai proses lain|Biasanya update otomatis di latar. Instalasi akan gagal dengan pesan 'Could not get lock'.|Tunggu sampai proses selesai (maksimal 5 menit)"
+  fi
+  if [ $PM = pacman ]; then
+    [ -e /var/lib/pacman/db.lck ] && ! pgrep -x pacman >/dev/null 2>&1 && echo "pacmanlock|tinggi|Lock pacman tertinggal|File db.lck tersisa dari pacman yang terhenti paksa; semua instalasi akan gagal.|sudo rm /var/lib/pacman/db.lck"
+    grep -qsE 'signature from .* is (unknown trust|invalid)|invalid or corrupted package \(PGP' "$fl" && echo "keyring|tinggi|Keyring Arch kedaluwarsa|Paket ditolak karena tanda tangan PGP tidak dikenal.|sudo pacman -Sy --noconfirm archlinux-keyring"
+  fi
+  command -v flatpak >/dev/null 2>&1 && grep -qsiE 'flatpak.*(error|fail)|error:.*flathub' "$fl" && echo "flatrepair|sedang|Flatpak bermasalah di instalasi terakhir|Repositori atau runtime Flatpak mungkin rusak.|flatpak repair --user"
+  [ "$IS_ROOT" = 0 ] && [ "$IS_TERMUX" = 0 ] && ! command -v sudo >/dev/null 2>&1 && echo "sudo|tinggi|sudo tidak tersedia|User biasa tidak bisa memasang paket sistem.|Manual: masuk root (su -) lalu pasang sudo dan tambahkan user ke grup sudo/wheel"
+  local w; w=$(cat /proc/sys/fs/inotify/max_user_watches 2>/dev/null || echo 999999); [ "$w" -lt 524288 ] && [ "$IS_TERMUX$IS_PROOT" = 00 ] && echo "inotify|rendah|Batas file watcher rendah ($w)|VS Code, Vite dan npm run dev bisa error ENOSPC.|Naikkan ke 524288 (sysctl)"
+  [ "${SYS_DISKFREE:-99}" -lt 10 ] && echo "disk|tinggi|Disk tinggal ${SYS_DISKFREE} GB|Instalasi dan update bisa gagal.|Buka Tune-Up untuk membersihkan cache"
+  [ "$SYS_NET" = 0 ] && echo "net|tinggi|Tidak ada koneksi internet|Tidak bisa mengunduh paket.|Manual: cek WiFi/kabel, DNS (resolvectl status), proxy"
+  local fk; fk=$(failed_keys); [ -n "$fk" ] && echo "retry|sedang|Aplikasi gagal di instalasi terakhir|$fk|Coba pasang ulang: $fk"
+  return 0
+}
+apply_fix() {
+  case $1 in
+    dpkg) $SUDO dpkg --configure -a >>"$LOG" 2>&1 ;;
+    aptfix) $SUDO env DEBIAN_FRONTEND=noninteractive apt-get -f install -y >>"$LOG" 2>&1 ;;
+    aptlock) local t=0; while pgrep -x 'apt|apt-get|dpkg|unattended-upgr' >/dev/null 2>&1 && [ $t -lt 300 ]; do sleep 5; t=$((t+5)); done; ! pgrep -x 'apt|apt-get|dpkg' >/dev/null 2>&1 ;;
+    pacmanlock) pgrep -x pacman >/dev/null 2>&1 && return 1; $SUDO rm -f /var/lib/pacman/db.lck ;;
+    keyring) $SUDO pacman -Sy --noconfirm archlinux-keyring >>"$LOG" 2>&1 ;;
+    flatrepair) flatpak repair --user >>"$LOG" 2>&1 ;;
+    inotify) echo 'fs.inotify.max_user_watches=524288' | $SUDO tee /etc/sysctl.d/60-devsetup-inotify.conf >/dev/null && $SUDO sysctl -q -p /etc/sysctl.d/60-devsetup-inotify.conf ;;
+    disk) tune_up ;;
+    retry) local fk; fk=$(failed_keys); sync_cart "$fk" "$fk"; [ "$(cart_count)" -gt 0 ] && install_cart; [ "$INSTALL_FAIL" = 0 ] ;;
+    *) return 1 ;;
+  esac
+}
+
 update_all() {
   printf '%s' "$E[2J$E[H"; show_cur
   printf '\n  %s═══ UPDATE SEMUA (%s + flatpak) ═══%s\n\n' "$MAG" "$PM" "$R0"
@@ -1313,6 +1435,8 @@ main_menu() {
     opt_add "⚙️  Tweak Linux untuk Developer" "Batas inotify untuk VS Code/Vite, grup dialout/docker/libvirt, dark mode, file tersembunyi." tweak
     opt_add "🚀 Tune-Up & Optimasi" "Bersihkan cache paket & paket yatim, Flatpak tak terpakai, batasi log journal, zram (RAM terkompresi), earlyoom anti-freeze, TRIM SSD, TLP baterai, matikan animasi. Cocok untuk laptop lama." tune "$( [ "${SYS_RAM:-8}" -le 8 ] && printf '%s★ disarankan untuk laptop ini' "$YEL")"
     opt_add "🧹 Debloat Linux" "Lepas Snap (Ubuntu), hapus telemetri Ubuntu, matikan layanan latar yang tidak dipakai (printer, bluetooth, modem, PackageKit)." debloat
+    opt_add "🩺 Doctor (cek & perbaiki otomatis)" "Periksa dpkg/apt yang rusak atau terkunci, lock pacman, keyring Arch, Flatpak, sudo, batas inotify, disk, internet, dan aplikasi yang gagal di instalasi terakhir. Lalu perbaiki otomatis dengan izinmu." doctor
+    opt_add "🐞 Laporkan Masalah" "Buat laporan (log disensor dari path home, nama user, hostname, email dan token), copy ke clipboard, lalu buka form GitHub Issue yang sudah terisi." report
     opt_add "🔄 Update Semua" "Upgrade semua paket $PM${AUR_HELPER:+ + AUR} + Flatpak." upd
     opt_add "💻 Info Sistem" "Distro, package manager, kernel, desktop, RAM, disk dan status KVM." sys
     opt_add "🚪 Keluar" "Sampai jumpa! Semangat ngodingnya." quit
@@ -1322,7 +1446,7 @@ main_menu() {
     case $v in
       wiz) run_wizard ;; prof) pick_profile ;; cat) browse_category ;; status) show_all ;;
       cart) review_install ;; ext) setup_vscode_ext ;; git) setup_git ;; tweak) setup_tweaks ;;
-      upd) update_all ;; sys) show_sysinfo ;; tune) tune_up ;; debloat) debloat ;;
+      upd) update_all ;; sys) show_sysinfo ;; tune) tune_up ;; debloat) debloat ;; doctor) doctor_menu ;; report) report_issue ;;
       quit)
         if [ "$(cart_count)" -gt 0 ]; then printf '%s' "$E[2J$E[H"; echo; yesno "Keranjang masih berisi $(cart_count) item. Yakin keluar?" n || continue; fi
         printf '%s' "$E[2J$E[H"; printf '\n  %sTerima kasih sudah pakai DEVSETUP IF. Log: %s%s\n\n' "$MAG" "$LOG" "$R0"; return ;;
@@ -1335,6 +1459,18 @@ main_menu() {
 # =====================================================================================
 log "DEVSETUP IF Linux dimulai ($(uname -m), bash $BASH_VERSION, tes=$TEST_MODE)"
 boot
+emit "{\"t\":\"sys\",\"os\":\"$(je "$SYS_OS")\",\"arch\":\"$(uname -m)\",\"pm\":\"$PM\",\"ram\":${SYS_RAM:-0},\"version\":\"$VERSION\",\"log\":\"$(je "$LOG")\"}"
+if [ $SCANJSON = 1 ]; then
+  inst=(); avl=(); for ((i=0;i<NCAT;i++)); do [ "${INST[$i]}" = 1 ] && inst+=("${K_KEY[$i]}"); [ "${K_TYPE[$i]}" != none ] && avl+=("${K_KEY[$i]}"); done
+  emit "{\"t\":\"scan\",\"installed\":$(keys_json "${inst[@]}"),\"available\":$(keys_json "${avl[@]}")}"; exit 0
+fi
+if [ $DOCTOR = 1 ] && [ $JSON = 1 ]; then
+  get_findings | while IFS='|' read -r id sev title detail fix; do emit "{\"t\":\"doctor\",\"id\":\"$id\",\"sev\":\"$sev\",\"title\":\"$(je "$title")\",\"detail\":\"$(je "$detail")\",\"fix\":\"$(je "$fix")\"}"; done; emit '{"t":"end"}'; exit 0
+fi
+[ $DOCTOR = 1 ] && { doctor_menu; exit 0; }
+if [ -n "$DOCTOR_FIX" ]; then allok=0; for id in $(echo "$DOCTOR_FIX" | tr ',' ' '); do if apply_fix "$id"; then r=true; else r=false; allok=4; fi; emit "{\"t\":\"fixed\",\"id\":\"$id\",\"ok\":$r}"; done; exit $allok; fi
+[ $REPORT = 1 ] && { report_issue; exit 0; }
+if [ -n "$CONFIG" ]; then read_config "$CONFIG"; echo "Konfigurasi: ${CFG_NAME:-tanpa nama} ($(echo $CFG_KEYS | wc -w | tr -d ' ') aplikasi)"; INSTALL_KEYS=$(echo $CFG_KEYS | tr ' ' ','); fi
 if [ $SELFTEST = 1 ] && [ ${#KEYQ[@]} = 0 ]; then
   avail=0; for ((i=0;i<NCAT;i++)); do [ "${K_TYPE[$i]}" != none ] && avail=$((avail+1)); done
   echo "SELFTEST distro=$D_ID pm=$PM arch=$(uname -m) katalog=$NCAT tersedia=$avail terpasang=$(inst_count)"; exit 0

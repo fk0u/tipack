@@ -6,7 +6,8 @@
   Jalankan:  klik kanan JALANKAN.bat -> Run as administrator
   atau:      powershell -ExecutionPolicy Bypass -File setup.ps1 [-Preset starter] [-NoAnim]
 #>
-param([string]$Preset = "", [string]$Install = "", [switch]$NoAnim, [switch]$SelfTest)
+param([string]$Preset = "", [string]$Install = "", [string]$Config = "", [switch]$Json, [switch]$ScanJson, [switch]$Doctor, [string]$DoctorFix = "", [switch]$Report, [switch]$NoAnim, [switch]$SelfTest)
+$Version = '2.1.0'
 
 $ErrorActionPreference = 'Continue'
 $ProgressPreference = 'SilentlyContinue'
@@ -26,7 +27,9 @@ $KeyQueue = New-Object System.Collections.Queue
 if ($env:TIPACK_KEYS) { foreach ($k in ($env:TIPACK_KEYS -split ',')) { if ($k.Trim()) { $KeyQueue.Enqueue($k.Trim()) } } }
 $TestMode = [bool]$env:TIPACK_KEYS -or [bool]$SelfTest
 if ($TestMode) { $NoAnim = $true }
-$Unattended = [bool]$Install -or [bool]$Preset
+if ($ScanJson) { $Json = $true }
+if ($Json) { $NoAnim = $true }
+$Unattended = [bool]$Install -or [bool]$Preset -or [bool]$Config -or $Json -or [bool]$DoctorFix -or $Report
 $script:InstallFail = 0
 
 # =====================================================================================
@@ -730,7 +733,7 @@ function Show-Boot {
   }
   if (-not $Sys.Net) { Line '  Tidak ada internet. Instalasi butuh koneksi, cek WiFi dulu ya.' Yellow }
   if ($Sys.DiskFree -and $Sys.DiskFree -lt 20) { Line "  Disk C tinggal $($Sys.DiskFree) GB. Paket berat seperti Android Studio/VS bisa gagal." Yellow }
-  if (-not $IsAdmin -and -not $TestMode) {
+  if (-not $IsAdmin -and -not $TestMode -and -not $Unattended) {
     Line '  Script tidak berjalan sebagai Administrator: akan banyak popup UAC dan WSL/fitur Windows tidak bisa dipasang.' Yellow
     if (YesNo 'Jalankan ulang sebagai Administrator sekarang?' $true) {
       $a = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""; if ($Preset) { $a += " -Preset $Preset" }
@@ -744,6 +747,7 @@ function Show-Boot {
   }
   Scan-Installed
   $n = @($Catalog | Where-Object Installed).Count
+  Emit @{ t = 'sys'; os = $Sys.OS; arch = $Arch; ram = $Sys.Ram; disk = $Sys.DiskType; admin = $IsAdmin; winget = $Sys.Winget; version = $Version; log = $LogFile }
   Write-Host "`r   √ Pemindaian selesai: $n dari $($Catalog.Count) aplikasi di katalog sudah terpasang.               " -ForegroundColor Green
   if (-not $NoAnim) { Start-Sleep -Milliseconds 900 }
 }
@@ -858,6 +862,7 @@ function Install-Cart {
     Write-Host ('  ' + (Bar ($n - 1) $total) + "  [$n/$total] ") -NoNewline -ForegroundColor DarkMagenta
     Write-Host $c.Cat -ForegroundColor DarkGray
     $status = 'fail'; $msg = ''; $secs = 0
+    Emit @{ t = 'start'; key = $c.Key; name = $c.Name; n = $n; total = $total }
     switch ($c.Kind) {
       'winget' {
         $r = Invoke-Spin 'winget' "install --id $($c.Id) --exact --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --source winget" "Menginstall $($c.Name)"
@@ -903,6 +908,7 @@ function Install-Cart {
       'fail' { Write-Host ("`r   × {0}  GAGAL: {1}{2}" -f $c.Name, $msg, $pad) -ForegroundColor Red; $failed += $c.Name }
     }
     Log "$($c.Key): $status $msg"
+    Emit @{ t = 'done'; key = $c.Key; name = $c.Name; status = $status; secs = $secs; msg = $msg }
     if ($status -ne 'fail') { $Cart.Remove($c.Key) }
   }
   Refresh-Path
@@ -925,6 +931,7 @@ function Install-Cart {
     $Notes.Clear()
   }
   $script:InstallFail = $res.fail
+  Emit @{ t = 'summary'; ok = $res.ok; skip = $res.skip; fail = $res.fail; info = $res.info; reboot = $reboot; log = $LogFile }
   Line "`n  Tip: tutup lalu buka lagi terminal/VS Code supaya PATH baru terbaca." DarkCyan
   if ($reboot) {
     Line '  Beberapa komponen (WSL/fitur Windows) butuh RESTART.' Yellow
@@ -1320,6 +1327,129 @@ function Debloat {
   Pause-Key
 }
 
+# =====================================================================================
+#  JSON EVENTS, KONFIGURASI, DOCTOR & LAPORAN MASALAH
+# =====================================================================================
+function Emit([hashtable]$ev) {
+  if (-not $Json) { return }
+  try { [Console]::Out.WriteLine('@@TIPACK ' + ($ev | ConvertTo-Json -Compress -Depth 5)); [Console]::Out.Flush() } catch {}
+}
+
+function Read-Config([string]$src) {
+  try {
+    $text = if ($src -match '^https?://') { (Invoke-WebRequest -Uri $src -UseBasicParsing -TimeoutSec 30).Content } else { Get-Content -Raw -Path $src -ErrorAction Stop }
+    $cfg = $text | ConvertFrom-Json -ErrorAction Stop
+  } catch { Line "Konfigurasi tidak bisa dibaca: $($_.Exception.Message)" Red; Emit @{ t = 'error'; msg = "config: $($_.Exception.Message)" }; exit 1 }
+  $keys = @()
+  if ($cfg.apps) { $keys += @($cfg.apps) }
+  if ($cfg.profiles) { foreach ($pk in $cfg.profiles) { $pp = $Profiles | Where-Object { $_.K -eq $pk }; if ($pp) { $keys += (KeyList $pp.L) } } }
+  Log "config '$($cfg.name)': $($keys -join ',')"
+  return [pscustomobject]@{ Name = [string]$cfg.name; Keys = @($keys | Select-Object -Unique) }
+}
+
+function Get-LastLog {
+  $all = @(Get-ChildItem -Path $Root, $env:TEMP -Filter 'devsetup-log-*.txt' -ErrorAction SilentlyContinue | Where-Object { $_.FullName -ne $LogFile } | Sort-Object LastWriteTime -Descending)
+  if ($all.Count) { return $all[0].FullName } else { return $null }
+}
+
+function Get-Findings {
+  $f = New-Object System.Collections.Generic.List[object]
+  $add = { param($id, $sev, $title, $detail, $fix) $f.Add([pscustomobject]@{ Id = $id; Sev = $sev; Title = $title; Detail = $detail; Fix = $fix }) }
+  if (-not $Sys.Winget) { & $add 'winget' 'tinggi' 'winget tidak tersedia / tidak merespons' 'Tanpa winget, aplikasi tidak bisa dipasang otomatis.' 'Repair-WinGetPackageManager (modul resmi Microsoft.WinGet.Client)' }
+  else {
+    $src = Invoke-Ext -File 'winget' -ArgStr 'source list --disable-interactivity' -Timeout 60 -Quiet
+    if ($src.Code -ne 0 -or $src.Out -notmatch 'winget') { & $add 'wgsource' 'tinggi' 'Sumber paket winget rusak' 'Gejala: "Failed when searching source" atau semua instalasi gagal.' 'winget source reset --force (butuh Administrator)' }
+  }
+  $free = [int]((Get-PSDrive C).Free / 1GB)
+  if ($free -lt 10) { & $add 'disk' 'tinggi' "Disk C tinggal $free GB" 'Instalasi besar dan update Windows bisa gagal.' 'Buka Tune-Up untuk membersihkan file sampah' }
+  $pend = (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending') -or (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired')
+  if ($pend) { & $add 'reboot' 'sedang' 'Windows menunggu restart' 'Installer (terutama WSL, .NET, VC++) sering gagal sebelum restart.' 'Restart laptop, lalu jalankan TIPACK lagi' }
+  if ((Get-ExecutionPolicy -Scope CurrentUser) -in 'Restricted', 'AllSigned', 'Undefined' -and (Get-ExecutionPolicy) -in 'Restricted', 'AllSigned') { & $add 'execpol' 'sedang' 'PowerShell memblokir script' 'npm, venv\Scripts\Activate.ps1 dan script lain akan error "running scripts is disabled".' 'Set-ExecutionPolicy RemoteSigned -Scope CurrentUser' }
+  if ((Get-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' 'LongPathsEnabled') -ne 1) { & $add 'longpath' 'rendah' 'Long Paths belum aktif' 'Proyek Node/Java dengan folder dalam bisa error "path too long".' 'Aktifkan LongPathsEnabled (butuh Administrator)' }
+  if ($Sys.Virt -like 'TIDAK*') { & $add 'virt' 'sedang' 'Virtualisasi BIOS mati' 'WSL2, Docker, Android Emulator dan VirtualBox tidak bisa berjalan.' 'Manual: masuk BIOS (F2/Del/F10), aktifkan Intel VT-x / AMD SVM' }
+  try { $t = (Invoke-WebRequest -Uri 'https://github.com' -Method Head -UseBasicParsing -TimeoutSec 8).Headers.Date; if ($t) { $skew = [Math]::Abs(((Get-Date).ToUniversalTime() - [datetime]::Parse($t).ToUniversalTime()).TotalMinutes); if ($skew -gt 5) { & $add 'clock' 'sedang' "Jam laptop selisih $([int]$skew) menit" 'Jam yang salah membuat koneksi HTTPS (download installer) gagal.' 'Sinkronkan jam (w32tm /resync)' } } } catch {}
+  $last = Get-LastLog
+  if ($last) {
+    $fails = @(Select-String -Path $last -Pattern '^\[.*\] ([a-z0-9-]+): fail' -ErrorAction SilentlyContinue | ForEach-Object { $_.Matches[0].Groups[1].Value } | Where-Object { $Apps.ContainsKey($_) -and -not $Apps[$_].Installed } | Select-Object -Unique)
+    if ($fails.Count) { & $add 'retry' 'sedang' "$($fails.Count) aplikasi gagal di instalasi terakhir" ($fails -join ', ') "Coba pasang ulang: $($fails -join ', ')" }
+    if (Select-String -Path $last -Pattern 'Installer hash does not match|0x8A150011' -Quiet -ErrorAction SilentlyContinue) { & $add 'hash' 'rendah' 'Hash installer tidak cocok (log terakhir)' 'Biasanya karena vendor baru merilis versi baru dan manifest winget belum diperbarui. Coba lagi beberapa jam kemudian.' 'Perbarui sumber winget lalu ulangi' }
+  }
+  return ,$f
+}
+
+function Apply-Fix([string]$id) {
+  Log "DOCTOR-FIX $id"
+  switch ($id) {
+    'winget' { Repair-Winget; return [bool]$Sys.Winget }
+    'wgsource' { if (-not $IsAdmin) { Line '   Butuh Administrator.' Red; return $false }; $r = Invoke-Ext -File 'winget' -ArgStr 'source reset --force --disable-interactivity' -Label 'winget source reset' -Timeout 180; $null = Invoke-Ext -File 'winget' -ArgStr 'source update --disable-interactivity' -Label 'winget source update' -Timeout 180; return ($r.Code -eq 0) }
+    'disk' { Tune-Up; return $true }
+    'execpol' { Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; return $true }
+    'longpath' { if (-not $IsAdmin) { return $false }; Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' LongPathsEnabled 1; return $true }
+    'clock' { if (-not $IsAdmin) { return $false }; Start-Service w32time -ErrorAction SilentlyContinue; $null = Invoke-Ext -File 'w32tm.exe' -ArgStr '/resync /force' -Label 'Sinkron jam' -Timeout 60; return $true }
+    'hash' { $null = Invoke-Ext -File 'winget' -ArgStr 'source update --disable-interactivity' -Label 'winget source update' -Timeout 180; return $true }
+    'retry' {
+      $last = Get-LastLog
+      $fails = @(Select-String -Path $last -Pattern '^\[.*\] ([a-z0-9-]+): fail' | ForEach-Object { $_.Matches[0].Groups[1].Value } | Where-Object { $Apps.ContainsKey($_) -and -not $Apps[$_].Installed } | Select-Object -Unique)
+      Sync-Cart $fails $fails; if ($Cart.Count) { Install-Cart }; return ($script:InstallFail -eq 0)
+    }
+    default { Line "   Perbaikan '$id' hanya bisa dilakukan manual (lihat keterangan)." Yellow; return $false }
+  }
+}
+
+function Doctor {
+  Clear-Scr; Write-Host "`n   Memeriksa kesehatan sistem..." -ForegroundColor DarkGray
+  $fs = Get-Findings
+  foreach ($x in $fs) { Emit @{ t = 'doctor'; id = $x.Id; sev = $x.Sev; title = $x.Title; detail = $x.Detail; fix = $x.Fix } }
+  if (-not $fs.Count) { Clear-Scr; Line "`n   √ Doctor: tidak ada masalah yang terdeteksi. Laptop siap dipakai." Green; Pause-Key; return }
+  $col = @{ tinggi = 'Red'; sedang = 'Yellow'; rendah = 'DarkGray' }
+  $items = foreach ($x in $fs) { MkItem $x.Title "$($x.Detail)`nPerbaikan: $($x.Fix)" $x.Id "{$($col[$x.Sev])}● $($x.Sev)" ($x.Sev -ne 'rendah' -and $x.Id -notin 'virt', 'reboot') $false $true }
+  $r = Select-List -Title "Doctor │ $($fs.Count) temuan" -Sub 'Masalah yang terdeteksi beserta perbaikannya. Yang dicentang akan diperbaiki otomatis; perintahnya tercatat di log.' -Items $items -Multi -EnterText 'perbaiki'
+  if (-not $r.Ok -or -not $r.Values.Count) { return }
+  Clear-Scr; Write-Host "`n  ═══ DOCTOR: MEMPERBAIKI ═══`n" -ForegroundColor Magenta
+  foreach ($id in $r.Values) {
+    $x = $fs | Where-Object Id -eq $id
+    $ok = $false; try { $ok = Apply-Fix $id } catch { Log "fix $id error: $_" }
+    if ($ok) { Line "   √ $($x.Title)" Green } else { Line "   × $($x.Title): belum bisa diperbaiki otomatis" Red }
+  }
+  Line "`n   Kalau masih bermasalah, pilih menu Laporkan Masalah." DarkGray
+  Pause-Key
+}
+
+function Get-Redacted([string]$text) {
+  $t = $text
+  foreach ($s in @($env:USERPROFILE, $env:USERNAME, $env:COMPUTERNAME, $env:USERDOMAIN) | Where-Object { $_ -and $_.Length -ge 3 } | Sort-Object Length -Descending) { $t = $t -replace [regex]::Escape($s), '<redacted>' }
+  $t = $t -replace '[\w.+-]+@[\w-]+\.[\w.-]+', '<email>'
+  $t = $t -replace '\b(gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9-]{20,}|xox[abp]-[A-Za-z0-9-]+)\b', '<token>'
+  $t = $t -replace '\b(?!10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)(\d{1,3}\.){3}\d{1,3}\b', '<ip>'
+  return $t
+}
+
+function Send-Report {
+  Clear-Scr
+  $last = if (Test-Path $LogFile) { $LogFile } else { Get-LastLog }
+  $cands = @($LogFile, (Get-LastLog)) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+  $logText = ($cands | ForEach-Object { Get-Content $_ -Tail 400 -ErrorAction SilentlyContinue }) -join "`n"
+  $fs = Get-Findings
+  $hdr = @("TIPACK $Version · Windows", "OS: $($Sys.OS)", "Arsitektur: $Arch · PowerShell $($Sys.PS) · winget $($Sys.Winget)", "RAM $($Sys.Ram) GB · disk $($Sys.DiskType) · admin $IsAdmin", "Doctor: $((@($fs | ForEach-Object Title)) -join '; ')")
+  $repText = Get-Redacted (($hdr + '', '----- LOG (disensor) -----', $logText) -join "`n")
+  $out = Join-Path $Root ("devsetup-laporan-{0:yyyyMMdd-HHmmss}.txt" -f (Get-Date))
+  try { Set-Content -Path $out -Value $repText -Encoding UTF8 } catch { $out = Join-Path $env:TEMP (Split-Path $out -Leaf); Set-Content -Path $out -Value $repText -Encoding UTF8 }
+  try { $repText | Set-Clipboard } catch {}
+  $tail = Get-Redacted ((($logText -split "`n") | Select-Object -Last 40) -join "`n")
+  if ($tail.Length -gt 3500) { $tail = $tail.Substring($tail.Length - 3500) }
+  $q = @{ template = 'bug_report.yml'; title = "[Windows] "; os = "$($Sys.OS) ($Arch)"; versi = $Version; log = $tail }
+  $url = 'https://github.com/fk0u/tipack/issues/new?' + (($q.GetEnumerator() | ForEach-Object { $_.Key + '=' + [uri]::EscapeDataString([string]$_.Value) }) -join '&')
+  Emit @{ t = 'report'; file = $out; url = $url }
+  Line "`n  ═══ LAPORKAN MASALAH ═══`n" Magenta
+  Line "  Laporan disimpan (nama user, nama komputer, email, IP publik & token sudah disensor):" Gray
+  Line "   $out" White
+  Line "  Isi lengkapnya juga sudah DICOPY ke clipboard." Green
+  Line "`n  Langkah: form issue GitHub akan terbuka dengan info sistem & 40 baris log terakhir sudah terisi." Gray
+  Line "  Tulis apa yang kamu lakukan, lalu seret file laporan di atas ke kotak komentar supaya log lengkap ikut terkirim." Gray
+  if (-not $TestMode -and -not $Json -and (YesNo 'Buka form issue GitHub sekarang?' $true)) { Start-Process $url }
+  if (-not $Json) { Pause-Key }
+}
+
 function Show-SysInfo {
   $n = @($Catalog | Where-Object Installed).Count
   $items = @(
@@ -1355,6 +1485,8 @@ function Main-Menu {
       MkItem '🚀 Tune-Up & Optimasi' 'Bersihkan file sampah (TEMP, cache Windows Update, Recycle Bin, komponen lama), efek visual ringan, power plan, matikan hibernasi, TRIM/defrag, perbaiki file sistem (SFC/DISM). Cocok untuk laptop lama yang mulai lemot.' 'tune' $(if ($Sys.Ram -le 8 -or $Sys.DiskType -eq 'HDD') { '{Yellow}♦ disarankan untuk laptop ini' } else { '' })
       MkItem '⚡ Kelola Aplikasi Startup' 'Pilih aplikasi yang boleh ikut jalan saat Windows menyala. Makin sedikit, makin cepat booting. Bisa diaktifkan lagi kapan saja.' 'startup'
       MkItem '🧹 Debloat Windows' 'Hapus aplikasi bawaan/promo yang tidak perlu (Candy Crush, News, Solitaire, trial antivirus, dll), matikan iklan di Start, Copilot, Recall, Widgets, telemetri, Bing di pencarian. Restore point dibuat dulu.' 'debloat'
+      MkItem '🩺 Doctor (cek & perbaiki otomatis)' 'Periksa winget, sumber paket, disk, restart tertunda, ExecutionPolicy, Long Paths, virtualisasi, jam sistem, dan aplikasi yang gagal di instalasi terakhir. Lalu perbaiki otomatis dengan izinmu.' 'doctor'
+      MkItem '🐞 Laporkan Masalah' 'Buat laporan (log sudah disensor dari nama user, email, IP dan token), copy ke clipboard, lalu buka form GitHub Issue yang sudah terisi.' 'report'
       MkItem '⟳  Update Semua Aplikasi' 'winget upgrade --all + wsl --update.' 'upd'
       MkItem '💻 Info Sistem' 'Spesifikasi laptop, RAM, disk, status virtualisasi (untuk WSL/Docker/Emulator).' 'sys'
       MkItem '⏻  Keluar' 'Sampai jumpa! Semangat ngodingnya.' 'quit'
@@ -1366,7 +1498,7 @@ function Main-Menu {
       'wiz' { Run-Wizard } 'prof' { Pick-Profile } 'cat' { Browse-Category } 'status' { Show-All }
       'cart' { Review-Install } 'ext' { Setup-VSCodeExt } 'git' { Setup-Git } 'tweak' { Setup-Tweaks }
       'upd' { Update-All } 'sys' { Show-SysInfo }
-      'tune' { Tune-Up } 'startup' { Manage-Startup } 'debloat' { Debloat }
+      'tune' { Tune-Up } 'startup' { Manage-Startup } 'debloat' { Debloat } 'doctor' { Doctor } 'report' { Send-Report }
       'quit' {
         if ($Cart.Count -and -not (YesNo "Keranjang masih berisi $($Cart.Count) item. Yakin keluar?" $false)) { continue }
         Clear-Scr; Set-Cursor $true
@@ -1391,6 +1523,15 @@ try {
     Write-Host "SELFTEST katalog=$($Catalog.Count) terpasang=$(@($Catalog | Where-Object Installed).Count) arch=$Arch winget=$($Sys.Winget) vt=$VT key-hilang=$($miss -join ',')"
     if ($miss) { exit 2 }; exit 0
   }
+  if ($ScanJson) {
+    Emit @{ t = 'scan'; installed = @($Catalog | Where-Object Installed | ForEach-Object Key); available = @($Catalog | ForEach-Object Key) }
+    exit 0
+  }
+  if ($Doctor -and $Json) { foreach ($x in (Get-Findings)) { Emit @{ t = 'doctor'; id = $x.Id; sev = $x.Sev; title = $x.Title; detail = $x.Detail; fix = $x.Fix } }; Emit @{ t = 'end' }; exit 0 }
+  if ($Doctor) { Doctor; exit 0 }
+  if ($DoctorFix) { $ok = $true; foreach ($id in ($DoctorFix -split ',')) { $r = $false; try { $r = Apply-Fix $id.Trim() } catch {}; Emit @{ t = 'fixed'; id = $id.Trim(); ok = [bool]$r }; if (-not $r) { $ok = $false } }; exit $(if ($ok) { 0 } else { 4 }) }
+  if ($Report) { Send-Report; exit 0 }
+  if ($Config) { $cf = Read-Config $Config; Line "Konfigurasi: $($cf.Name) ($($cf.Keys.Count) aplikasi)" Cyan; $Install = ($cf.Keys -join ',') }
   if ($Install) {
     $ks = KeyList $Install
     $bad = @($Install -split '[,\s]+' | Where-Object { $_ -and -not $Apps.ContainsKey($_) })

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Dokumentasi & FAQ
+    url: https://github.com/fk0u/tipack/blob/main/docs/troubleshooting.md
+    about: Cek dulu masalah umum dan solusinya.
+  - name: 🧰 Katalog aplikasi
+    url: https://tipack.kousozo.tech/katalog
+    about: Lihat semua aplikasi dan perintah install-nya.

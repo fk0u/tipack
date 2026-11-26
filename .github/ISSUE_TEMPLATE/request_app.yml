@@ -1,0 +1,17 @@
+name: ➕ Usul aplikasi
+description: Usulkan aplikasi baru untuk katalog TIPACK
+title: "[Usul] "
+labels: ["katalog"]
+body:
+  - type: input
+    id: nama
+    attributes: { label: Nama aplikasi }
+    validations: { required: true }
+  - type: textarea
+    id: id
+    attributes:
+      label: ID paket (kalau tahu)
+      placeholder: "winget: Vendor.App · brew: app · Flathub: org.vendor.App · apt/dnf/pacman: nama-paket"
+  - type: textarea
+    id: alasan
+    attributes: { label: Kenapa aplikasi ini berguna? }

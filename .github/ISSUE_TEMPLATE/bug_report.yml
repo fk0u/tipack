@@ -1,0 +1,35 @@
+name: 🐞 Laporan masalah
+description: Ada yang gagal/stuck saat memakai TIPACK. Paling mudah dibuat lewat menu "Laporkan Masalah" di TIPACK.
+title: "[OS] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih sudah melapor! Kalau form ini dibuka dari menu **Laporkan Masalah**, info sistem dan potongan log sudah terisi otomatis.
+        Log yang dibuat TIPACK sudah disensor (nama user, nama komputer, email, IP publik dan token), tapi tetap cek sekilas sebelum mengirim.
+  - type: input
+    id: os
+    attributes:
+      label: Sistem operasi & arsitektur
+      placeholder: "Windows 11 23H2 (AMD64) / macOS 15 (arm64) / Ubuntu 24.04 (x86_64)"
+    validations:
+      required: true
+  - type: input
+    id: versi
+    attributes:
+      label: Versi TIPACK
+      placeholder: "2.1.0"
+  - type: textarea
+    id: langkah
+    attributes:
+      label: Apa yang kamu lakukan dan apa yang terjadi?
+      placeholder: "Contoh: pilih profil starter, saat menginstall Docker muncul GAGAL kode ..."
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Potongan log
+      description: Terisi otomatis dari menu Laporkan Masalah. Seret file devsetup-laporan-*.txt ke kotak komentar di bawah untuk log lengkap.
+      render: text
