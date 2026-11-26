@@ -264,6 +264,9 @@ detect_distro() {
   if [ -e /run/ostree-booted ] || [ "$D_ID" = steamos ] || [ "$D_ID" = nixos ] || command -v rpm-ostree >/dev/null 2>&1; then IMMUTABLE=1; BASE_PM=$PM; PM=immutable; fi
   if [ "$IS_TERMUX" = 1 ]; then PM=termux; D_NAME="Termux $(getprop ro.build.version.release 2>/dev/null | sed 's/^/(Android /;s/$/)/')"; fi
   IS_CROS=0; [ -e /dev/.cros_milestone ] && IS_CROS=1
+  # Linux di dalam Android lewat proot (Andronix / proot-distro): tidak ada systemd, Flatpak tidak bisa jalan
+  IS_PROOT=0
+  if [ "$IS_TERMUX" = 0 ] && { [ -n "$ANDROID_ROOT" ] || [ -d /system/bin ] || [ -n "$PROOT_TMP_DIR" ] || grep -qi proot /proc/self/status 2>/dev/null || uname -r | grep -qi android; }; then IS_PROOT=1; fi
   IS_RPI=0; grep -qi 'raspberry pi' /proc/device-tree/model 2>/dev/null && IS_RPI=1
   case $PM in apt) PM_LABEL="apt (keluarga Debian/Ubuntu)" ;; dnf) PM_LABEL="dnf (keluarga Fedora/RHEL)" ;; pacman) PM_LABEL="pacman + AUR (keluarga Arch)" ;;
     zypper) PM_LABEL="zypper (openSUSE)" ;; apk) PM_LABEL="apk (Alpine)" ;; termux) PM_LABEL="pkg (Termux di Android)" ;;
@@ -284,7 +287,7 @@ resolve_methods() {
     fi
     if [ -n "$v" ] && [ "$v" != "-" ]; then
       case "$v" in aur:*) K_TYPE[$i]=aur; K_ID[$i]=${v#aur:} ;; sh:*) K_TYPE[$i]=script; K_ID[$i]=${v#sh:} ;; *) K_TYPE[$i]=native; K_ID[$i]=$v ;; esac
-    elif [ "${K_FLAT[$i]}" != "-" ] && [ -n "${K_FLAT[$i]}" ]; then K_TYPE[$i]=flatpak; K_ID[$i]=${K_FLAT[$i]}
+    elif [ "${K_FLAT[$i]}" != "-" ] && [ -n "${K_FLAT[$i]}" ] && [ "$IS_PROOT" = 0 ]; then K_TYPE[$i]=flatpak; K_ID[$i]=${K_FLAT[$i]}
     elif [ "${K_UNI[$i]}" != "-" ] && [ -n "${K_UNI[$i]}" ]; then
       case "${K_UNI[$i]}" in sh:*) K_TYPE[$i]=script; K_ID[$i]=${K_UNI[$i]#sh:} ;; info:*) K_TYPE[$i]=info; K_ID[$i]=${K_UNI[$i]#info:} ;; esac
       [ $PM = immutable ] && [ "${K_ID[$i]}" = ollama ] && { K_TYPE[$i]=none; K_ID[$i]=""; }
@@ -703,10 +706,10 @@ tune_up() {
   local TU=()
   TU+=("pkgcache|Bersihkan cache paket & paket yatim ($(human "$pc"))|Hapus installer paket lama di cache dan dependensi yang sudah tidak dipakai ($PM).|1|0")
   command -v flatpak >/dev/null && TU+=("flatunused|Hapus runtime Flatpak yang tidak terpakai|flatpak uninstall --unused. Sering membebaskan ratusan MB sampai beberapa GB.|1|0")
-  [ "$IS_TERMUX" = 0 ] && command -v journalctl >/dev/null && TU+=("journal|Batasi log sistem (journal $jr) ke 100 MB|Log lama dihapus dan ukuran maksimal diatur supaya tidak terus membengkak.|1|0")
+  [ "$IS_TERMUX" = 0 ] && [ "$IS_PROOT" = 0 ] && command -v journalctl >/dev/null && TU+=("journal|Batasi log sistem (journal $jr) ke 100 MB|Log lama dihapus dan ukuran maksimal diatur supaya tidak terus membengkak.|1|0")
   TU+=("thumbs|Hapus cache thumbnail ($(human "$th"))|Gambar mini file manager, dibuat ulang otomatis.|0|0")
   TU+=("devcache|Bersihkan cache developer ($(human "$dv"))|npm, pip, yarn, Gradle dan Go build cache. Diunduh/dibuat ulang saat dibutuhkan.|0|0")
-  if [ "$IS_TERMUX" = 0 ] && [ $PM != immutable ]; then
+  if [ "$IS_TERMUX" = 0 ] && [ "$IS_PROOT" = 0 ] && [ $PM != immutable ]; then
     TU+=("zram|Aktifkan zram (RAM terkompresi)|Swap di dalam RAM yang dikompresi: laptop RAM 4-8 GB jauh lebih jarang lag/freeze saat banyak tab. Hampir tanpa efek samping.|$old|$zr")
     TU+=("earlyoom|Pasang earlyoom (anti freeze)|Kalau RAM hampir habis, aplikasi paling boros ditutup sebelum seluruh sistem macet. Penyelamat laptop lama.|$old|$eo")
     TU+=("swappiness|Swappiness = 10 (sekarang $sw)|Kernel lebih lama menahan data di RAM sebelum memakai swap disk. Bagus untuk RAM 8 GB+ tanpa zram.|0|$( [ "$sw" -le 10 ] && echo 1 || echo 0)")
@@ -773,7 +776,7 @@ debloat() {
     local tel=""; for x in popularity-contest ubuntu-report apport whoopsie; do case "$NATIVE_LIST" in *$'\n'"$x"$'\n'*) tel="$tel $x" ;; esac; done
     [ -n "$tel" ] && { opt_add "Hapus telemetri & pelaporan error Ubuntu" "Menghapus paket:$tel. Ubuntu tidak lagi mengirim statistik pemakaian dan laporan crash." "ubtel" "${YEL}★ rekomendasi" 1 0 1; any=1; }
   fi
-  if command -v systemctl >/dev/null 2>&1 && [ "$IS_TERMUX" = 0 ]; then
+  if command -v systemctl >/dev/null 2>&1 && [ "$IS_TERMUX" = 0 ] && [ "$IS_PROOT" = 0 ]; then
     local sv
     for sv in "cups|Printer (CUPS)|Matikan kalau tidak pernah mencetak dari laptop ini.|0" "bluetooth|Bluetooth|Matikan kalau tidak memakai mouse/headset bluetooth.|0" "ModemManager|ModemManager|Untuk modem/kartu SIM internal. Hampir tidak pernah dipakai di laptop.|1" "avahi-daemon|Avahi (discovery jaringan lokal)|Untuk menemukan printer/perangkat di jaringan otomatis.|0" "packagekit|PackageKit (cek update di latar)|Sering memakan CPU/RAM di belakang. Update tetap bisa lewat menu Update Semua.|0"; do
       IFS='|' read -r k n d r <<< "$sv"
@@ -830,7 +833,8 @@ show_sysinfo() {
   opt_add "KVM     : $SYS_KVM" "Dibutuhkan virt-manager, GNOME Boxes dan emulator Android. Kalau tidak aktif: masuk BIOS lalu aktifkan Intel VT-x / AMD SVM."
   opt_add "Disk    : $( [ "$SYS_SSD" = 1 ] && echo SSD || echo HDD)$( [ "$SYS_LAPTOP" = 1 ] && echo ' · laptop (baterai terdeteksi)')" "$( [ "$SYS_SSD" = 1 ] && echo 'SSD: cepat.' || echo 'HDD lambat untuk desktop modern: upgrade ke SSD adalah peningkatan paling terasa. Sementara itu aktifkan zram & earlyoom di Tune-Up.')"
   [ "$IMMUTABLE" = 1 ] && opt_add "Immutable: ya" "Sistem dasar read-only. Aplikasi GUI lewat Flatpak; tool CLI/compiler sebaiknya di dalam distrobox (distrobox create -i ubuntu:24.04 lalu jalankan TIPACK di dalamnya)."
-  [ "$IS_TERMUX" = 1 ] && opt_add "Termux  : ya" "Linux di Android tanpa root. Hanya paket CLI yang tersedia; aplikasi GUI tidak didukung. Akses penyimpanan HP: termux-setup-storage."
+  [ "$IS_TERMUX" = 1 ] && opt_add "Termux  : ya (disarankan Andronix)" "Termux murni hanya punya paket CLI dasar. Untuk katalog lengkap, pasang Andronix (Linux utuh di Android), masuk ke distronya, lalu jalankan TIPACK lagi di sana. Akses penyimpanan HP: termux-setup-storage."
+  [ "$IS_PROOT" = 1 ] && opt_add "Android : Linux via proot (Andronix)" "Berjalan sebagai Linux biasa di atas Android. Tidak ada systemd/Flatpak; aplikasi GUI bisa dibuka lewat VNC/X11 (fitur desktop Andronix)."
   [ "$IS_WSL" = 1 ] && opt_add "WSL     : ya" "Berjalan di dalam WSL. Aplikasi GUI tampil lewat WSLg (Windows 11)."
   opt_add "Katalog : $(inst_count)/$NCAT aplikasi terpasang" "Lihat menu Cek Status untuk detailnya."
   select_list "Info Sistem" "" single 0 "kembali"
@@ -852,6 +856,18 @@ boot() {
   [ "$PM" != none ] && chk "Package manager: $PM_LABEL" 1 || chk "Package manager tidak dikenal (pakai Flatpak & script)" 0
   [ "$IMMUTABLE" = 1 ] && chk "Distro immutable: aplikasi lewat Flatpak; untuk tool CLI pakai distrobox" 0
   [ "$IS_CROS" = 1 ] && chk "ChromeOS (Crostini) terdeteksi" 1
+  [ "$IS_PROOT" = 1 ] && chk "Linux di Android (Andronix/proot): Flatpak & layanan sistem tidak tersedia" 1
+  if [ "$IS_TERMUX" = 1 ]; then
+    chk "Termux murni: hanya tool CLI dasar" 0
+    printf '\n  %sSARAN: pakai Andronix untuk pengalaman lengkap di Android%s\n' "$YEL$B" "$R0"
+    printf '  %sAndronix memasang Linux utuh (Ubuntu/Debian/Arch/Fedora) di dalam Termux, jadi katalog TIPACK\n' "$GRY"
+    printf '  jauh lebih lengkap (apt/pacman/dnf). Langkah:%s\n' "$R0"
+    printf '   %s1.%s Install aplikasi %sAndronix%s dari Play Store/F-Droid, pilih distro (disarankan Ubuntu)\n' "$CYN" "$R0" "$WHT" "$R0"
+    printf '   %s2.%s Salin perintah dari Andronix, tempel di Termux, lalu masuk ke distronya (./start-ubuntu.sh)\n' "$CYN" "$R0"
+    printf '   %s3.%s Di dalam distro: %scurl -fsSL https://tipack.kousozo.tech/install.sh | bash%s\n' "$CYN" "$R0" "$WHT" "$R0"
+    printf '  %sAlternatif resmi Termux: pkg install proot-distro && proot-distro install ubuntu && proot-distro login ubuntu%s\n\n' "$DIM" "$R0"
+    if [ "$TEST_MODE$UNATTENDED" = 00 ] && ! yesno "Tetap lanjut di Termux (tool CLI dasar saja)?" y; then show_cur; exit 0; fi
+  fi
   [ "$IS_RPI" = 1 ] && chk "Raspberry Pi terdeteksi ($SYS_ARCH)" 1
   chk "Koneksi internet" $SYS_NET
   [ "$IS_ROOT" = 1 ] && chk "Berjalan sebagai root (AUR & beberapa fitur dinonaktifkan)" 0

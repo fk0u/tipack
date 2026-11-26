@@ -95,7 +95,7 @@ Mau membaca script-nya dulu? Lihat [Instalasi manual](docs/instalasi.md#instalas
 | **openSUSE Tumbleweed / Leap** | zypper | |
 | **Alpine** | apk | |
 | **Fedora Silverblue/Kinoite, Bazzite, Bluefin, SteamOS, NixOS** (immutable) | Flatpak + script di home | Sistem tidak diubah; tool CLI disarankan di dalam distrobox. |
-| **Android (Termux)** | pkg | Tool CLI: Python, Node, C/C++, Java, Go, Rust, Git, SSH, database. |
+| **Android** | via **[Andronix](https://andronix.app)** (disarankan) atau Termux | Andronix memasang Ubuntu/Debian/Arch di Android, lalu TIPACK berjalan seperti Linux biasa. Termux murni hanya punya tool CLI dasar. |
 | **ChromeOS (Crostini), Raspberry Pi OS** | apt | Terdeteksi otomatis. |
 | **Distro lain** (Void, Solus, Gentoo, ...) | Flatpak + script resmi | Paket native tidak didukung; aplikasi GUI tetap bisa lewat Flathub. |
 

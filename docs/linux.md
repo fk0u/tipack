@@ -104,7 +104,31 @@ Daftar lengkap ada di [katalog.md](katalog.md) dan di https://tipack.kousozo.tec
 - **Fedora:** inisialisasi database PostgreSQL (`postgresql-setup --initdb`).
 - Menambahkan PATH untuk `~/.local/bin`, `~/.cargo`, `~/.bun/bin` dan fnm ke `~/.bashrc` (dan `~/.zshrc` kalau ada). Baris yang sudah ada tidak ditulis dua kali.
 
-## Termux (Android)
+## Android: disarankan Andronix
+
+Cara terbaik memakai TIPACK di HP/tablet Android adalah lewat **[Andronix](https://andronix.app)**. Andronix memasang Linux utuh (Ubuntu, Debian, Arch, Fedora, dan lainnya) di dalam Termux tanpa root, jadi TIPACK berjalan seperti di Linux biasa dengan `apt`/`pacman`/`dnf` dan katalog yang jauh lebih lengkap.
+
+1. Install **Termux** (dari F-Droid atau GitHub) dan aplikasi **Andronix**.
+2. Di Andronix, pilih distro (disarankan **Ubuntu**), salin perintahnya, tempel di Termux, lalu masuk ke distronya (misalnya `./start-ubuntu.sh`).
+3. Di dalam distro tersebut:
+   ```bash
+   curl -fsSL https://tipack.kousozo.tech/install.sh | bash
+   ```
+
+Alternatif resmi dari Termux tanpa aplikasi tambahan:
+
+```bash
+pkg install proot-distro && proot-distro install ubuntu && proot-distro login ubuntu
+```
+
+TIPACK mengenali lingkungan ini sebagai **Linux di Android (proot)**. Ada beberapa batasan di sini:
+- Flatpak tidak bisa berjalan di proot, jadi aplikasinya disembunyikan.
+- Tidak ada systemd, jadi zram, earlyoom, TLP, TRIM, journal dan pengaturan layanan disembunyikan dari Tune-Up dan Debloat.
+- Aplikasi GUI bisa dibuka lewat fitur desktop/VNC Andronix.
+
+## Termux murni (terbatas)
+
+Kalau tetap ingin langsung di Termux tanpa Andronix, TIPACK menampilkan saran Andronix di awal, lalu tetap bisa dilanjutkan dengan katalog terbatas:
 
 ```bash
 pkg install curl
