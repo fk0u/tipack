@@ -3,3 +3,4 @@
 devsetup-log-*.txt
 laporan-status.txt
 __pycache__/
+dist/

@@ -214,11 +214,11 @@ Nama tombol: `Up Down Enter Esc Space PgUp PgDn Home End Back`, atau satu huruf 
 3. Rakit & regenerasi: `bash linux/src/build.sh && python3 web/build-catalog.py`. Commit hasilnya.
 4. Siapkan lampiran dan checksum:
    ```bash
-   mkdir -p dist && cp windows/setup.ps1 dist/tipack-windows-setup.ps1 && cp windows/JALANKAN.bat dist/
+   mkdir -p dist && zip -j dist/tipack-windows.zip windows/setup.ps1 windows/JALANKAN.bat LICENSE
    cp macos/setup.sh dist/tipack-macos-setup.sh && cp linux/setup.sh dist/tipack-linux-setup.sh
    cp web/install.sh web/install.ps1 dist/ && (cd dist && shasum -a 256 * > SHA256SUMS.txt)
    ```
-   Catatan: `JALANKAN.bat` memanggil `setup.ps1`, jadi pengguna yang memakai lampiran rilis perlu mengganti nama `tipack-windows-setup.ps1` menjadi `setup.ps1` (atau memakai bootstrap `install.ps1`).
+   Windows dilampirkan sebagai zip karena `JALANKAN.bat` memanggil file bernama `setup.ps1` di folder yang sama.
 5. Buat tag & rilis: `gh release create vX.Y.Z dist/* --title "TIPACK vX.Y.Z" --notes-file catatan.md`.
 6. Deploy situs (lihat [website.md](website.md#deploy)) dan verifikasi checksum file di server.
 
