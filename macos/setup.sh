@@ -23,6 +23,8 @@ export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 HOMEBREW_NO_INSTALL_CLEANUP=1
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 LOG="$ROOT/devsetup-log-$(date +%Y%m%d-%H%M%S).txt"
+# folder script tidak bisa ditulisi (flashdisk read-only, folder milik root, dll) -> log ke folder temp
+( : >> "$LOG" ) 2>/dev/null || { LOG="${TMPDIR:-/tmp}/devsetup-log-$(date +%Y%m%d-%H%M%S).txt"; ROOT="${TMPDIR:-/tmp}"; }
 
 E=$'\e'; R0="$E[0m"; B="$E[1m"; RED="$E[31m"; GRN="$E[32m"; YEL="$E[33m"; BLU="$E[34m"; MAG="$E[35m"; CYN="$E[36m"
 WHT="$E[97m"; GRY="$E[37m"; DIM="$E[90m"; ORG="$E[38;5;208m"; PNK="$E[38;5;213m"; INV="$E[7m"

@@ -13,6 +13,9 @@ Panduan ini membahas setiap layar TIPACK secara berurutan. Tampilan di Windows, 
 - [Setup Git & SSH key](#9-setup-git--ssh-key)
 - [Tweak OS](#10-tweak-os-untuk-developer)
 - [Update semua](#11-update-semua)
+- [Tune-Up & optimasi](#13-tune-up--optimasi)
+- [Kelola startup (Windows)](#14-kelola-startup-windows)
+- [Debloat](#15-debloat)
 - [Info sistem](#12-info-sistem)
 - [Membaca tampilan daftar](#membaca-tampilan-daftar)
 
@@ -226,6 +229,65 @@ Menampilkan spesifikasi dengan saran praktis, misalnya:
 - RAM < 8 GB: hindari Docker dan Android Studio.
 - Virtualisasi/KVM mati: cara mengaktifkannya di BIOS.
 - Disk kurang dari 30 GB.
+
+## 13. Tune-Up & optimasi
+
+Untuk laptop lama yang mulai lemot, atau laptop baru yang ingin dirapikan. Ukuran setiap item ditampilkan **sebelum** dihapus, dan yang direkomendasikan untuk spesifikasi laptopmu (RAM, HDD/SSD, laptop/PC) sudah dicentang. Di akhir, ruang disk yang berhasil dibebaskan ditampilkan.
+
+**Windows**
+
+| Item | Keterangan | Admin |
+|---|---|---|
+| File sementara | `%TEMP%` dan `Windows\Temp` | — |
+| Cache Windows Update | `SoftwareDistribution\Download` | ✓ |
+| Cache thumbnail, Recycle Bin | Recycle Bin bersifat **permanen** | — |
+| Komponen Windows lama | `DISM /StartComponentCleanup` | ✓ |
+| Efek visual performa | Animasi & bayangan mati, teks tetap halus (ClearType) | — |
+| Transparansi, aplikasi latar, Game DVR | Meringankan GPU & RAM | — |
+| Power plan High performance | Tidak direkomendasikan otomatis di laptop (boros baterai) | — |
+| Matikan hibernasi | Menghapus `hiberfil.sys` (sebesar RAM) | ✓ |
+| Optimasi drive | TRIM untuk SSD, defrag untuk HDD | ✓ |
+| SysMain | Hanya muncul kalau disk C adalah HDD | ✓ |
+| SFC + DISM RestoreHealth | Memperbaiki file sistem rusak (15–40 menit) | ✓ |
+| Flush DNS | — | — |
+
+**macOS:** cache aplikasi user, log, Homebrew cleanup/autoremove, cache developer (npm, pip, Yarn, Gradle), Xcode DerivedData & cache simulator, Trash, snapshot lokal Time Machine, animasi lebih cepat (Dock, jendela, Mission Control), kurangi gerakan & transparansi, `purge` RAM, flush DNS, rebuild Spotlight, pintasan ke Login Items, dan pencari file > 500 MB.
+
+**Linux**
+
+| Item | Keterangan |
+|---|---|
+| Cache paket & paket yatim | `apt clean/autoremove`, `dnf clean/autoremove`, `pacman -Sc` + orphan, `zypper clean`, `apk cache clean`, `pkg clean` |
+| Flatpak tak terpakai | `flatpak uninstall --unused` |
+| Journal | Dibatasi 100 MB sekarang dan maksimal 200 MB ke depan |
+| **zram** | Swap terkompresi di RAM. Sangat membantu RAM 4–8 GB |
+| **earlyoom** | Menutup aplikasi paling boros sebelum sistem freeze total |
+| Swappiness 10, TRIM SSD, TLP | TLP hanya muncul di laptop (baterai terdeteksi) |
+| Animasi GNOME, flush DNS, cache thumbnail & developer, pencari file besar | |
+
+## 14. Kelola startup (Windows)
+
+Daftar aplikasi dari `HKCU\...\Run`, `HKLM\...\Run` (termasuk 32-bit) dan folder Startup. Hapus centang untuk menonaktifkan. TIPACK menulis status ke kunci `StartupApproved`, persis seperti tombol *Disable* di Task Manager: tidak ada yang dihapus, dan bisa diaktifkan lagi dari TIPACK atau Task Manager.
+
+## 15. Debloat
+
+**Windows:** restore point **"TIPACK sebelum debloat"** dibuat dulu (butuh Administrator; Windows membatasi 1 per 24 jam).
+
+- **Aplikasi bawaan:** hanya yang benar-benar terpasang yang ditampilkan. Contohnya News, Solitaire, Office Hub, Clipchamp, Cortana, Teams pribadi, Skype, Film & TV, aplikasi promo pabrik (Candy Crush, TikTok, Disney+, Facebook, Instagram, Prime Video), dan trial McAfee/Norton.
+- **Aplikasi yang tidak pernah disentuh:** Store, Kalkulator, Foto, Notepad, Terminal dan App Installer (winget).
+- **Deprovision:** opsional, untuk akun user baru.
+- **Privasi & gangguan:** iklan/saran Start & lock screen, Advertising ID, tailored experiences, Bing di pencarian Start, Copilot, Recall, Widgets, Chat & Task View di taskbar, telemetri minimum + DiagTrack, menu klik kanan klasik Windows 11, uninstall OneDrive.
+- **Cara membatalkan:** Control Panel → Recovery → *Open System Restore*. Aplikasi bisa dipasang ulang dari Microsoft Store.
+
+**macOS**
+- GarageBand (beserta loop audionya), iMovie, Keynote, Numbers dan Pages **dipindah ke Trash** (masih bisa dikembalikan, dan gratis di App Store).
+- Matikan iklan personal Apple, Siri, dan recent apps di Dock.
+- Aplikasi sistem yang dilindungi SIP tidak bisa dan tidak akan dihapus.
+
+**Linux**
+- **Lepas Snap (Ubuntu):** semua snap dan snapd dihapus, snap dikunci supaya tidak terpasang lagi, lalu Firefox versi Flatpak ditawarkan sebagai pengganti. Ini perubahan besar dan tidak dicentang otomatis.
+- **Telemetri Ubuntu:** `popularity-contest`, `ubuntu-report`, `apport`, `whoopsie`.
+- **Layanan tak terpakai:** CUPS, Bluetooth, ModemManager, Avahi, PackageKit. Bisa dihidupkan lagi dengan `sudo systemctl enable --now <nama>`.
 
 ## Membaca tampilan daftar
 

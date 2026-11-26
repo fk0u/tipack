@@ -19,6 +19,9 @@
 | Arch | `pacman` + AUR | Arch Linux, Manjaro, EndeavourOS, CachyOS, Garuda, Artix |
 | openSUSE | `zypper` | openSUSE Tumbleweed, Leap, SLES |
 | Alpine | `apk` | Alpine Linux |
+| Android | `pkg` (Termux) | Termux dari F-Droid atau GitHub (versi Play Store sudah lama, hindari) |
+| Immutable | Flatpak + script di home | Fedora Silverblue/Kinoite, Bazzite, Bluefin, Aurora, SteamOS, NixOS |
+| Lainnya | Terdeteksi otomatis | ChromeOS (Crostini, keluarga apt), Raspberry Pi OS (apt, ARM64) |
 
 ## Cara deteksi distro
 
@@ -100,6 +103,30 @@ Daftar lengkap ada di [katalog.md](katalog.md) dan di https://tipack.kousozo.tec
 - Mengaktifkan service **mariadb**, **postgresql** dan **docker** kalau terpasang (`systemctl enable --now`).
 - **Fedora:** inisialisasi database PostgreSQL (`postgresql-setup --initdb`).
 - Menambahkan PATH untuk `~/.local/bin`, `~/.cargo`, `~/.bun/bin` dan fnm ke `~/.bashrc` (dan `~/.zshrc` kalau ada). Baris yang sudah ada tidak ditulis dua kali.
+
+## Termux (Android)
+
+```bash
+pkg install curl
+curl -fsSL https://tipack.kousozo.tech/install.sh | bash
+```
+
+Termux berjalan tanpa root dan tanpa sudo. Yang tersedia hanya paket CLI dari repo Termux, misalnya Python, Node.js, Clang/Make/GDB, OpenJDK, Go, Rust, PHP, Git, GitHub CLI, MariaDB, PostgreSQL, SQLite, Nmap, OpenSSH, Zsh + Oh My Zsh, Neovim, tmux dan Ollama. Aplikasi GUI dan Flatpak tidak didukung, jadi disembunyikan dari menu. Untuk akses penyimpanan HP, jalankan `termux-setup-storage`.
+
+## Distro immutable
+
+Di Fedora Silverblue/Kinoite, Bazzite, Bluefin, SteamOS dan NixOS, sistem dasar bersifat read-only. TIPACK tidak mencoba mengubahnya:
+- Aplikasi GUI dipasang lewat **Flatpak**.
+- Tool yang dipasang ke folder home tetap tersedia: rustup, uv, Bun, fnm, Starship, Nerd Font.
+- Compiler dan paket CLI lain disarankan dipasang di dalam **distrobox**, lalu TIPACK dijalankan ulang di dalamnya:
+  ```bash
+  distrobox create -n dev -i ubuntu:24.04 && distrobox enter dev
+  curl -fsSL https://tipack.kousozo.tech/install.sh | bash
+  ```
+
+## Arsitektur ARM64
+
+Raspberry Pi, laptop ARM (Snapdragon, Asahi Linux) dan server ARM didukung. Paket distro dan Flathub menyediakan versi ARM64 untuk sebagian besar aplikasi. Pengecualiannya Google Chrome (hanya x86_64; pakai Chromium) dan beberapa aplikasi Flathub yang hanya x86_64; aplikasi seperti itu akan gagal dengan pesan jelas di log.
 
 ## Distro yang belum didukung penuh
 

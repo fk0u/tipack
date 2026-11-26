@@ -13,6 +13,7 @@
 
 | | Windows | macOS | Linux |
 |---|---|---|---|
+| Arsitektur | x64, ARM64, x86 (katalog terbatas) | Apple Silicon & Intel | x64, ARM64 (termasuk Raspberry Pi), Termux di Android |
 | Versi | Windows 10 1809+ atau Windows 11 | macOS 12 Monterey+ | Distro keluarga Debian, Fedora, Arch, openSUSE, Alpine (lihat [linux.md](linux.md)) |
 | Shell | Windows PowerShell 5.1 (bawaan) | bash 3.2 (bawaan) | bash 4+ |
 | Package manager | **winget** (App Installer). Bawaan Win 11; di Win 10 update "App Installer" dari Microsoft Store | Homebrew (dipasang otomatis) | Bawaan distro; Flatpak dipasang otomatis bila perlu |
@@ -113,6 +114,8 @@ bash macos/setup.sh      # atau: bash linux/setup.sh
 | Windows (`setup.ps1`) | macOS/Linux (`setup.sh`) | Fungsi |
 |---|---|---|
 | `-Preset <nama>` | `--preset <nama>` | Langsung memasang satu profil tanpa menu. Nama: `starter cpp java web mobile data net devops game design tech`. |
+| `-Install a,b,c` | `--install a,b,c` | Pasang aplikasi tertentu (key dari [katalog](katalog.md)) tanpa menu. Exit code `3` kalau ada yang gagal. |
+| `-SelfTest` | `--self-test` | Cek sistem & katalog lalu keluar, tanpa memasang apa pun. |
 | `-NoAnim` | `--no-anim` | Matikan animasi banner dan efek ketik (lebih cepat, cocok untuk terminal lambat/SSH). |
 
 Parameter juga bisa diteruskan lewat bootstrap:

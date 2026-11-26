@@ -11,12 +11,13 @@
 
 # TIPACK · DEVSETUP IF
 
-**Setup laptop anak Teknik Informatika dengan satu perintah.**
-Installer interaktif di terminal untuk **Windows, macOS & Linux**: wizard preferensi, 188 aplikasi dengan penjelasan dan rekomendasi, dan yang sudah terpasang otomatis dilewati.
+**Setup laptop anak Teknik Informatika dengan satu perintah, dan bikin laptop lama ringan lagi.**
+Installer, tune-up & debloat interaktif di terminal untuk **Windows, macOS & Linux** (x64 dan ARM64, termasuk Termux di Android): wizard preferensi, 188 aplikasi dengan penjelasan dan rekomendasi, dan yang sudah terpasang otomatis dilewati.
 
 [![Website](https://img.shields.io/badge/web-tipack.kousozo.tech-d946ef?style=flat-square)](https://tipack.kousozo.tech)
 [![Katalog](https://img.shields.io/badge/katalog-188_aplikasi-a855f7?style=flat-square)](https://tipack.kousozo.tech/katalog)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
+[![Uji semua platform](https://img.shields.io/github/actions/workflow/status/fk0u/tipack/test.yml?branch=main&style=flat-square&label=uji%20semua%20platform)](https://github.com/fk0u/tipack/actions/workflows/test.yml)
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows&logoColor=white)
 ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20%7C%20Intel-000000?style=flat-square&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-apt%20%7C%20dnf%20%7C%20pacman%20%7C%20zypper%20%7C%20apk-FCC624?style=flat-square&logo=linux&logoColor=black)
@@ -77,6 +78,9 @@ Mau membaca script-nya dulu? Lihat [Instalasi manual](docs/instalasi.md#instalas
 | 🧩 | **Ekstensi VS Code** | Pemilih 24–30 ekstensi penting dengan tooltip. Yang direkomendasikan sudah dicentang. |
 | 🔑 | **Git & SSH ke GitHub** | Atur `user.name`/`email`, buat SSH key ed25519, copy ke clipboard, buka halaman GitHub, `gh auth login`. |
 | ⚙️ | **Tweak OS untuk developer** | Tampilkan ekstensi dan file tersembunyi, Long Paths, Developer Mode, batas inotify, grup docker/dialout, dark mode, dan lainnya. |
+| 🚀 | **Tune-Up & optimasi** | Bersihkan file sampah & cache (TEMP, Windows Update, Homebrew, Xcode, cache paket Linux), efek visual ringan, power plan, matikan hibernasi, TRIM/defrag, SFC/DISM, **zram** & **earlyoom** di Linux, snapshot Time Machine di macOS. Ukuran ditampilkan sebelum dihapus. |
+| ⚡ | **Kelola startup** (Windows) | Nonaktifkan aplikasi yang ikut jalan saat booting, dengan cara yang sama seperti Task Manager. Bisa diaktifkan lagi kapan saja. |
+| 🧹 | **Debloat** | Windows: hapus aplikasi bawaan/promo, matikan iklan Start, Copilot, Recall, Widgets, telemetri, Bing (restore point otomatis). macOS: GarageBand/iMovie/iWork. Linux: lepas Snap, telemetri Ubuntu, layanan tak terpakai. |
 | ⟳ | **Update semua** | `winget upgrade --all`, `brew upgrade`, atau upgrade paket distro + Flatpak. |
 
 ### Dukungan OS
@@ -90,7 +94,12 @@ Mau membaca script-nya dulu? Lihat [Instalasi manual](docs/instalasi.md#instalas
 | **Arch, Manjaro, EndeavourOS, CachyOS, Garuda** | pacman + AUR | `yay` dipasang otomatis kalau perlu AUR. |
 | **openSUSE Tumbleweed / Leap** | zypper | |
 | **Alpine** | apk | |
-| **Distro lain** (Void, Solus, NixOS, ...) | Flatpak + script resmi | Paket native tidak didukung; aplikasi GUI tetap bisa lewat Flathub. |
+| **Fedora Silverblue/Kinoite, Bazzite, Bluefin, SteamOS, NixOS** (immutable) | Flatpak + script di home | Sistem tidak diubah; tool CLI disarankan di dalam distrobox. |
+| **Android (Termux)** | pkg | Tool CLI: Python, Node, C/C++, Java, Go, Rust, Git, SSH, database. |
+| **ChromeOS (Crostini), Raspberry Pi OS** | apt | Terdeteksi otomatis. |
+| **Distro lain** (Void, Solus, Gentoo, ...) | Flatpak + script resmi | Paket native tidak didukung; aplikasi GUI tetap bisa lewat Flathub. |
+
+**Arsitektur:** x64, **ARM64** (Windows on Snapdragon, Apple Silicon, Raspberry Pi, ARM Linux) dan Windows x86 (32-bit, katalog terbatas). Semua kombinasi utama diuji otomatis di [GitHub Actions](https://github.com/fk0u/tipack/actions/workflows/test.yml).
 
 Detail Linux: [docs/linux.md](docs/linux.md).
 
@@ -139,7 +148,16 @@ powershell -ExecutionPolicy Bypass -File setup.ps1 -Preset starter
 bash setup.sh --preset starter
 ```
 
-Tambahkan `-NoAnim` / `--no-anim` untuk mematikan animasi. Daftar preset dan isinya ada di [docs/katalog.md](docs/katalog.md#profil).
+Atau pasang aplikasi tertentu saja (key dari [katalog](docs/katalog.md)):
+
+```powershell
+setup.ps1 -Install git,vscode,7zip        # Windows
+```
+```bash
+bash setup.sh --install git,vscode,python # macOS / Linux
+```
+
+Exit code `0` = berhasil, `3` = ada yang gagal. Tambahkan `-NoAnim` / `--no-anim` untuk mematikan animasi. Daftar preset dan isinya ada di [docs/katalog.md](docs/katalog.md#profil).
 
 ## 📚 Dokumentasi
 

@@ -28,6 +28,11 @@ Selain memasang aplikasi pilihanmu, TIPACK bisa mengubah hal berikut. Semua peru
 - **SSH key** baru di `~/.ssh/id_ed25519`, hanya kalau belum ada dan kamu menyetujuinya. Key lama tidak pernah ditimpa.
 - **Repo paket tambahan (Linux):** repo Microsoft untuk VS Code (`/etc/apt/sources.list.d/vscode.list`, `/etc/yum.repos.d/vscode.repo`, `/etc/zypp/repos.d/vscode.repo`), hanya kalau VS Code dipilih.
 - **Tweak OS:** registry HKCU/HKLM (Windows), `defaults write` (macOS), `gsettings` dan `/etc/sysctl.d/60-devsetup-inotify.conf` (Linux), hanya yang dicentang.
+- **Tune-Up:** menghapus isi folder cache dan file sementara yang ukurannya ditampilkan lebih dulu. Recycle Bin/Trash bersifat permanen dan tidak dicentang otomatis. Konfigurasi Linux yang mungkin ditulis: `/etc/default/zramswap`, `/etc/systemd/zram-generator.conf`, `/etc/sysctl.d/61-tipack-swappiness.conf`, `/etc/systemd/journald.conf.d/60-tipack.conf`.
+- **Debloat:**
+  - Windows: membuat restore point dulu, menghapus paket Appx yang dipilih dan menulis kebijakan registry (Copilot, Recall, Widgets, telemetri).
+  - macOS: aplikasi Apple dipindah ke Trash, tidak dihapus langsung.
+  - Linux: `snap remove` dan `apt purge snapd` hanya kalau dipilih eksplisit, lalu `systemctl disable` untuk layanan yang dipilih.
 
 ## Script pihak ketiga yang mungkin dijalankan
 

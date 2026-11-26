@@ -14,6 +14,7 @@ try { [Console]::OutputEncoding = [Text.Encoding]::UTF8; $OutputEncoding = [Text
 $Host.UI.RawUI.WindowTitle = 'DEVSETUP IF - Installer Mahasiswa Informatika'
 $Root = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $LogFile = Join-Path $Root ("devsetup-log-{0:yyyyMMdd-HHmmss}.txt" -f (Get-Date))
+try { [IO.File]::AppendAllText($LogFile, '') } catch { $Root = $env:TEMP; $LogFile = Join-Path $Root ("devsetup-log-{0:yyyyMMdd-HHmmss}.txt" -f (Get-Date)) }
 $IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 $Arch = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }   # AMD64 / ARM64 / x86
 $ESC = [char]27
@@ -176,10 +177,10 @@ if ($Arch -eq 'ARM64') {
   }
 }
 if ($Arch -eq 'x86') { $Catalog = @($Catalog | Where-Object { $_.Key -notin @('docker', 'androidstudio', 'wslcore', 'wsl-ubuntu', 'wsl-debian', 'wsl-kali', 'ollama', 'lmstudio') }) }
-$C = @{}; foreach ($c in $Catalog) { $C[$c.Key] = $c }
-function KeyList([string]$csv) { @($csv -split '[,\s]+' | Where-Object { $_ -and $C.ContainsKey($_) }) }
+$Apps = @{}; foreach ($c in $Catalog) { $Apps[$c.Key] = $c }
+function KeyList([string]$csv) { @($csv -split '[,\s]+' | Where-Object { $_ -and $Apps.ContainsKey($_) }) }
 $CatOrder = @(); foreach ($c in $Catalog) { if ($CatOrder -notcontains $c.Cat) { $CatOrder += $c.Cat } }
-$Heavy = @('docker', 'androidstudio', 'vs2022', 'unity', 'ollama', 'lmstudio', 'virtualbox', 'bluestacks')
+$HeavyKeys = @('docker', 'androidstudio', 'vs2022', 'unity', 'ollama', 'lmstudio', 'virtualbox', 'bluestacks')
 # Probe tambahan: aplikasi yang mungkin diinstall manual (bukan lewat winget)
 $CmdProbe = @{ git = 'git'; vscode = 'code'; python = 'python'; nodejs = 'node'; jdk = 'java'; mingw = 'g++'; go = 'go'; rust = 'rustc';
   php = 'php'; dotnet = 'dotnet'; cursor = 'cursor'; antigravity = 'antigravity'; docker = 'docker'; ghcli = 'gh'; pwsh = 'pwsh'; uv = 'uv'; bun = 'bun'; cmake = 'cmake' }
@@ -376,14 +377,14 @@ function MkItem($Label, $Tip = '', $Value = $null, $Badge = '', [bool]$Checked =
 }
 
 function CatItem([string]$k) {
-  $c = $C[$k]
+  $c = $Apps[$k]
   $b = ''
   if ($c.Installed) { $b += '{Green}√ terpasang  ' }
   elseif ($Cart.Contains($k)) { $b += '{Cyan}+ keranjang  ' }
   if ($c.Rec) { $b += '{Yellow}♦ rekomendasi  ' }
   if ($c.Kind -eq 'info') { $b += '{DarkYellow}i manual  ' }
   if ($c.Kind -eq 'wsl' -or $c.Kind -eq 'feat') { $b += '{DarkCyan}fitur Windows  ' }
-  if ($Heavy -contains $k -and $Sys.Ram -and $Sys.Ram -lt 12) { $b += '{Red}! berat untuk RAM ' + $Sys.Ram + 'GB' }
+  if ($HeavyKeys -contains $k -and $Sys.Ram -and $Sys.Ram -lt 12) { $b += '{Red}! berat untuk RAM ' + $Sys.Ram + 'GB' }
   $src = switch ($c.Kind) { 'winget' { "winget: $($c.Id)" } 'wsl' { 'wsl --install' } 'feat' { 'Windows Optional Feature' } 'info' { 'Download manual: ' + $c.Id.Substring(5) } }
   $st = if ($c.Installed) { 'Status: SUDAH TERPASANG di laptop ini.' } else { 'Status: belum terpasang.' }
   MkItem $c.Name ("$($c.Tip)`n$st  |  $src") $k $b $Cart.Contains($k) $c.Installed $c.Rec
@@ -677,7 +678,7 @@ function Show-Boot {
 
 function Sync-Cart([string[]]$Keys, [string[]]$Chosen) {
   foreach ($k in $Keys) {
-    if ($Chosen -contains $k -and -not $C[$k].Installed) { if (-not $Cart.Contains($k)) { $Cart.Add($k, $true) } }
+    if ($Chosen -contains $k -and -not $Apps[$k].Installed) { if (-not $Cart.Contains($k)) { $Cart.Add($k, $true) } }
     elseif ($Cart.Contains($k)) { $Cart.Remove($k) }
   }
 }
@@ -692,7 +693,7 @@ function Run-Wizard {
     if ($q.M) {
       $r = Select-List -Title "Wizard │ $prog" -Sub "$($q.Q)`n$tip" -Items $items -Multi -EnterText 'simpan & lanjut'
     } else {
-      foreach ($it in $items) { $it.Checked = $Cart.Contains($it.Value) -or $C[$it.Value].Installed }
+      foreach ($it in $items) { $it.Checked = $Cart.Contains($it.Value) -or $Apps[$it.Value].Installed }
       $items += MkItem 'Lewati / tidak perlu' 'Tidak memilih apa pun untuk pertanyaan ini.' '__skip'
       $start = 0; for ($j = 0; $j -lt $items.Count; $j++) { if ($items[$j].Checked) { $start = $j; break } elseif ($items[$j].Rec -and $start -eq 0) { $start = $j } }
       $r = Select-List -Title "Wizard │ $prog" -Sub "$($q.Q)`n$tip" -Items $items -Radio -Start $start -EnterText 'pilih & lanjut'
@@ -707,8 +708,8 @@ function Run-Wizard {
 function Pick-Profile {
   while ($true) {
     $items = foreach ($p in $Profiles) {
-      $ks = (KeyList $p.L); $done = @($ks | Where-Object { $C[$_].Installed }).Count
-      $names = ($ks | ForEach-Object { $C[$_].Name }) -join ', '
+      $ks = (KeyList $p.L); $done = @($ks | Where-Object { $Apps[$_].Installed }).Count
+      $names = ($ks | ForEach-Object { $Apps[$_].Name }) -join ', '
       MkItem $p.N "$($p.T)`nIsi: $names" $p.K ("{DarkGray}$($ks.Count) aplikasi  " + $(if ($done) { "{Green}$done sudah ada" } else { '' }))
     }
     $r = Select-List -Title 'Profil Siap Pakai' -Sub 'Pilih profil sesuai minat/peminatan. Isinya masih bisa kamu centang/hapus sebelum dimasukkan keranjang.' -Items $items
@@ -759,11 +760,11 @@ function Review-Install {
   if (-not $Cart.Count) { Clear-Host; Line "`n  Keranjang masih kosong. Pilih aplikasi lewat Wizard, Profil, atau Kategori dulu." Yellow; Pause-Key; return }
   $keys = @($Cart.Keys)
   $items = @($keys | ForEach-Object { $x = CatItem $_; $x.Checked = $true; $x })
-  $heavy = @($keys | Where-Object { $Heavy -contains $_ })
+  $heavy = @($keys | Where-Object { $HeavyKeys -contains $_ })
   $sub = "$($keys.Count) aplikasi siap dipasang. Hapus centang untuk membatalkan item. Enter = MULAI INSTALL."
-  if ($heavy.Count) { $sub += "`nPaket berat: " + (($heavy | ForEach-Object { $C[$_].Name }) -join ', ') + ' (download besar, butuh waktu).' }
+  if ($heavy.Count) { $sub += "`nPaket berat: " + (($heavy | ForEach-Object { $Apps[$_].Name }) -join ', ') + ' (download besar, butuh waktu).' }
   if ($keys -contains 'nodejs' -and $keys -contains 'nvm') { $sub += "`nPERINGATAN: Node.js LTS dan NVM sebaiknya tidak dipasang bersamaan." }
-  if ($keys -contains 'mysql' -and ($keys -contains 'xampp' -or $C['xampp'].Installed)) { $sub += "`nPERINGATAN: MySQL Server bisa bentrok port 3306 dengan XAMPP." }
+  if ($keys -contains 'mysql' -and ($keys -contains 'xampp' -or $Apps['xampp'].Installed)) { $sub += "`nPERINGATAN: MySQL Server bisa bentrok port 3306 dengan XAMPP." }
   $r = Select-List -Title 'Keranjang Instalasi' -Sub $sub -Items $items -Multi -EnterText 'MULAI INSTALL'
   if (-not $r.Ok) { return }
   Sync-Cart $keys $r.Values
@@ -771,7 +772,7 @@ function Review-Install {
 }
 
 function Install-Cart {
-  $list = @($Cart.Keys | ForEach-Object { $C[$_] })
+  $list = @($Cart.Keys | ForEach-Object { $Apps[$_] })
   # urutan: fitur Windows dulu, lalu winget, lalu info manual
   $list = @($list | Sort-Object { switch ($_.Kind) { 'feat' { 0 } 'wsl' { 1 } 'winget' { 2 } 'info' { 3 } } })
   Clear-Host; Set-Cursor $false
@@ -958,7 +959,7 @@ function Update-All {
   Clear-Host; Line "`n  ═══ UPDATE SEMUA APLIKASI (winget upgrade --all) ═══`n" Magenta
   Set-Cursor $true
   winget upgrade --all --silent --accept-package-agreements --accept-source-agreements --include-unknown
-  if ($C.ContainsKey('wslcore') -and $C['wslcore'].Installed) { Line "`n  Update WSL..." DarkCyan; $null = Invoke-Ext -File 'wsl.exe' -ArgStr '--update' -Label 'wsl --update' -Timeout 600 }
+  if ($Apps.ContainsKey('wslcore') -and $Apps['wslcore'].Installed) { Line "`n  Update WSL..." DarkCyan; $null = Invoke-Ext -File 'wsl.exe' -ArgStr '--update' -Label 'wsl --update' -Timeout 600 }
   Scan-Installed -Quiet
   Pause-Key
 }
@@ -1002,7 +1003,7 @@ function Tune-Up {
   $hib = Get-Item "$env:SystemDrive\hiberfil.sys" -Force -ErrorAction SilentlyContinue
   $laptop = Is-Laptop
   $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
-  $T = @(
+  $TuneList = @(
     @{ K = 'temp'; N = "Bersihkan file sementara ($(Fmt-Bytes $szTemp))"; T = 'Menghapus isi folder TEMP user dan Windows\Temp. File yang sedang dipakai otomatis dilewati. Aman.'; A = $false; On = $false; R = $true }
     @{ K = 'wu'; N = "Hapus cache Windows Update ($(Fmt-Bytes $szWu))"; T = 'File installer update yang sudah terpasang di SoftwareDistribution\Download. Aman; Windows mengunduh ulang kalau perlu.'; A = $true; On = $false; R = $true }
     @{ K = 'thumb'; N = "Hapus cache thumbnail ($(Fmt-Bytes $szThumb))"; T = 'Cache gambar mini di Explorer. Dibuat ulang otomatis saat membuka folder.'; A = $false; On = $false; R = $false }
@@ -1019,9 +1020,9 @@ function Tune-Up {
     @{ K = 'sfc'; N = 'Perbaiki file sistem (SFC + DISM RestoreHealth)'; T = 'Untuk Windows yang sering error/crash. Memeriksa dan memperbaiki file sistem yang rusak. Butuh 15-40 menit dan internet.'; A = $true; On = $false; R = $false }
   )
   if ($Sys.DiskType -eq 'HDD') {
-    $T += @{ K = 'sysmain'; N = 'Matikan SysMain/Superfetch (khusus HDD)'; T = 'Di HDD lama, SysMain sering membuat disk 100%. Di SSD sebaiknya dibiarkan.'; A = $true; On = ((Get-Service SysMain -ErrorAction SilentlyContinue).StartType -eq 'Disabled'); R = $true }
+    $TuneList += @{ K = 'sysmain'; N = 'Matikan SysMain/Superfetch (khusus HDD)'; T = 'Di HDD lama, SysMain sering membuat disk 100%. Di SSD sebaiknya dibiarkan.'; A = $true; On = ((Get-Service SysMain -ErrorAction SilentlyContinue).StartType -eq 'Disabled'); R = $true }
   }
-  $items = foreach ($t in $T) {
+  $items = foreach ($t in $TuneList) {
     $b = $(if ($t.On) { '{Green}√ sudah  ' } else { '' }) + $(if ($t.R) { '{Yellow}♦ rekomendasi  ' } else { '' }) + $(if ($t.A -and -not $IsAdmin) { '{Red}butuh admin' } else { '' })
     MkItem $t.N $t.T $t.K $b ($t.R -and -not $t.On -and (-not $t.A -or $IsAdmin)) ([bool]$t.On -and $t.K -notin 'trim', 'dns', 'sfc', 'dism') $t.R
   }
@@ -1031,7 +1032,7 @@ function Tune-Up {
   Clear-Host; Write-Host "`n  ═══ TUNE-UP ═══`n" -ForegroundColor Magenta
   $before = (Get-PSDrive C).Free
   foreach ($k in $r.Values) {
-    $t = $T | Where-Object { $_.K -eq $k }
+    $t = $TuneList | Where-Object { $_.K -eq $k }
     if ($t.A -and -not $IsAdmin) { Line "   × $($t.N): butuh Administrator" Red; continue }
     Log "TUNE $k"
     try {
@@ -1309,13 +1310,13 @@ try {
   }
   Show-Boot
   if ($SelfTest -and -not $env:TIPACK_KEYS) {
-    $miss = @(); foreach ($q in $Wizard) { foreach ($k in ($q.L -split ',')) { if (-not $C.ContainsKey($k) -and $Arch -eq 'AMD64') { $miss += $k } } }
+    $miss = @(); foreach ($q in $Wizard) { foreach ($k in ($q.L -split ',')) { if (-not $Apps.ContainsKey($k) -and $Arch -eq 'AMD64') { $miss += $k } } }
     Write-Host "SELFTEST katalog=$($Catalog.Count) terpasang=$(@($Catalog | Where-Object Installed).Count) arch=$Arch winget=$($Sys.Winget) vt=$VT key-hilang=$($miss -join ',')"
     if ($miss) { exit 2 }; exit 0
   }
   if ($Install) {
     $ks = KeyList $Install
-    $bad = @($Install -split '[,\s]+' | Where-Object { $_ -and -not $C.ContainsKey($_) })
+    $bad = @($Install -split '[,\s]+' | Where-Object { $_ -and -not $Apps.ContainsKey($_) })
     if ($bad) { Line "Key tidak dikenal: $($bad -join ', ')" Red }
     if (-not $ks) { exit 1 }
     Sync-Cart $ks $ks

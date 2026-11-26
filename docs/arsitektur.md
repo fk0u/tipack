@@ -182,6 +182,31 @@ Contoh: `xbps` (Void Linux).
 
 Untuk Windows belum ada uji otomatis. Uji manual di VM/laptop Windows dan perhatikan ringkasan instalasi. Item dengan ID salah akan muncul sebagai `GAGAL: paket tidak ditemukan di winget`.
 
+## Uji otomatis (GitHub Actions)
+
+`.github/workflows/test.yml` berjalan setiap push dan pull request:
+
+| Job | Mesin | Isi |
+|---|---|---|
+| Windows | `windows-2025` (x64), `windows-11-arm` (ARM64) | Parser PowerShell, `-SelfTest` di PS 5.1 & 7, navigasi semua menu dengan antrean tombol, `-Install 7zip` sungguhan, validasi semua ID winget |
+| macOS | `macos-15` (Apple Silicon), `macos-15-intel` | `bash -n` dengan bash 3.2, `--self-test`, navigasi menu, `--install lazygit` |
+| Linux | Container Ubuntu, Debian, Fedora, Arch, openSUSE, Alpine di runner x64 + Ubuntu/Fedora/Debian di runner ARM64 | `build.sh` harus sinkron, `test-distro.sh`, self-test, navigasi, `--install git,python,build,nmap` |
+| Termux | `termux/termux-docker` | self-test & install |
+| Katalog | — | `catalog.json` dan `docs/katalog.md` harus sinkron |
+
+### Antrean tombol (`TIPACK_KEYS`)
+
+Semua installer membaca tombol dari variabel `TIPACK_KEYS` kalau variabel itu ada, sehingga TUI bisa dikendalikan tanpa keyboard:
+
+```bash
+TIPACK_KEYS="Up,Up,Enter,Esc" bash macos/setup.sh
+```
+
+Nama tombol: `Up Down Enter Esc Space PgUp PgDn Home End Back`, atau satu huruf (`a`, `n`, `r`, `q`). Dalam mode ini:
+- Semua pertanyaan teks memakai jawaban default.
+- Browser tidak dibuka.
+- Saat antrean habis, script mencetak `SELFTEST-TOMBOL-SELESAI` dan keluar dengan kode 0. Error apa pun akan menghasilkan kode selain 0.
+
 ## Aturan gaya
 
 - **Bahasa UI:** Bahasa Indonesia yang santai tapi jelas. Tooltip menjelaskan *fungsinya* dan *kapan dipilih*.

@@ -48,6 +48,17 @@ Tidak. Semua aplikasi diunduh dari sumber resminya saat instalasi.
 ## Windows
 
 <details>
+<summary><b>Installer berhenti/stuck di layar pembuka atau saat memindai.</b></summary>
+
+Versi lama menjalankan `winget source update` dan `wsl.exe` tanpa batas waktu. Kalau winget atau stub WSL menampilkan pertanyaan tersembunyi, script menunggu selamanya. **Versi sekarang sudah diperbaiki:** semua program luar dijalankan dengan input kosong dan batas waktu, dan WSL dideteksi lewat registry.
+
+Kalau masih terjadi:
+1. Unduh ulang lewat perintah `irm`, supaya pasti mendapat versi terbaru.
+2. Buka log `devsetup-log-*.txt`. Baris terakhir `>>> ...` menunjukkan program yang sedang dijalankan.
+3. Laporkan di [issue](https://github.com/fk0u/tipack/issues) dengan melampirkan log itu.
+</details>
+
+<details>
 <summary><b>"winget tidak ditemukan"</b></summary>
 
 Install atau update **App Installer** dari Microsoft Store: https://apps.microsoft.com/detail/9NBLGGH4NNS1. TIPACK membuka halaman ini otomatis. Di Windows 10 LTSC/Server, winget harus dipasang manual dari rilis GitHub `microsoft/winget-cli`.
@@ -96,6 +107,21 @@ Buka terminal baru. Kalau masih belum terbaca, cek `where g++`. WinLibs lewat wi
 <summary><b>Python membuka Microsoft Store.</b></summary>
 
 Itu "app execution alias" bawaan Windows. Matikan di Settings → Apps → Advanced app settings → App execution aliases (python.exe / python3.exe). TIPACK sendiri mengabaikan alias ini saat mendeteksi Python.
+</details>
+
+<details>
+<summary><b>Windows di prosesor ARM (Snapdragon / Copilot+ PC).</b></summary>
+
+Didukung. Aplikasi tanpa versi ARM berjalan lewat emulasi x64. MinGW diganti **LLVM-MinGW** (perintah `gcc`/`g++` tetap ada). VirtualBox dan BlueStacks disembunyikan karena tidak tersedia untuk ARM.
+</details>
+
+<details>
+<summary><b>Setelah Tune-Up / Debloat ada yang tidak beres.</b></summary>
+
+- **Debloat:** Control Panel → Recovery → *Open System Restore* → pilih **TIPACK sebelum debloat**. Aplikasi yang terhapus bisa dipasang ulang dari Microsoft Store.
+- **Efek visual:** Settings → System → About → Advanced system settings → Performance → *Let Windows choose*.
+- **Startup:** buka lagi menu Kelola Startup, atau Task Manager → Startup apps → Enable.
+- **Hibernasi:** `powercfg /hibernate on` (Admin).
 </details>
 
 ## macOS
